@@ -1,4 +1,8 @@
 stable-baselines3[extra]
 pandas
 scikit-learn
+plotly
+dash
+seaborn
+tensorflow
 -e .
