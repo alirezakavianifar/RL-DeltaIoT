@@ -4,6 +4,7 @@ scikit-learn
 plotly
 dash
 seaborn
-tensorflow
 pretty-errors
+tensorflow
+tqdm
 -e .
