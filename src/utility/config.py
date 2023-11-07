@@ -8,13 +8,12 @@ from src.environments.deltaiot_env import DeltaIotEnv
 import numpy as np
 from src.utility.agent_helpers import EpsDecTypeOne, EpsDecTypeTwo
 from src.environments.env_helpers import RewardMcOne, RewardMcTwo, RewardMcThree, RewardMcFour, RewardMcFive
-import sys
-sys.path.append(r'D:\projects\tensorflow_gpu\experiments\DQN')
-sys.path.append(r'D:\projects\tensorflow_gpu\experiments\DDPG')
+
+GET_CWD = os.getcwd()
 
 PROMPT = True
 # FROM_SCRATCH is used if we want to split data into training and testing from scratch
-FROM_SCRATCH = True
+FROM_SCRATCH = False
 # If the agent needs training then TRAINING flag is used.
 TRAINING = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
@@ -55,7 +54,7 @@ EPS = 1.0
 
 HER = False
 HER_PROBABILITY = 0.8
-LOG_PATH = r'\repo'
+LOG_PATH = os.path.join(GET_CWD, 'logs')
 EPS_DEC_TYPE = EpsDecTypeTwo()
 
 if VERSION == 'DeltaIoTv1':
@@ -66,7 +65,7 @@ if VERSION == 'DeltaIoTv1':
     LATENCY_THRESH = 10.0
     N_ACTIONS = 216
     NETWORK_LAYERS = [50, 25, 15]
-    DATA_DIR = r'\data\DeltaIoTv1'
+    DATA_DIR = os.path.join(GET_CWD,'data','DeltaIoTv1')
     # DATA_DIR = r'D:\projects\papers\Deep Learning for Effective and Efficient  Reduction of Large Adaptation Spaces in Self-Adaptive Systems\DLASeR_plus_online_material\dlaser_plus\raw\DeltaIoTv1'
     N_STATES = 216
     N_OBS_SPACE = 3
@@ -80,7 +79,7 @@ else:
     N_STATES = 4096
     N_ACTIONS = 4096
     N_OBS_SPACE = 42
-    DATA_DIR = r'\data\DeltaIoTv2'
+    DATA_DIR = os.path.join(GET_CWD,'data','DeltaIoTv2')
 # Create Training and testing Data Directory
 
 TRAIN_DIR = os.path.join(DATA_DIR, 'train')
@@ -120,8 +119,7 @@ CHKPT_DIR = os.path.join(
 FNAME = ALGO + '_' + ENV_NAME + '_lr' + str(LR) + '_' \
     + str(NUMGAMES) + 'games'
 
-MODEL_DIR = r'D:\repo\models'
-
+MODEL_DIR = os.path.join(GET_CWD, 'models')
 
 def get_models(model_names, model_load_type=None):
 
