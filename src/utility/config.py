@@ -3,7 +3,7 @@ import os
 import click
 import glob
 from collections import defaultdict
-from utils import load_dataV1
+from src.utility.utils import load_data
 from src.environments.deltaiot_env import DeltaIotEnv
 import numpy as np
 from utils import move_files
