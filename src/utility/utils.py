@@ -5,6 +5,27 @@ import os
 from sklearn.preprocessing import MinMaxScaler
 from tqdm import tqdm
 import shutil
+from functools import wraps
+import time
+
+def timeit(func):
+    @wraps(func)
+    def measure_time(*args, **kwargs):
+
+        before = time.process_time()
+        result = func(*args, **kwargs)
+        after = time.process_time()
+        total_time = after-before
+        print("The operation for %s took %s" %
+              (func.__name__, total_time))
+        return result, total_time
+    return measure_time
+
+def set_log_dir(name, path):
+    # current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    train_log_dir = os.path.join(path, name)
+    train_summary_writer = tf.summary.create_file_writer(train_log_dir)
+    return train_summary_writer
 
 def utility(energy_coef, packet_coef, latency_coef, energy_consumption, packet_loss, latency):
 
