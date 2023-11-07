@@ -1,6 +1,7 @@
 import pretty_errors
 from collections import defaultdict
 import glob
+from tensorflow.keras.models import load_model
 # from src.experiments.dqn.dqn import dqn
 from src.utility.agent_helpers import dqn
 from stable_baselines3 import DQN, PPO
@@ -18,10 +19,10 @@ if __name__ == '__main__':
 
     else:
 
-        model_dics = get_models(lambda: get_models_v3(r'D:\repo'))
+        model_dics = get_models(lambda: get_models_v2(r'D:\repo\models\DQN_v1_multi-n_games=*'))
 
         models = config.get_models(
-            model_names=model_dics, model_load_type=DQN.load)
+            model_names=model_dics, model_load_type=load_model)
 
         test_phase(
             config.TEST_LST, models,
