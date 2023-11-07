@@ -3,12 +3,19 @@ import glob
 import random
 import os
 from sklearn.preprocessing import MinMaxScaler
-
+from tqdm import tqdm
+import shutil
 
 def utility(energy_coef, packet_coef, latency_coef, energy_consumption, packet_loss, latency):
 
     return (energy_coef * energy_consumption + packet_coef * packet_loss + latency_coef * latency)
 
+def move_files(files, dst, *args, **kwargs):
+    """Copy files from src to destination"""
+    for file in tqdm(files):
+        file_name = file.rsplit('\\', 1)[1]
+        final_dst = os.path.join(dst, file_name)
+        shutil.copyfile(file, final_dst)
 
 def scale_data(data):
     '''

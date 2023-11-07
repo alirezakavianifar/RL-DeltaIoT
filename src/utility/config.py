@@ -3,10 +3,9 @@ import os
 import click
 import glob
 from collections import defaultdict
-from src.utility.utils import load_data
+from src.utility.utils import load_data, move_files
 from src.environments.deltaiot_env import DeltaIotEnv
 import numpy as np
-from utils import move_files
 from src.utility.agent_helpers import EpsDecTypeOne, EpsDecTypeTwo
 from src.environments.env_helpers import RewardMcOne, RewardMcTwo, RewardMcThree, RewardMcFour, RewardMcFive
 import sys
@@ -90,7 +89,7 @@ TEST_DIR = os.path.join(DATA_DIR, 'test')
 os.makedirs(TEST_DIR, exist_ok=True)
 
 if FROM_SCRATCH:
-    TRAIN_LST, TEST_LST = load_dataV1(
+    TRAIN_LST, TEST_LST = load_data(
         path=DATA_DIR, load_all=False, version='', shuffle=False, fraction=1.0, test_size=0.2, return_train_test=True)
 
     move_files(TRAIN_LST, TRAIN_DIR)
@@ -133,7 +132,6 @@ def get_models(model_names, model_load_type=None):
                 # cycle = item.split('=')[1].split('-')[0]
                 models[key][item].append(model_load_type(item))
     return models
-
 
 def wrapper_get_params_for_training(is_training, *args, **kwargs):
     if is_training:
