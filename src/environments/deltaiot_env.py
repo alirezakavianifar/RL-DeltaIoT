@@ -24,8 +24,7 @@ class DeltaIotEnv(gym.Env):
                                             high=np.full(
                                                 shape=n_obs_space, fill_value=100, dtype=np.float32),
                                             dtype=float)
-        self.data = os.path.join(data_dir, 'train')
-        self.data = glob.glob(os.path.join(self.data, "*.json"))
+        self.data = data_dir
         self.info = {}
         self.data = return_next_item(self.data, normalize=False)
         self.reward = 0
@@ -67,7 +66,7 @@ class DeltaIotEnv(gym.Env):
         self.terminated = False
         self.truncated = False
         self.df = next(self.data)
-        rand_num = np.random.randint(self.df.count()[0])
+        rand_num = np.random.randint(self.df.count().iloc[0])
         self.obs = self.df.iloc[rand_num][[
             'energyconsumption', 'packetloss', 'latency']].to_numpy(dtype=float).flatten()
         return self.obs, self.info

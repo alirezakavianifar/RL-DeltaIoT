@@ -5,4 +5,5 @@ plotly
 dash
 seaborn
 tensorflow
+pretty-errors
 -e .

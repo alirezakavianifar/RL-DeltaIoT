@@ -67,7 +67,7 @@ if VERSION == 'DeltaIoTv1':
     LATENCY_THRESH = 10.0
     N_ACTIONS = 216
     NETWORK_LAYERS = [50, 25, 15]
-    DATA_DIR = r'D:\projects\papers\Lifelong\generated_data_by_deltaiot_simulation\no_drift_scanerio'
+    DATA_DIR = r'D:\projects\RL-DeltaioT\RL-DeltaIoT\data\DeltaIoTv1'
     # DATA_DIR = r'D:\projects\papers\Deep Learning for Effective and Efficient  Reduction of Large Adaptation Spaces in Self-Adaptive Systems\DLASeR_plus_online_material\dlaser_plus\raw\DeltaIoTv1'
     N_STATES = 216
     N_OBS_SPACE = 3
@@ -81,7 +81,7 @@ else:
     N_STATES = 4096
     N_ACTIONS = 4096
     N_OBS_SPACE = 42
-    DATA_DIR = r'D:\projects\papers\Deep Learning for Effective and Efficient  Reduction of Large Adaptation Spaces in Self-Adaptive Systems\DLASeR_plus_online_material\dlaser_plus\raw\DeltaIoTv2'
+    DATA_DIR = r'D:\projects\RL-DeltaioT\RL-DeltaIoT\data\DeltaIoTv2'
 # Create Training and testing Data Directory
 
 TRAIN_DIR = os.path.join(DATA_DIR, 'train')
@@ -170,9 +170,8 @@ def wrapper_get_params_for_training(is_training, *args, **kwargs):
 def get_params_for_training(*args, **kwargs):
 
     if kwargs['environment'] == 'DeltaIoT':
-        ENV = DeltaIotEnv(data=TRAIN_LST, timesteps=TIME_STEPS, n_actions=N_ACTIONS, n_obs_space=N_OBS_SPACE,
-                          version=VERSION, her=HER, reward_type=RewardMcThree(),
-                          energy_coef=ENERGY_COEF, packet_coef=PACKET_COEF, latency_coef=LATENCY_COEF,
+        ENV = DeltaIotEnv(data_dir=TRAIN_LST, timesteps=TIME_STEPS, n_actions=N_ACTIONS, n_obs_space=N_OBS_SPACE,
+                          reward_type=RewardMcThree, energy_coef=ENERGY_COEF, packet_coef=PACKET_COEF, latency_coef=LATENCY_COEF,
                           packet_thresh=PACKET_THRESH, latency_thresh=LATENCY_THRESH, energy_thresh=ENERGY_THRESH)
 
     # agent params

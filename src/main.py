@@ -1,11 +1,10 @@
 import pretty_errors
 from collections import defaultdict
 import glob
-from src.experiments.ddpg.ddpg import ddpg
 # from src.experiments.dqn.dqn import dqn
-from src.experiments.dqn.deltaiot_stablebaselines import dqn
+from src.utility.agent_helpers import dqn
 from stable_baselines3 import DQN, PPO
-from src.experiments.dqn.utils_dqn import get_models, get_models_v1, get_models_v2, get_models_v3
+from src.utility.agent_helpers import get_models, get_models_v1, get_models_v2, get_models_v3
 from src.utility.test_utils import test_phase, evaluate_models, load_models
 from src.utility import config
 
