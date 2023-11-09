@@ -63,7 +63,7 @@ if VERSION == 'DeltaIoTv1':
     LATENCY_THRESH = 10.0
     N_ACTIONS = 216
     NETWORK_LAYERS = [50, 25, 15]
-    DATA_DIR = os.path.join(GET_CWD,'data','DeltaIoTv1')
+    DATA_DIR = os.path.join(GET_CWD, 'data', 'DeltaIoTv1')
     # DATA_DIR = r'D:\projects\papers\Deep Learning for Effective and Efficient  Reduction of Large Adaptation Spaces in Self-Adaptive Systems\DLASeR_plus_online_material\dlaser_plus\raw\DeltaIoTv1'
     N_STATES = 216
     N_OBS_SPACE = 3
@@ -77,7 +77,7 @@ else:
     N_STATES = 4096
     N_ACTIONS = 4096
     N_OBS_SPACE = 42
-    DATA_DIR = os.path.join(GET_CWD,'data','DeltaIoTv2')
+    DATA_DIR = os.path.join(GET_CWD, 'data', 'DeltaIoTv2')
 # Create Training and testing Data Directory
 
 TRAIN_DIR = os.path.join(DATA_DIR, 'train')
@@ -97,6 +97,7 @@ else:
 
 
 NUMGAMES = len(TRAIN_LST)
+print(TRAIN_LST)
 EPSILON = 1
 EPS_MIN = 0.001
 EPS_STEP_SIZE = 1
@@ -119,6 +120,7 @@ FNAME = ALGO + '_' + ENV_NAME + '_lr' + str(LR) + '_' \
 
 MODEL_DIR = os.path.join(GET_CWD, 'models')
 
+
 def get_models(model_names, model_load_type=None):
 
     models = defaultdict(lambda: defaultdict(list))
@@ -128,6 +130,7 @@ def get_models(model_names, model_load_type=None):
                 # cycle = item.split('=')[1].split('-')[0]
                 models[key][item].append(model_load_type(item))
     return models
+
 
 def wrapper_get_params_for_training(is_training, *args, **kwargs):
     if is_training:

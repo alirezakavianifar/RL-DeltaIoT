@@ -3,11 +3,10 @@ import numpy as np
 import tensorflow as tf
 from src.drl4sao.custom_dqn.network import DeepQNetwork
 from src.drl4sao.custom_dqn.replay_memory import ReplayBuffer
-from src.utility.config import GET_CWD
 train_loss = tf.keras.metrics.Mean('train_loss', dtype=tf.float32)
 train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy('train_accuracy')
 loss_object = tf.keras.losses.SparseCategoricalCrossentropy()
-checkpoint_filepath = os.path.join(GET_CWD, 'logs')
+checkpoint_filepath = os.path.join(os.getcwd(), 'logs')
 
 
 class Agent:

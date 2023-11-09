@@ -2,7 +2,6 @@ import pretty_errors
 from collections import defaultdict
 import glob
 import os
-from src.utility.config import GET_CWD
 from tensorflow.keras.models import load_model
 # from src.experiments.dqn.dqn import dqn
 from src.drl4sao.custom_dqn.dqn import dqn
@@ -21,7 +20,8 @@ if __name__ == '__main__':
 
     else:
 
-        model_dics = get_models(lambda: get_models_v2(f'{os.path.join(GET_CWD, "models")}\\DQN_v1_multi-n_games=*'))
+        model_dics = get_models(lambda: get_models_v2(
+            f'{os.path.join(os.getcwd(), "models")}\\DQN_v1_multi-n_games=*'))
 
         models = config.get_models(
             model_names=model_dics, model_load_type=load_model)

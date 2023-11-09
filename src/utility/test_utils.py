@@ -5,7 +5,7 @@ from src.utility.utils import load_data, \
     utility, return_next_item, scale_data, get_tts_qs, get_tt_qs
 import pandas as pd
 from collections import defaultdict
-import numpy as n
+import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
 import os
@@ -83,9 +83,9 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
                     # features = df['features'][0][:num_features]
                     features = df[['energyconsumption', 'packetloss',
                                    'latency']].iloc[1:2, :].to_numpy()
-                    # predicted_multi = np.argsort(
-                    #     value[0]([features]).numpy()[0])[-1:].item()
-                    predicted_multi = value[0].predict(features)[0][0]
+                    predicted_multi = np.argsort(
+                        value[0]([features]).numpy()[0])[-1:].item()
+                    # predicted_multi = value[0].predict(features)[0][0]
                     evals[keys][key]['energy'].append(
                         df.iloc[predicted_multi]['energyconsumption'])
                     evals[keys][key]['packet'].append(
