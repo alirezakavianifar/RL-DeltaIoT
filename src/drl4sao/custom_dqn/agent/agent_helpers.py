@@ -1,47 +1,11 @@
-from abc import ABCMeta, abstractmethod
 import os
-import numpy as np
 from collections import defaultdict
 import glob
-from stable_baselines3 import DQN, PPO
-from src.environments.env_helpers import RewardMcOne, RewardMcTwo, RewardMcThree, RewardMcFour, RewardMcFive
-from src.environments.deltaiot_env import DeltaIotEnv
+from stable_baselines3 import DQN
 
 from src.utility.utils import set_log_dir, timeit
-from src.utility.config import GET_CWD
 
-class EpsDec(metaclass=ABCMeta):
-    def __init__(self) -> None:
-        pass
-
-    @abstractmethod
-    def eps_dec_type(self, epsilon, eps_min, n_games, eps_dec):
-        pass
-
-
-class EpsDecTypeOne(EpsDec):
-    def __init__(self) -> None:
-        pass
-
-    def eps_dec_type(self, epsilon, eps_min, n_games, eps_dec):
-        if epsilon > eps_min:
-            epsilon -= 2 / (n_games)
-        else:
-            epsilon = eps_min
-
-        return epsilon
-
-
-class EpsDecTypeTwo(EpsDec):
-    def __init__(self) -> None:
-        pass
-
-    def eps_dec_type(self, epsilon, eps_min, n_games, eps_dec):
-        epsilon = epsilon - eps_dec \
-            if epsilon > eps_min else eps_min
-
-        return epsilon
-
+GET_CWD = os.getcwd()
 
 def get_models_v1(str_base=f'{os.path.join(GET_CWD, "models")}\\DQN_v1_multi-n_games=*'):
     lrs = ['lr=0.0001', 'lr=0.001', 'lr=0.01', 'lr=0.1']
@@ -106,5 +70,3 @@ def dqn(agent_params):
     model.learn(total_timesteps=agent_params['n_games'] * 216, log_interval=1)
     model.save(os.path.join(agent_params['log_path'],
                             f"DQN_v1_multi_lr={agent_params['lr']}_eps_dec={agent_params['eps_min']}_batch_size={agent_params['batch_size']}_gamma={agent_params['gamma']}.zip"))
-    
-
