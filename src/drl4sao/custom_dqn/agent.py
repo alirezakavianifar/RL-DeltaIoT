@@ -9,6 +9,7 @@ train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy('train_accuracy')
 loss_object = tf.keras.losses.SparseCategoricalCrossentropy()
 checkpoint_filepath = os.path.join(GET_CWD, 'logs')
 
+
 class Agent:
     def __init__(self, agent_params):
         self.gamma = agent_params['gamma']
@@ -28,11 +29,9 @@ class Agent:
         self.action_space = [i for i in range(int(agent_params['n_actions']))]
         self.learn_step_counter = 0
         self.fname = agent_params['fname']
-        self.her = agent_params['her']
 
         self.memory = ReplayBuffer(
-            agent_params['mem_size'], agent_params['input_dims'], agent_params['n_actions'],
-            her=agent_params['her'], her_probability=agent_params['her_probability'])
+            agent_params['mem_size'], agent_params['input_dims'], agent_params['n_actions'])
 
         self.q_eval = DeepQNetwork(
             agent_params['input_dims'], agent_params['n_actions'], network_layers=agent_params['network_layers'])
@@ -63,7 +62,7 @@ class Agent:
 
     def store_transition(self, state, action, reward, state_, done, her=False):
         self.memory.store_transition(
-            (state, action, reward, state_, done), her=her)
+            (state, action, reward, state_, done))
 
     def sample_memory(self):
         states = []
@@ -72,7 +71,7 @@ class Agent:
         actions = []
         states_ = []
         experiences = \
-            self.memory.sample_buffer(self.batch_size, her=self.her)
+            self.memory.sample_buffer(self.batch_size)
 
         for index, item in enumerate(experiences):
             states.append(item[0])

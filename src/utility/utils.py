@@ -1,5 +1,6 @@
 import pandas as pd
 import glob
+import tensorflow as tf
 import random
 import os
 from sklearn.preprocessing import MinMaxScaler

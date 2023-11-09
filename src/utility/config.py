@@ -6,7 +6,7 @@ from collections import defaultdict
 from src.utility.utils import load_data, move_files
 from src.environments.deltaiot_env import DeltaIotEnv
 import numpy as np
-from src.utility.agent_helpers import EpsDecTypeOne, EpsDecTypeTwo
+from src.drl4sao.custom_dqn.eps_dec_types import EpsDecTypeOne, EpsDecTypeTwo
 from src.environments.env_helpers import RewardMcOne, RewardMcTwo, RewardMcThree, RewardMcFour, RewardMcFive
 
 GET_CWD = os.getcwd()
@@ -52,8 +52,6 @@ ALPHA = 0.1
 GAMMA = 0.99
 EPS = 1.0
 
-HER = False
-HER_PROBABILITY = 0.8
 LOG_PATH = os.path.join(GET_CWD, 'logs')
 EPS_DEC_TYPE = EpsDecTypeTwo()
 
@@ -115,7 +113,7 @@ WARMUP_COUNT = 100
 ALGORITHMS = ['SARSA', 'Q_LEARNING', 'DOUBLE_Q_LEARNING']
 TOTAT_TIMES = []
 CHKPT_DIR = os.path.join(
-    LOG_PATH, 'models', ALGO_NAME + '_' + QUALITY_TYPE)
+    GET_CWD, 'models', ALGO_NAME + '_' + QUALITY_TYPE)
 FNAME = ALGO + '_' + ENV_NAME + '_lr' + str(LR) + '_' \
     + str(NUMGAMES) + 'games'
 
@@ -155,12 +153,10 @@ def wrapper_get_params_for_training(is_training, *args, **kwargs):
 @click.option('--env_name', prompt=PROMPT, default=ENV_NAME)
 @click.option('--algo', prompt=PROMPT, default=ALGO)
 @click.option('--replace', prompt=PROMPT, default=REPLACE)
-@click.option('--HER', prompt=PROMPT, default=HER)
 @click.option('--fname', prompt=PROMPT, default=FNAME)
 # @click.option('--Network_layers', prompt=PROMPT, default=NETWORK_LAYERS)
 @click.option('--quality_type', prompt=PROMPT, default=QUALITY_TYPE)
 @click.option('--algo_name', prompt=PROMPT, default=ALGO_NAME)
-@click.option('--her_probability', prompt=PROMPT, default=HER_PROBABILITY)
 @click.option('--log_path', prompt=PROMPT, default=LOG_PATH)
 @click.option('--chkpt_dir', prompt=PROMPT, default=CHKPT_DIR)
 def get_params_for_training(*args, **kwargs):
@@ -187,12 +183,10 @@ def get_params_for_training(*args, **kwargs):
         'batch_size': kwargs['batch_size'],
         'replace': kwargs['replace'],
         'lr': kwargs['lr'],
-        'her': kwargs['her'],
         'fname': kwargs['fname'],
         'network_layers': NETWORK_LAYERS,
         'quality_type': kwargs['quality_type'],
         'algo_name': kwargs['algo_name'],
-        'her_probability': kwargs['her_probability'],
         'log_path': kwargs['log_path'],
         'chkpt_dir': kwargs['chkpt_dir'],
         'warmup_count': kwargs['warmup_count'],

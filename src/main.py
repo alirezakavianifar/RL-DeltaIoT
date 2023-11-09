@@ -7,7 +7,7 @@ from tensorflow.keras.models import load_model
 # from src.experiments.dqn.dqn import dqn
 from src.drl4sao.custom_dqn.dqn import dqn
 from stable_baselines3 import DQN, PPO
-from src.utility.agent_helpers import get_models, get_models_v1, get_models_v2, get_models_v3
+from src.drl4sao.custom_dqn.agent_helpers import get_models, get_models_v1, get_models_v2, get_models_v3
 from src.utility.test_utils import test_phase, evaluate_models, load_models
 from src.utility import config
 

@@ -6,7 +6,6 @@ from src.drl4sao.custom_dqn.agent import Agent
 from src.utility.utils import set_log_dir, timeit
 
 
-
 @timeit
 def dqn(agent_params=None):
     train_summary_writer = set_log_dir(
@@ -19,9 +18,6 @@ def dqn(agent_params=None):
         agent_params['log_path'], 'models', agent_params['algo_name'] + '_' + agent_params['quality_type'])
     fname = chkpt_dir + '_'
     env = agent_params['env']
-    dg_size = 0
-    ag_size = 0
-    obs_size = env.observation_space.shape[0]
     best_score = -np.inf
     best_avg_score = -np.inf
     load_checkpoint = False
@@ -35,40 +31,15 @@ def dqn(agent_params=None):
 
     for i in range(agent_params['n_games']):
         done = False
-        observation = env.reset()
+        observation = env.reset()[0]
         score = 0
         while not done:
-            if agent_params['her']:
-                desired_state = np.hstack(
-                    (observation['obs'], observation['desired_util']))
-
-                achieved_state = np.hstack(
-                    (observation['obs'], observation['achieved_util']))
-
-                action = agent.choose_action(desired_state)
-                observation_, reward, done, info, ut = env.step(action)
-            else:
-                action = agent.choose_action(observation['obs'])
-                observation_, reward, done, info, ut = env.step(action)
-
-            if agent_params['her']:
-                next_desired_state = np.hstack(
-                    (observation_['obs'], observation_['desired_util']))
-                next_achieved_state = np.hstack(
-                    (observation_['obs'], observation_['achieved_util']))
+            action = agent.choose_action(observation)
+            observation_, reward, done, truncated, info = env.step(action)
             score += reward
-
             if not load_checkpoint:
-
-                if agent_params['her']:
-                    agent.store_transition(desired_state, action,
-                                           reward, next_desired_state, done, her=False)
-                    reward = env.compute_reward(ut, ut)
-                    agent.store_transition(achieved_state, action,
-                                           reward, next_achieved_state, done, her=True)
-                else:
-                    agent.store_transition(observation['obs'], action,
-                                           reward, observation_['obs'], done)
+                agent.store_transition(observation, action,
+                                       reward, observation_, done)
 
                 train_loss = agent.learn()
 
