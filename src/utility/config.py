@@ -1,3 +1,4 @@
+import time
 import glob
 import os
 import click
@@ -97,7 +98,6 @@ else:
 
 
 NUMGAMES = len(TRAIN_LST)
-print(TRAIN_LST)
 EPSILON = 1
 EPS_MIN = 0.001
 EPS_STEP_SIZE = 1
