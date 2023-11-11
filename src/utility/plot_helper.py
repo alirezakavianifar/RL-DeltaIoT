@@ -34,8 +34,8 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'], ve
                     name=eval_values_value_k.split('=')[1].split('-')[0],
                     # name=eval_values_value_k,
                 )
-                # traces[f'{str(eval_key)}-{str(eval_values_key)}'].append(trace)
-                traces[f'{str(eval_key)}'].append(trace)
+                traces[f'{str(eval_key)}-{str(eval_values_key)}'].append(trace)
+                # traces[f'{str(eval_key)}'].append(trace)
 
             traces_all.append(traces)
 
@@ -75,7 +75,7 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'], ve
     num_items = sorted([int(num) for num in items if num != ''])
     lst_yaxis = ['yaxis'] + [f'yaxis{item}' for item in num_items]
     # Split them into equal parts
-    lst_yaxis = np.array_split(lst_yaxis, 13)
+    lst_yaxis = np.array_split(lst_yaxis, len(cols))
 
     for items in lst_yaxis:
         for index, item in enumerate(items):
