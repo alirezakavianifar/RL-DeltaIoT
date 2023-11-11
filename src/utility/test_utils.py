@@ -80,12 +80,9 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
             df = next(all_data)
             for keys, values in models.items():
                 for key, value in values.items():
-                    # features = df['features'][0][:num_features]
                     features = df[['energyconsumption', 'packetloss',
                                    'latency']].iloc[1:2, :].to_numpy()
-                    predicted_multi = np.argsort(
-                        value[0]([features]).numpy()[0])[-1:].item()
-                    # predicted_multi = value[0].predict(features)[0][0]
+                    predicted_multi = np.argsort(value[0](features)).flatten()[-1:].item()
                     evals[keys][key]['energy'].append(
                         df.iloc[predicted_multi]['energyconsumption'])
                     evals[keys][key]['packet'].append(

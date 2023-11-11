@@ -31,8 +31,8 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'], ve
             for eval_values_value_k, eval_values_value_v in eval_values_value.items():
                 trace = go.Box(
                     y=eval_values_value_v[0],
-                    # name=eval_values_value_k.split('=')[1].split('-')[0],
-                    name=eval_values_value_k,
+                    name=eval_values_value_k.split('=')[1].split('-')[0],
+                    # name=eval_values_value_k,
                 )
                 # traces[f'{str(eval_key)}-{str(eval_values_key)}'].append(trace)
                 traces[f'{str(eval_key)}'].append(trace)
@@ -61,7 +61,7 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'], ve
                 fig.append_trace(f, row=row, col=col)
         col += 1
 
-    # fig['layout'].update(height=3000)
+    fig['layout'].update(height=3000)
 
     # xaxis titles
 
