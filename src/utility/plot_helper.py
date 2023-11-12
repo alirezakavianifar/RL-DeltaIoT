@@ -61,7 +61,7 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'], ve
                 fig.append_trace(f, row=row, col=col)
         col += 1
 
-    fig['layout'].update(height=3000)
+    fig['layout'].update(height=len(cols) * 300)
 
     # xaxis titles
 

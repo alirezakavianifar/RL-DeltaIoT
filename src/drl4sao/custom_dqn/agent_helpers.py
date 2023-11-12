@@ -37,25 +37,9 @@ def get_models_v2(str_base=f'{os.path.join(GET_CWD, "models")}\\DQN_v1_multi-n_g
     lrs = list(dict.fromkeys(lrs))
 
     files = defaultdict(list)
-    # lrs = [
-    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=1.0-q_eval',
-    #     f'{str_base}-lr=0.001-eps_dec=0.00167-batch_size=64-gamma=1.0-q_eval',
-    #     f'{str_base}-lr=0.01-eps_dec=0.00167-batch_size=64-gamma=1.0-q_eval',
-    #     f'{str_base}-lr=0.1-eps_dec=0.00167-batch_size=64-gamma=1.0-q_eval',
-    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=0.99-q_eval',
-    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=0.98-q_eval',
-    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=0.95-q_eval',
-    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=0.9-q_eval',
-    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=128-gamma=0.98-q_eval',
-    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=256-gamma=0.98-q_eval',
-    #     f'{str_base}-lr=0.0001-eps_dec=0.00200-batch_size=64-gamma=1.0-q_eval',
-    #     f'{str_base}-lr=0.0001-eps_dec=0.00250-batch_size=64-gamma=1.0-q_eval',
-    #     f'{str_base}-lr=0.0001-eps_dec=0.00333-batch_size=64-gamma=1.0-q_eval',
-    # ]
-
+    
     [files[lr].append(glob.glob(lr)) for lr in lrs]
     return files
-
 
 def get_models_v3(str_base):
     files = defaultdict(list)
