@@ -21,7 +21,7 @@ if __name__ == '__main__':
     else:
 
         model_dics = get_models(lambda: get_models_v2(
-            f'{os.path.join(os.getcwd(), "models")}\\DQN_v1_multi-n_games=*'))
+            DEEP_AGENT_PARAMS['model_dics']))
 
         models = config.get_models(
             model_names=model_dics, model_load_type=load_model)

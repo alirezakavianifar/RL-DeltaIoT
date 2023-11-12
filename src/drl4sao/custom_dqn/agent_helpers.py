@@ -26,25 +26,32 @@ def get_models_v1(str_base=f'{os.path.join(GET_CWD, "models")}\\DQN_v1_multi-n_g
 
 
 def get_models_v2(str_base=f'{os.path.join(GET_CWD, "models")}\\DQN_v1_multi-n_games=*'):
-    # str_base = r'D:\backup\backup\14020809\models\DQN_v1_multi-n_games=*'
+
+    str_bases = [s.split('-')[2] for s in str_base['multi']]
+
+    lrs = []
+
+    for item, rep in zip(str_base['multi'], str_bases):
+        lrs.append(item.replace(rep, 'n_games=*'))
+
+    lrs = list(dict.fromkeys(lrs))
 
     files = defaultdict(list)
-    # files = glob.glob(str_base)
-    lrs = [
-        f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=1.0-q_eval',
-        f'{str_base}-lr=0.001-eps_dec=0.00167-batch_size=64-gamma=1.0-q_eval',
-        f'{str_base}-lr=0.01-eps_dec=0.00167-batch_size=64-gamma=1.0-q_eval',
-        f'{str_base}-lr=0.1-eps_dec=0.00167-batch_size=64-gamma=1.0-q_eval',
-        f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=0.99-q_eval',
-        f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=0.98-q_eval',
-        f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=0.95-q_eval',
-        f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=0.9-q_eval',
-        f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=128-gamma=0.98-q_eval',
-        f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=256-gamma=0.98-q_eval',
-        f'{str_base}-lr=0.0001-eps_dec=0.00200-batch_size=64-gamma=1.0-q_eval',
-        f'{str_base}-lr=0.0001-eps_dec=0.00250-batch_size=64-gamma=1.0-q_eval',
-        f'{str_base}-lr=0.0001-eps_dec=0.00333-batch_size=64-gamma=1.0-q_eval',
-    ]
+    # lrs = [
+    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=1.0-q_eval',
+    #     f'{str_base}-lr=0.001-eps_dec=0.00167-batch_size=64-gamma=1.0-q_eval',
+    #     f'{str_base}-lr=0.01-eps_dec=0.00167-batch_size=64-gamma=1.0-q_eval',
+    #     f'{str_base}-lr=0.1-eps_dec=0.00167-batch_size=64-gamma=1.0-q_eval',
+    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=0.99-q_eval',
+    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=0.98-q_eval',
+    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=0.95-q_eval',
+    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=64-gamma=0.9-q_eval',
+    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=128-gamma=0.98-q_eval',
+    #     f'{str_base}-lr=0.0001-eps_dec=0.00167-batch_size=256-gamma=0.98-q_eval',
+    #     f'{str_base}-lr=0.0001-eps_dec=0.00200-batch_size=64-gamma=1.0-q_eval',
+    #     f'{str_base}-lr=0.0001-eps_dec=0.00250-batch_size=64-gamma=1.0-q_eval',
+    #     f'{str_base}-lr=0.0001-eps_dec=0.00333-batch_size=64-gamma=1.0-q_eval',
+    # ]
 
     [files[lr].append(glob.glob(lr)) for lr in lrs]
     return files
