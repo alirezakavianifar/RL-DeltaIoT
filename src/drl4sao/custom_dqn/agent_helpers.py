@@ -1,4 +1,5 @@
 import os
+import re
 from collections import defaultdict
 import glob
 from stable_baselines3 import DQN
@@ -25,20 +26,11 @@ def get_models_v1(str_base=f'{os.path.join(GET_CWD, "models")}\\DQN_v1_multi-n_g
     return model_dics
 
 
-def get_models_v2(str_base=f'{os.path.join(GET_CWD, "models")}\\DQN_v1_multi-n_games=*'):
+def get_models_v2(str_base=f'{os.path.join(os.getcwd(), "models")}\\DQN_v1_multi-n_games=*'):
 
-    str_bases = [s.split('-')[3] for s in str_base['multi']]
-
-    lrs = []
-
-    for item, rep in zip(str_base['multi'], str_bases):
-        lrs.append(item.replace(rep, 'n_games=*'))
-
-    lrs = list(dict.fromkeys(lrs))
-
+    str_bases = list(dict.fromkeys([re.sub(r'n_games=\d*[a-z]*', 'n_games=*', item) for item in str_base['multi']]))
     files = defaultdict(list)
-    
-    [files[lr].append(glob.glob(lr)) for lr in lrs]
+    [files[lr].append(glob.glob(lr)) for lr in str_bases]
     return files
 
 def get_models_v3(str_base):
