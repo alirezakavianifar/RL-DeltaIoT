@@ -20,8 +20,21 @@ if __name__ == '__main__':
 
     else:
 
+        def get_chosen_model(model_dics, params):
+            model_dics_ = defaultdict(list)
+            for key, item in model_dics.items():
+                if key == os.path.join(os.getcwd(), 'models', f"DQN_v1_multi-n_games=*-lr={params['lr']}-eps_dec={params['eps_dec']}-batch_size={params['batch_size']}-gamma={params['gamma']}-q_eval"):
+                    model_dics_[key] = model_dics[key]
+                    return model_dics_
+                             
+
+
+        chosen_model_params = {'lr':'0.0001', 'eps_dec':'0.00167', 'batch_size': '64', 'gamma': '0.95'}
+
         model_dics = get_models(lambda: get_models_v2(
             DEEP_AGENT_PARAMS['model_dics']))
+        
+        model_dics = get_chosen_model(model_dics, chosen_model_params)
 
         models = config.get_models(
             model_names=model_dics, model_load_type=load_model)
