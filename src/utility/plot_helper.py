@@ -32,30 +32,21 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'], ve
                 trace = go.Box(
                     y=eval_values_value_v[0],
                     name=eval_values_value_k.split('=')[1].split('-')[0],
-                    # name=eval_values_value_k,
                 )
                 traces[f'{str(eval_key)}-{str(eval_values_key)}'].append(trace)
-                # traces[f'{str(eval_key)}'].append(trace)
 
             traces_all.append(traces)
 
-    # fig = make_subplots(rows=len(cols), cols=3,
-    #                     row_titles=[key.split('*')[1][:-7] for item in traces_all for key, _ in item.items()],
-    #                     shared_xaxes=False,
-    #                     shared_yaxes=False
-    #                     )
-    row_titles=[key.split('*')[1][:-7] for item in traces_all for key, _ in item.items()]
+    subplot_titles=[key.split('*')[1][:-7] if index % 3 == 1 else "" 
+                    for index, item in enumerate(traces_all)
+                    for key, _ in item.items()]
+                
     fig = make_subplots(rows=len(cols), cols=3,
-                        row_titles=row_titles,
+                        subplot_titles=subplot_titles,
                         shared_xaxes=False,
                         shared_yaxes=False,
                         start_cell='top-left'
                         )
-    
-    # fig = make_subplots(rows=len(cols), cols=3,
-    #                     shared_xaxes=False,
-    #                     shared_yaxes=False
-    #                     )
 
     row = 1
     col = 1
