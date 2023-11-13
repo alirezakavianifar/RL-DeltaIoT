@@ -27,12 +27,10 @@ if __name__ == '__main__':
                     model_dics_[key] = model_dics[key]
                     return model_dics_
                              
-
-
-        chosen_model_params = {'lr':'0.0001', 'eps_dec':'0.00167', 'batch_size': '64', 'gamma': '0.95'}
-
         model_dics = get_models(lambda: get_models_v2(
             DEEP_AGENT_PARAMS['model_dics']))
+        
+        chosen_model_params = {'lr':'0.0001', 'eps_dec':'0.00167', 'batch_size': '64', 'gamma': '0.95'}
         
         model_dics = get_chosen_model(model_dics, chosen_model_params)
 
