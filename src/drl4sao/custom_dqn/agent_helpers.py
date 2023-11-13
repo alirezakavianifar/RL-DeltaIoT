@@ -27,7 +27,7 @@ def get_models_v1(str_base=f'{os.path.join(GET_CWD, "models")}\\DQN_v1_multi-n_g
 
 def get_models_v2(str_base=f'{os.path.join(GET_CWD, "models")}\\DQN_v1_multi-n_games=*'):
 
-    str_bases = [s.split('-')[2] for s in str_base['multi']]
+    str_bases = [s.split('-')[3] for s in str_base['multi']]
 
     lrs = []
 

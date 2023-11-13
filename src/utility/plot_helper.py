@@ -40,15 +40,22 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'], ve
             traces_all.append(traces)
 
     # fig = make_subplots(rows=len(cols), cols=3,
-    #                     subplot_titles=[
-    #                         key.split('*')[1][:-7] for item in traces_all for key, _ in item.items()],
+    #                     row_titles=[key.split('*')[1][:-7] for item in traces_all for key, _ in item.items()],
     #                     shared_xaxes=False,
     #                     shared_yaxes=False
     #                     )
+    row_titles=[key.split('*')[1][:-7] for item in traces_all for key, _ in item.items()]
     fig = make_subplots(rows=len(cols), cols=3,
+                        row_titles=row_titles,
                         shared_xaxes=False,
-                        shared_yaxes=False
+                        shared_yaxes=False,
+                        start_cell='top-left'
                         )
+    
+    # fig = make_subplots(rows=len(cols), cols=3,
+    #                     shared_xaxes=False,
+    #                     shared_yaxes=False
+    #                     )
 
     row = 1
     col = 1
@@ -61,7 +68,8 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'], ve
                 fig.append_trace(f, row=row, col=col)
         col += 1
 
-    fig['layout'].update(height=len(cols) * 300)
+    fig['layout'].update(height=len(cols) * 350)
+    # fig.for_each_annotation(lambda a:  a.update(x = 0.9) if a.text in row_titles else())
 
     # xaxis titles
 
