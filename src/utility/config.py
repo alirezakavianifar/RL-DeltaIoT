@@ -4,7 +4,7 @@ import os
 import click
 import glob
 from collections import defaultdict
-from src.utility.utils import load_data, move_files
+from src.utility.utils import load_data, move_files, get_tts_qs
 from src.environments.deltaiot_env import DeltaIotEnv
 import numpy as np
 from src.drl4sao.custom_dqn.eps_dec_types import EpsDecTypeOne, EpsDecTypeTwo
@@ -121,7 +121,7 @@ FNAME = ALGO + '_' + ENV_NAME + '_lr' + str(LR) + '_' \
 MODEL_DIR = os.path.join(GET_CWD, 'models')
 
 
-def get_models(model_names, model_load_type=None):
+def get_models(model_names, model_load_type=None, load_truths=False):
 
     models = defaultdict(lambda: defaultdict(list))
     for key, values in model_names.items():

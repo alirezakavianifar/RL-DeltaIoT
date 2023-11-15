@@ -89,6 +89,10 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
                         df.iloc[predicted_multi]['packetloss'])
                     evals[keys][key]['latency'].append(
                         df.iloc[predicted_multi]['latency'])
+                df_truth=get_tts_qs(df, packet_thresh=15, latency_thresh=10, energy_thresh=13.2)[['energyconsumption','packetloss','latency']]
+                evals[keys]['tts_qs']['energyconsumption'].append(df_truth['energyconsumption'].item())
+                evals[keys]['tts_qs']['packetloss'].append(df_truth['packetloss'].item())
+                evals[keys]['tts_qs']['latency'].append(df_truth['latency'].item())
         except Exception as e:
             print(e)
             break
