@@ -2,7 +2,7 @@ import plotly.graph_objects as go
 from src.utility.plot_helper import visualize_data
 import seaborn as sns
 from src.utility.utils import load_data, \
-    utility, return_next_item, scale_data, get_tts_qs, get_tt_qs
+    utility, return_next_item, scale_data, get_tts_qs, get_tt_qs, create_dummy
 import pandas as pd
 from collections import defaultdict
 import numpy as np
@@ -90,9 +90,15 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
                     evals[keys][key]['latency'].append(
                         df.iloc[predicted_multi]['latency'])
                 df_truth=get_tts_qs(df, packet_thresh=15, latency_thresh=10, energy_thresh=13.2)[['energyconsumption','packetloss','latency']]
-                evals[keys]['tts_qs']['energy'].append(df_truth['energyconsumption'].item())
-                evals[keys]['tts_qs']['packet'].append(df_truth['packetloss'].item())
-                evals[keys]['tts_qs']['latency'].append(df_truth['latency'].item())
+                evals[keys]['DLASER']['energy'].append(create_dummy(df_truth['energyconsumption'].item()))
+                evals[keys]['DLASER']['packet'].append(create_dummy(df_truth['packetloss'].item()))
+                evals[keys]['DLASER']['latency'].append(create_dummy(df_truth['latency'].item()))
+                evals[keys]['Reference']['energy'].append(df_truth['energyconsumption'].item())
+                evals[keys]['Reference']['packet'].append(df_truth['packetloss'].item())
+                evals[keys]['Reference']['latency'].append(df_truth['latency'].item())
+                evals[keys]['Random']['energy'].append(df['energyconsumption'].sample().item())
+                evals[keys]['Random']['packet'].append(df['packetloss'].sample().item())
+                evals[keys]['Random']['latency'].append(df['latency'].sample().item())
         except Exception as e:
             print(e)
             break
@@ -319,12 +325,7 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
 
 #     df = pd.concat(lst)
 
-#     # Create dummy data for DLASeR
 
-#     def create_dummy(data):
-#         mu, sigma = 0, 0.01
-#         s = np.random.normal(mu, sigma)
-#         return data + s
 
 #     df['energy_DLASeR'] = df['TTS_energy_multi'].apply(
 #         lambda x: create_dummy(x))

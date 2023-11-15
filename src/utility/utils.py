@@ -3,6 +3,7 @@ import glob
 import tensorflow as tf
 import random
 import os
+import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from tqdm import tqdm
 import shutil
@@ -48,6 +49,14 @@ def scale_data(data):
     data = scaler.fit_transform(data)
     data = pd.DataFrame(data)
     return data
+
+
+# Create dummy data for DLASeR
+
+def create_dummy(data):
+    mu, sigma = 0, 0.01
+    s = np.random.normal(mu, sigma)
+    return data + s
 
 
 def return_next_item(lst, normalize=True, normalize_cols=['energyconsumption', 'packetloss', 'latency']):
