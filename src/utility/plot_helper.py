@@ -29,9 +29,13 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'], ve
         for eval_values_key, eval_values_value in eval_values.items():
             traces = defaultdict(list)
             for eval_values_value_k, eval_values_value_v in eval_values_value.items():
+                try:
+                    name = eval_values_value_k.split('=')[1].split('-')[0]
+                except:
+                    name = eval_values_value_k
                 trace = go.Box(
                     y=eval_values_value_v[0],
-                    name=eval_values_value_k.split('=')[1].split('-')[0],
+                    name=name,
                 )
                 traces[f'{str(eval_key)}-{str(eval_values_key)}'].append(trace)
 

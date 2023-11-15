@@ -103,22 +103,25 @@ def load_data(path=None, load_all=False, version='', shuffle=False, fraction=1.0
 
 
 def get_tts_qs(df, packet_thresh, latency_thresh, energy_thresh):
-    if not df.loc[df['packetloss'] < packet_thresh].empty:
-        df_tts = df.loc[df['packetloss'] < packet_thresh]
+    try:
+        if not df.loc[df['packetloss'] < packet_thresh].empty:
+            df = df.loc[df['packetloss'] < packet_thresh]
 
-    if not df_tts.loc[df_tts['latency'] < latency_thresh].empty:
-        df_tts = df_tts.loc[df_tts['latency'] < latency_thresh]
+        if not df.loc[df['latency'] < latency_thresh].empty:
+            df = df.loc[df['latency'] < latency_thresh]
 
-    if not df_tts.loc[df_tts['energyconsumption'] > (energy_thresh - 0.1)].empty:
-        df_tts = df_tts.loc[df_tts['energyconsumption']
-                            > (energy_thresh - 0.1)]
+        if not df.loc[df['energyconsumption'] > (energy_thresh - 0.1)].empty:
+            df = df.loc[df['energyconsumption']
+                                > (energy_thresh - 0.1)]
 
-    if not df_tts.loc[df_tts['energyconsumption'] < energy_thresh].empty:
-        df_tts = df_tts.loc[df_tts['energyconsumption'] < energy_thresh]
+        if not df.loc[df['energyconsumption'] < energy_thresh].empty:
+            df = df.loc[df['energyconsumption'] < energy_thresh]
 
-    if not df_tts.loc[df_tts['energyconsumption'] == df_tts['energyconsumption'].min()].iloc[-1:, :].empty:
-        df_tts_final = df_tts.loc[df_tts['energyconsumption']
-                                  == df_tts['energyconsumption'].min()].iloc[-1:, :]
+        if not df.loc[df['energyconsumption'] == df['energyconsumption'].min()].iloc[-1:, :].empty:
+            df_tts_final = df.loc[df['energyconsumption']
+                                    == df['energyconsumption'].min()].iloc[-1:, :]
+    except:
+        print('f')
     return df_tts_final
 
 
