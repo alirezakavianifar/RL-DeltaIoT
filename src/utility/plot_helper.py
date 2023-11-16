@@ -9,7 +9,7 @@ from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
 import numpy as np
 from src.utility.constants import mapping, mapping_title, box_plots, \
-    selected_on_others, other_plots, dict_subplot_titles
+    selected_on_others, other_plots, dict_subplot_titles, cmp_methods
 
 
 def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
@@ -23,6 +23,9 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
     evals = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     for key, values in cols.items():
         for k, v in values.items():
+            if not cmp:
+                if k in cmp_methods:
+                    continue
             for k_, v_ in v.items():
                 evals[key][k_][k].append(v_)
 
@@ -78,10 +81,10 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
     # fig.for_each_annotation(lambda a:  a.update(x = 0.9) if a.text in row_titles else())
 
     # xaxis titles
-
-    lst_xaxis = [item for item in fig['layout'] if 'xax' in item]
-    for item in lst_xaxis:
-        fig['layout'][item]['title'] = 'cycle'
+    if not cmp:
+        lst_xaxis = [item for item in fig['layout'] if 'xax' in item]
+        for item in lst_xaxis:
+            fig['layout'][item]['title'] = 'cycle'
 
     # yaxis titles
     # Sort yaxis titles
