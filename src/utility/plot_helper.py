@@ -9,10 +9,12 @@ from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
 import numpy as np
 from src.utility.constants import mapping, mapping_title, box_plots, \
-    selected_on_others, other_plots, subplot_titles
+    selected_on_others, other_plots, dict_subplot_titles
 
 
-def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'], vesrion='v1'):
+def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
+                 vesrion='v1', cmp=True, algo_name=None,
+                 quality_type=None, *args, **kwargs):
     if group_col is not None:
         x = group_col
     figs = []
@@ -31,6 +33,8 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'], ve
             for eval_values_value_k, eval_values_value_v in eval_values_value.items():
                 try:
                     name = eval_values_value_k.split('=')[1].split('-')[0]
+                    if cmp:
+                        name = 'DRL4SAO'
                 except:
                     name = eval_values_value_k
                 trace = go.Box(
@@ -40,11 +44,18 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'], ve
                 traces[f'{str(eval_key)}-{str(eval_values_key)}'].append(trace)
 
             traces_all.append(traces)
+            
+    if cmp:
+        titles = dict_subplot_titles[algo_name][quality_type]
+        subplot_titles = [titles[index]
+                      for index, item in enumerate(traces_all)
+                      for key, _ in item.items()]
 
-    subplot_titles=[key.split('*')[1][:-7] if index % 3 == 1 else "" 
-                    for index, item in enumerate(traces_all)
-                    for key, _ in item.items()]
-                
+    else:
+        subplot_titles = [key.split('*')[1][:-7] if index % 3 == 1 else ""
+                      for index, item in enumerate(traces_all)
+                      for key, _ in item.items()]
+
     fig = make_subplots(rows=len(cols), cols=3,
                         subplot_titles=subplot_titles,
                         shared_xaxes=False,
@@ -63,7 +74,7 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'], ve
                 fig.append_trace(f, row=row, col=col)
         col += 1
 
-    fig['layout'].update(height=len(cols) * 350)
+    fig['layout'].update(height=len(cols) * 380)
     # fig.for_each_annotation(lambda a:  a.update(x = 0.9) if a.text in row_titles else())
 
     # xaxis titles
@@ -268,7 +279,8 @@ def visualize(cols, group=True, group_col=None, other_plots=['3dsurface'], vesri
     return figs
 
 
-def visualize_data(cols, normalize=True, group=True, group_col=None):
+def visualize_data(cols, normalize=True, group=True, group_col=None, cmp=True, algo_name=None,
+                   quality_type=None, *args, **kwargs):
 
     if normalize:
         scaled_cols = {}
@@ -281,7 +293,8 @@ def visualize_data(cols, normalize=True, group=True, group_col=None):
 
     app = Dash(__name__)
 
-    figs = visualize_v3(cols=cols, group=group, group_col=group_col)
+    figs = visualize_v3(cols=cols, group=group, group_col=group_col, cmp=cmp, algo_name=algo_name,
+                        quality_type=quality_type)
 
     divs = []
     divs.append(html.H3("DeltaIoT Case"))

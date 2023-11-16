@@ -66,7 +66,21 @@ selected_on_others = {'selected_item_energy': 'energy consumption',
                       'selected_item_packet_for_latency': 'packet loss',
                       }
 
-subplot_titles = {'version1': ("Set-point: EC in [13.2 ± 0.1]", "PL < 15%", "Threshold: LA < 10%",
-                               "Minimize EC", "PL < 15%", "Threshold: LA < 10%"),
-                  'version2': ("Set-point: EC in [67 ± 0.3]", "PL < 15%", "Threshold: LA < 10%",
-                               "Minimize EC", "PL < 15%", "Threshold: LA < 10%")}
+# subplot_titles = {'version1': ("Set-point: EC in [13.2 ± 0.1]", "PL < 15%", "Threshold: LA < 10%",
+#                                "Minimize EC", "PL < 15%", "Threshold: LA < 10%"),
+#                   'version2': ("Set-point: EC in [67 ± 0.3]", "PL < 15%", "Threshold: LA < 10%",
+#                                "Minimize EC", "PL < 15%", "Threshold: LA < 10%")}
+
+dict_subplot_titles = {
+    'DQN_v1':
+    {
+        'multi': ["Set-point: EC in [13.2 ± 0.1]", "PL < 15%", "Threshold: LA < 10%"],
+        'multi_tto': ["Minimize EC", "PL < 15%", "Threshold: LA < 10%"]
+    },
+    'DQN_v2':
+    {
+        'multi': ["Set-point: EC in [67 ± 0.3]", "PL < 15%", "Threshold: LA < 10%"],
+        'multi_tto': ["Minimize EC", "PL < 15%", "Threshold: LA < 10%"],
+    }
+
+}

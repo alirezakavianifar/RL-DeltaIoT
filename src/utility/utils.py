@@ -6,9 +6,11 @@ import os
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from tqdm import tqdm
+from collections import defaultdict
 import shutil
 from functools import wraps
 import time
+
 
 def timeit(func):
     @wraps(func)
@@ -23,15 +25,18 @@ def timeit(func):
         return result, total_time
     return measure_time
 
+
 def set_log_dir(name, path):
     # current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     train_log_dir = os.path.join(path, name)
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
     return train_summary_writer
 
+
 def utility(energy_coef, packet_coef, latency_coef, energy_consumption, packet_loss, latency):
 
     return (energy_coef * energy_consumption + packet_coef * packet_loss + latency_coef * latency)
+
 
 def move_files(files, dst, *args, **kwargs):
     """Copy files from src to destination"""
@@ -39,6 +44,7 @@ def move_files(files, dst, *args, **kwargs):
         file_name = file.rsplit('\\', 1)[1]
         final_dst = os.path.join(dst, file_name)
         shutil.copyfile(file, final_dst)
+
 
 def scale_data(data):
     '''
@@ -111,6 +117,14 @@ def load_data(path=None, load_all=False, version='', shuffle=False, fraction=1.0
     return train_lst, test_lst
 
 
+def get_chosen_model(model_dics, params):
+    model_dics_ = defaultdict(list)
+    for key, item in model_dics.items():
+        if key == os.path.join(os.getcwd(), 'models', f"DQN_v1_multi-n_games=*-lr={params['lr']}-eps_dec={params['eps_dec']}-batch_size={params['batch_size']}-gamma={params['gamma']}-q_eval"):
+            model_dics_[key] = [[model_dics[key][0][0]]]
+            return model_dics_
+
+
 def get_tts_qs(df, packet_thresh, latency_thresh, energy_thresh):
     try:
         if not df.loc[df['packetloss'] < packet_thresh].empty:
@@ -121,14 +135,14 @@ def get_tts_qs(df, packet_thresh, latency_thresh, energy_thresh):
 
         if not df.loc[df['energyconsumption'] > (energy_thresh - 0.1)].empty:
             df = df.loc[df['energyconsumption']
-                                > (energy_thresh - 0.1)]
+                        > (energy_thresh - 0.1)]
 
         if not df.loc[df['energyconsumption'] < energy_thresh].empty:
             df = df.loc[df['energyconsumption'] < energy_thresh]
 
         if not df.loc[df['energyconsumption'] == df['energyconsumption'].min()].iloc[-1:, :].empty:
             df_tts_final = df.loc[df['energyconsumption']
-                                    == df['energyconsumption'].min()].iloc[-1:, :]
+                                  == df['energyconsumption'].min()].iloc[-1:, :]
     except:
         print('f')
     return df_tts_final

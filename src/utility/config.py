@@ -17,6 +17,8 @@ PROMPT = True
 FROM_SCRATCH = False
 # If the agent needs training then TRAINING flag is used.
 TRAINING = True
+# If True then compare different methods
+CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
 VERSION = 'DeltaIoTv1'
 ALGO_NAME = 'DQN_v1'
@@ -211,8 +213,11 @@ def get_params(*args, **kwargs):
 
 
 @click.command()
+@click.option('--algo_name', prompt=PROMPT, default=ALGO_NAME)
+@click.option('--quality_type', prompt=PROMPT, default=QUALITY_TYPE)
 @click.option('--model_dir', prompt=True, default=MODEL_DIR)
 @click.option('--model_names', prompt=True, default='multi')
+@click.option('--cmp', prompt=True, default=CMP)
 def get_params_for_testing(*args, **kwargs):
     MODEL_DICS = {}
     model_names = kwargs['model_names'].split(',')
@@ -222,5 +227,6 @@ def get_params_for_testing(*args, **kwargs):
         files = glob.glob(dir_name + '*q_eval')
         if len(files) > 0:
             MODEL_DICS[item] = files
-    DEEP_AGENT_PARAMS = {'model_dics': MODEL_DICS}
+    DEEP_AGENT_PARAMS = {'model_dics': MODEL_DICS, 'algo_name': kwargs['algo_name'],
+                         'quality_type': kwargs['quality_type'], 'cmp': kwargs['cmp']}
     return DEEP_AGENT_PARAMS

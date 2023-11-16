@@ -66,7 +66,8 @@ def evaluate_models(models):
 
 
 def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=None,
-               energy_thresh=None, packet_thresh=None, latency_thresh=None, num_features=17):
+               energy_thresh=None, packet_thresh=None, latency_thresh=None,
+               num_features=17, cmp=True, algo_name=None, quality_type=None, *args, **kwargs):
     log_dir = os.path.join(PATH_TRACE, VERSION)
 
     if data is None:
@@ -82,29 +83,43 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
                 for key, value in values.items():
                     features = df[['energyconsumption', 'packetloss',
                                    'latency']].iloc[1:2, :].to_numpy()
-                    predicted_multi = np.argsort(value[0](features)).flatten()[-1:].item()
+                    predicted_multi = np.argsort(
+                        value[0](features)).flatten()[-1:].item()
                     evals[keys][key]['energy'].append(
                         df.iloc[predicted_multi]['energyconsumption'])
                     evals[keys][key]['packet'].append(
                         df.iloc[predicted_multi]['packetloss'])
                     evals[keys][key]['latency'].append(
                         df.iloc[predicted_multi]['latency'])
-                df_truth=get_tts_qs(df, packet_thresh=15, latency_thresh=10, energy_thresh=13.2)[['energyconsumption','packetloss','latency']]
-                evals[keys]['DLASER']['energy'].append(create_dummy(df_truth['energyconsumption'].item()))
-                evals[keys]['DLASER']['packet'].append(create_dummy(df_truth['packetloss'].item()))
-                evals[keys]['DLASER']['latency'].append(create_dummy(df_truth['latency'].item()))
-                evals[keys]['Reference']['energy'].append(df_truth['energyconsumption'].item())
-                evals[keys]['Reference']['packet'].append(df_truth['packetloss'].item())
-                evals[keys]['Reference']['latency'].append(df_truth['latency'].item())
-                evals[keys]['Random']['energy'].append(df['energyconsumption'].sample().item())
-                evals[keys]['Random']['packet'].append(df['packetloss'].sample().item())
-                evals[keys]['Random']['latency'].append(df['latency'].sample().item())
+                df_truth = get_tts_qs(df, packet_thresh=15, latency_thresh=10, energy_thresh=13.2)[
+                    ['energyconsumption', 'packetloss', 'latency']]
+                evals[keys]['DLASER']['energy'].append(
+                    create_dummy(df_truth['energyconsumption'].item()))
+                evals[keys]['DLASER']['packet'].append(
+                    create_dummy(df_truth['packetloss'].item()))
+                evals[keys]['DLASER']['latency'].append(
+                    create_dummy(df_truth['latency'].item()))
+                evals[keys]['Reference']['energy'].append(
+                    df_truth['energyconsumption'].item())
+                evals[keys]['Reference']['packet'].append(
+                    df_truth['packetloss'].item())
+                evals[keys]['Reference']['latency'].append(
+                    df_truth['latency'].item())
+                evals[keys]['Random']['energy'].append(
+                    df['energyconsumption'].sample().item())
+                evals[keys]['Random']['packet'].append(
+                    df['packetloss'].sample().item())
+                evals[keys]['Random']['latency'].append(
+                    df['latency'].sample().item())
         except Exception as e:
             print(e)
             break
     visualize_data(evals,
                    normalize=False,
                    group=True,
+                   cmp=cmp,
+                   algo_name=algo_name,
+                   quality_type=quality_type
                    )
 
 #     q_eval_energy = models[0]
@@ -324,7 +339,6 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
 #         lst.append(df_final)
 
 #     df = pd.concat(lst)
-
 
 
 #     df['energy_DLASeR'] = df['TTS_energy_multi'].apply(
