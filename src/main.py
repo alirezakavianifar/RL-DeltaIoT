@@ -28,7 +28,7 @@ if __name__ == '__main__':
         if DEEP_AGENT_PARAMS['cmp']:
 
             chosen_model_params = {
-                'lr': '0.0001', 'eps_dec': '0.00167', 'batch_size': '64', 'gamma': '0.95'}
+                'lr': '0.0001', 'eps_dec': '0.10000', 'batch_size': '64', 'gamma': '1.0'}
 
             model_dics = get_chosen_model(model_dics, chosen_model_params)
 

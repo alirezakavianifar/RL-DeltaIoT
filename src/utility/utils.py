@@ -120,7 +120,7 @@ def load_data(path=None, load_all=False, version='', shuffle=False, fraction=1.0
 def get_chosen_model(model_dics, params):
     model_dics_ = defaultdict(list)
     for key, item in model_dics.items():
-        if key == os.path.join(os.getcwd(), 'models', f"DQN_v1_multi-n_games=*-lr={params['lr']}-eps_dec={params['eps_dec']}-batch_size={params['batch_size']}-gamma={params['gamma']}-q_eval"):
+        if key == os.path.join(os.getcwd(), 'models', f"DQN_v2_multi-n_games=*-lr={params['lr']}-eps_dec={params['eps_dec']}-batch_size={params['batch_size']}-gamma={params['gamma']}-q_eval"):
             model_dics_[key] = [[model_dics[key][0][0]]]
             return model_dics_
 

@@ -224,7 +224,7 @@ def get_params_for_testing(*args, **kwargs):
     model_names = kwargs['model_names'].split(',')
 
     for item in model_names:
-        dir_name = r'%s\DQN_v1_%s' % (kwargs['model_dir'], item)
+        dir_name = r'%s\DQN_v%s_%s' % (kwargs['model_dir'], V, item)
         files = glob.glob(dir_name + '*q_eval')
         if len(files) > 0:
             MODEL_DICS[item] = files
