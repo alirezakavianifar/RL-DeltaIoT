@@ -20,8 +20,9 @@ TRAINING = True
 # If True then compare different methods
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
-VERSION = 'DeltaIoTv1'
-ALGO_NAME = 'DQN_v1'
+V = 2
+VERSION = 'DeltaIoTv%s' % V
+ALGO_NAME = 'DQN_v%s' % V
 # Quality types
 QUALITY_TYPES = {'energy': 'energy', 'packet': 'packet',
                  'latency': 'latency', 'multi': 'multi', 'multi_tto': 'multi_tto'}
@@ -79,7 +80,7 @@ else:
     NETWORK_LAYERS = [150, 120, 100, 50, 25]
     N_STATES = 4096
     N_ACTIONS = 4096
-    N_OBS_SPACE = 42
+    N_OBS_SPACE = 3
     DATA_DIR = os.path.join(GET_CWD, 'data', 'DeltaIoTv2')
 # Create Training and testing Data Directory
 
