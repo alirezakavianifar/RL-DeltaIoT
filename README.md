@@ -14,10 +14,10 @@ git clone https://github.com/alirezakavianifar/RL-DeltaIoT.git
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install requirements.
 
 ```bash
-pip install foobar
+pip install -r requirements.txt
 ```
 
 ## Usage
