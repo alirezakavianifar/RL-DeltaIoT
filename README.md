@@ -6,6 +6,14 @@ Engineering software systems in an uncertain and ever-changing operating environ
 
 ## Installation
 
+Use the following command to clone the repository
+
+```bash
+git clone https://github.com/alirezakavianifar/RL-DeltaIoT.git
+```
+
+## Installation
+
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
 
 ```bash
