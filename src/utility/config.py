@@ -8,7 +8,8 @@ from src.utility.utils import load_data, move_files, get_tts_qs
 from src.environments.deltaiot_env import DeltaIotEnv
 import numpy as np
 from src.drl4sao.custom_dqn.eps_dec_types import EpsDecTypeOne, EpsDecTypeTwo
-from src.environments.env_helpers import RewardMcOne, RewardMcTwo, RewardMcThree, RewardMcFour, RewardMcFive
+from src.environments.env_helpers import RewardMcOne, RewardMcTwo,\
+        RewardMcThree, RewardMcFour, RewardMcFive
 
 GET_CWD = os.getcwd()
 
@@ -20,7 +21,7 @@ TRAINING = True
 # If True then compare different methods
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
-V = 2
+V = 1
 VERSION = 'DeltaIoTv%s' % V
 ALGO_NAME = 'DQN_v%s' % V
 # Quality types
@@ -145,6 +146,7 @@ def wrapper_get_params_for_training(is_training, *args, **kwargs):
 
 
 @click.command()
+@click.option('--algo_type', prompt=PROMPT, default='custom_dqn')
 @click.option('--environment', prompt=PROMPT, default="DeltaIoT")
 @click.option('--warmup_count', prompt=PROMPT, default=WARMUP_COUNT)
 @click.option('--lr', prompt=PROMPT, default=LR)
@@ -159,7 +161,7 @@ def wrapper_get_params_for_training(is_training, *args, **kwargs):
 @click.option('--env_name', prompt=PROMPT, default=ENV_NAME)
 @click.option('--algo', prompt=PROMPT, default=ALGO)
 @click.option('--replace', prompt=PROMPT, default=REPLACE)
-@click.option('--fname', prompt=PROMPT, default=FNAME)
+# @click.option('--fname', prompt=PROMPT, default=FNAME)
 # @click.option('--Network_layers', prompt=PROMPT, default=NETWORK_LAYERS)
 @click.option('--quality_type', prompt=PROMPT, default=QUALITY_TYPE)
 @click.option('--algo_name', prompt=PROMPT, default=ALGO_NAME)
@@ -174,6 +176,7 @@ def get_params_for_training(*args, **kwargs):
 
     # agent params
     DEEP_AGENT_PARAMS = {
+        'algo_type':kwargs['algo_type'],
         'env': ENV,
         'eps_min': kwargs['eps_min'],
         'n_games': kwargs['n_games'],
@@ -189,7 +192,6 @@ def get_params_for_training(*args, **kwargs):
         'batch_size': kwargs['batch_size'],
         'replace': kwargs['replace'],
         'lr': kwargs['lr'],
-        'fname': kwargs['fname'],
         'network_layers': NETWORK_LAYERS,
         'quality_type': kwargs['quality_type'],
         'algo_name': kwargs['algo_name'],

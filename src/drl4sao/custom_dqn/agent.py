@@ -27,7 +27,7 @@ class Agent:
         self.chkpt_dir = agent_params['chkpt_dir']
         self.action_space = [i for i in range(int(agent_params['n_actions']))]
         self.learn_step_counter = 0
-        self.fname = agent_params['fname']
+        # self.fname = agent_params['fname']
 
         self.memory = ReplayBuffer(
             agent_params['mem_size'], agent_params['input_dims'], agent_params['n_actions'])
