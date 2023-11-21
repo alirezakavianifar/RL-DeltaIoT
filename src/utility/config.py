@@ -16,6 +16,8 @@ GET_CWD = os.getcwd()
 PROMPT = True
 # FROM_SCRATCH is used if we want to split data into training and testing from scratch
 FROM_SCRATCH = False
+# Type of Deep RL Algorithms, 1 = customdqn, 2= stabledqn
+ALGO_TYPE = 2
 # If the agent needs training then TRAINING flag is used.
 TRAINING = True
 # If True then compare different methods
@@ -146,7 +148,7 @@ def wrapper_get_params_for_training(is_training, *args, **kwargs):
 
 
 @click.command()
-@click.option('--algo_type', prompt=PROMPT, default='custom_dqn')
+@click.option('--algo_type', prompt=PROMPT, default=ALGO_TYPE)
 @click.option('--environment', prompt=PROMPT, default="DeltaIoT")
 @click.option('--warmup_count', prompt=PROMPT, default=WARMUP_COUNT)
 @click.option('--lr', prompt=PROMPT, default=LR)

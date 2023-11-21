@@ -15,4 +15,5 @@ def stable_dqn(agent_params):
                 verbose=1)
     
     model.learn(total_timesteps=7500, log_interval=4)
-    model.save(os.path.join(agent_params['chkpt_dir'],'stable_models'))
+    saved_dir = f"{agent_params['chkpt_dir']}-n_games="
+    model.save(os.path.join(agent_params['chkpt_dir'],'stable_models', 'models.zip'))
