@@ -65,9 +65,17 @@ def evaluate_models(models):
     return evals
 
 
+def predict_action(features, model, model_type='1'):
+    if model_type == '1':
+        predicted_multi = np.argsort(
+            model(features)).flatten()[-1:].item()
+    elif model_type == '2':
+        predicted_multi = model.predict(features)[0].flatten().item()
+    return predicted_multi
+
 def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=None,
                energy_thresh=None, packet_thresh=None, latency_thresh=None,
-               num_features=17, cmp=True, algo_name=None, quality_type=None, *args, **kwargs):
+               num_features=17, cmp=True, algo_name=None, quality_type=None, model_type=None, *args, **kwargs):
     log_dir = os.path.join(PATH_TRACE, VERSION)
 
     if data is None:
@@ -83,8 +91,7 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
                 for key, value in values.items():
                     features = df[['energyconsumption', 'packetloss',
                                    'latency']].iloc[1:2, :].to_numpy()
-                    predicted_multi = np.argsort(
-                        value[0](features)).flatten()[-1:].item()
+                    predicted_multi = predict_action(features, value[0], model_type=model_type)
                     evals[keys][key]['energy'].append(
                         df.iloc[predicted_multi]['energyconsumption'])
                     evals[keys][key]['packet'].append(

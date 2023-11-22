@@ -28,10 +28,14 @@ def get_models_v1(str_base=f'{os.path.join(GET_CWD, "models")}\\DQN_v1_multi-n_g
 
 
 def get_models_v2(str_base=f'{os.path.join(os.getcwd(), "models")}\\DQN_v1_multi-n_games=*',
-                  algo_name=None, quality_type=None):
-
-    str_bases = list(dict.fromkeys([re.sub(
-        r'n_games=\d*[a-z]*', 'n_games=*', item) for item in str_base[quality_type]]))
+                  algo_name=None, quality_type=None, model_dir=None, load_model=None):
+    
+    if model_dir == '1':
+        str_bases = list(dict.fromkeys([re.sub(
+            r'n_games=\d*[a-z]*', 'n_games=*', item) for item in str_base[quality_type]]))
+    elif model_dir == '2':
+        str_bases = list(dict.fromkeys([re.sub(
+            r'\d*[a-z]*_steps', '*_steps', item) for item in str_base[quality_type]]))
     files = defaultdict(list)
     [files[lr].append(glob.glob(lr)) for lr in str_bases]
     return files
@@ -39,11 +43,13 @@ def get_models_v2(str_base=f'{os.path.join(os.getcwd(), "models")}\\DQN_v1_multi
 
 def get_models_v3(str_base,algo_name=None, quality_type=None):
     files = defaultdict(list)
-    lrs = [
-        f'{str_base}\\*.zip',
-    ]
 
-    [files[lr].append(glob.glob(lr)) for lr in lrs]
+
+    # lrs = [
+    #     f'{str_base}\\*.zip',
+    # ]
+
+    # [files[lr].append(str_base[quality_type])]
     return files
 
 

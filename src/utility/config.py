@@ -3,6 +3,8 @@ import glob
 import os
 import click
 import glob
+from tensorflow.keras.models import load_model
+from stable_baselines3 import DQN
 from collections import defaultdict
 from src.utility.utils import load_data, move_files, get_tts_qs
 from src.environments.deltaiot_env import DeltaIotEnv
@@ -231,10 +233,18 @@ def get_params_for_testing(*args, **kwargs):
         dir_name = r'%s\DQN_v%s_%s' % (MODEL_DIR, V, item)
         if kwargs['model_dir'] == '1':
             files = glob.glob(dir_name + '*q_eval')
+            load_model = load_model
         else:
             files = glob.glob(dir_name + '*.zip')
+            load_model = DQN.load
         if len(files) > 0:
             MODEL_DICS[item] = files
-    DEEP_AGENT_PARAMS = {'model_dics': MODEL_DICS, 'algo_name': kwargs['algo_name'],
-                         'quality_type': kwargs['quality_type'], 'cmp': kwargs['cmp']}
+    DEEP_AGENT_PARAMS = {
+                         'model_dics': MODEL_DICS, 
+                         'algo_name': kwargs['algo_name'],
+                         'quality_type': kwargs['quality_type'], 
+                         'cmp': kwargs['cmp'],
+                         'model_dir':kwargs['model_dir'],
+                         'load_model': load_model
+                         }
     return DEEP_AGENT_PARAMS

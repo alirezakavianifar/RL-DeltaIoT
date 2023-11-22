@@ -2,7 +2,6 @@ import pretty_errors
 from collections import defaultdict
 import glob
 import os
-from tensorflow.keras.models import load_model
 # from src.experiments.dqn.dqn import dqn
 from src.drl4sao.custom_dqn.dqn import dqn
 from src.drl4sao.stable_algos.stable_dqn import stable_dqn
@@ -24,10 +23,12 @@ if __name__ == '__main__':
             stable_dqn(agent_params=DEEP_AGENT_PARAMS)
     else:
 
-        model_dics = get_models(lambda: get_models_v3(
+        model_dics = get_models(lambda: get_models_v2(
             DEEP_AGENT_PARAMS['model_dics'], 
             DEEP_AGENT_PARAMS['algo_name'],
-            DEEP_AGENT_PARAMS['quality_type']))
+            DEEP_AGENT_PARAMS['quality_type'],
+            DEEP_AGENT_PARAMS['model_dir'],
+            DEEP_AGENT_PARAMS['load_model']))
 
         if DEEP_AGENT_PARAMS['cmp']:
             params_dict = defaultdict(list)
@@ -44,7 +45,7 @@ if __name__ == '__main__':
             model_dics = get_chosen_model(model_dics, chosen_model_params)
 
         models = config.get_models(
-            model_names=model_dics, model_load_type=load_model)
+            model_names=model_dics, model_load_type=DEEP_AGENT_PARAMS['load_model'])
 
         test_phase(
             config.TEST_LST, models,
@@ -57,4 +58,5 @@ if __name__ == '__main__':
             num_features=config.INPUT_DIMS,
             cmp=DEEP_AGENT_PARAMS['cmp'],
             algo_name=DEEP_AGENT_PARAMS['algo_name'],
-            quality_type=DEEP_AGENT_PARAMS['quality_type'])
+            quality_type=DEEP_AGENT_PARAMS['quality_type'],
+            model_type=DEEP_AGENT_PARAMS['model_dir'])
