@@ -233,10 +233,10 @@ def get_params_for_testing(*args, **kwargs):
         dir_name = r'%s\DQN_v%s_%s' % (MODEL_DIR, V, item)
         if kwargs['model_dir'] == '1':
             files = glob.glob(dir_name + '*q_eval')
-            load_model = load_model
+            model = load_model
         else:
             files = glob.glob(dir_name + '*.zip')
-            load_model = DQN.load
+            model = DQN.load
         if len(files) > 0:
             MODEL_DICS[item] = files
     DEEP_AGENT_PARAMS = {
@@ -245,6 +245,6 @@ def get_params_for_testing(*args, **kwargs):
                          'quality_type': kwargs['quality_type'], 
                          'cmp': kwargs['cmp'],
                          'model_dir':kwargs['model_dir'],
-                         'load_model': load_model
+                         'load_model': model
                          }
     return DEEP_AGENT_PARAMS

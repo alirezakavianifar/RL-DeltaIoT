@@ -10,11 +10,20 @@ import pandas as pd
 import numpy as np
 from src.utility.constants import mapping, mapping_title, box_plots, \
     selected_on_others, other_plots, dict_subplot_titles, cmp_methods
+    
+
+
+def return_name(name, model_type):
+    if model_type == "1":
+        return name.split('=')[1].split('-')[0]
+    if model_type == '2':
+        return name.rsplit('_',2)[-2]
+    
 
 
 def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
                  vesrion='v1', cmp=True, algo_name=None,
-                 quality_type=None, *args, **kwargs):
+                 quality_type=None, model_type=None, *args, **kwargs):
     if group_col is not None:
         x = group_col
     figs = []
@@ -35,7 +44,7 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
             traces = defaultdict(list)
             for eval_values_value_k, eval_values_value_v in eval_values_value.items():
                 try:
-                    name = eval_values_value_k.split('=')[1].split('-')[0]
+                    name = return_name(eval_values_value_k, model_type)
                     if cmp:
                         name = 'DRL4SAO'
                 except:
@@ -283,7 +292,7 @@ def visualize(cols, group=True, group_col=None, other_plots=['3dsurface'], vesri
 
 
 def visualize_data(cols, normalize=True, group=True, group_col=None, cmp=True, algo_name=None,
-                   quality_type=None, *args, **kwargs):
+                   quality_type=None, model_type=None, *args, **kwargs):
 
     if normalize:
         scaled_cols = {}
@@ -297,7 +306,7 @@ def visualize_data(cols, normalize=True, group=True, group_col=None, cmp=True, a
     app = Dash(__name__)
 
     figs = visualize_v3(cols=cols, group=group, group_col=group_col, cmp=cmp, algo_name=algo_name,
-                        quality_type=quality_type)
+                        quality_type=quality_type, model_type=model_type)
 
     divs = []
     divs.append(html.H3("DeltaIoT Case"))

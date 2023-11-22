@@ -126,7 +126,8 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
                    group=True,
                    cmp=cmp,
                    algo_name=algo_name,
-                   quality_type=quality_type
+                   quality_type=quality_type, 
+                   model_type=model_type
                    )
 
 
