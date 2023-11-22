@@ -37,7 +37,7 @@ def get_models_v2(str_base=f'{os.path.join(os.getcwd(), "models")}\\DQN_v1_multi
     return files
 
 
-def get_models_v3(str_base):
+def get_models_v3(str_base,algo_name=None, quality_type=None):
     files = defaultdict(list)
     lrs = [
         f'{str_base}\\*.zip',

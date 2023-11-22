@@ -220,7 +220,7 @@ def get_params(*args, **kwargs):
 @click.command()
 @click.option('--algo_name', prompt=PROMPT, default=ALGO_NAME)
 @click.option('--quality_type', prompt=PROMPT, default=QUALITY_TYPE)
-@click.option('--model_dir', prompt=True, default=MODEL_DIR)
+@click.option('--model_dir', '-m', prompt=True, default='1', type=click.Choice(['1', '2']), multiple=False)
 @click.option('--model_names', prompt=True, default='multi')
 @click.option('--cmp', prompt=True, default=CMP)
 def get_params_for_testing(*args, **kwargs):
@@ -228,8 +228,11 @@ def get_params_for_testing(*args, **kwargs):
     model_names = kwargs['model_names'].split(',')
 
     for item in model_names:
-        dir_name = r'%s\DQN_v%s_%s' % (kwargs['model_dir'], V, item)
-        files = glob.glob(dir_name + '*q_eval')
+        dir_name = r'%s\DQN_v%s_%s' % (MODEL_DIR, V, item)
+        if kwargs['model_dir'] == '1':
+            files = glob.glob(dir_name + '*q_eval')
+        else:
+            files = glob.glob(dir_name + '*.zip')
         if len(files) > 0:
             MODEL_DICS[item] = files
     DEEP_AGENT_PARAMS = {'model_dics': MODEL_DICS, 'algo_name': kwargs['algo_name'],

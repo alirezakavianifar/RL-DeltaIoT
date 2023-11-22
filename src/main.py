@@ -24,7 +24,7 @@ if __name__ == '__main__':
             stable_dqn(agent_params=DEEP_AGENT_PARAMS)
     else:
 
-        model_dics = get_models(lambda: get_models_v2(
+        model_dics = get_models(lambda: get_models_v3(
             DEEP_AGENT_PARAMS['model_dics'], 
             DEEP_AGENT_PARAMS['algo_name'],
             DEEP_AGENT_PARAMS['quality_type']))
