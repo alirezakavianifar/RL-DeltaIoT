@@ -10,15 +10,25 @@ import pandas as pd
 import numpy as np
 from src.utility.constants import mapping, mapping_title, box_plots, \
     selected_on_others, other_plots, dict_subplot_titles, cmp_methods
-    
 
 
 def return_name(name, model_type):
     if model_type == "1":
         return name.split('=')[1].split('-')[0]
     if model_type == '2':
-        return name.rsplit('_',2)[-2]
-    
+        # return name.rsplit('_',2)[-2]
+        return int(int(name.rsplit('_', 2)[-2])/216)
+
+
+def get_subplot_titles(key, model_type, traces_all):
+    if model_type == '1':
+        return [key.split('*')[1][:-7] if index % 3 == 1 else ""
+                for index, item in enumerate(traces_all)
+                for key, _ in item.items()]
+    if model_type == '2':
+        return [key.split('*')[0].rsplit('\\', 1)[1][13:-1].replace('-', ', ') if index % 3 == 1 else ""
+                for index, item in enumerate(traces_all)
+                for key, _ in item.items()]
 
 
 def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
@@ -56,17 +66,16 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
                 traces[f'{str(eval_key)}-{str(eval_values_key)}'].append(trace)
 
             traces_all.append(traces)
-            
+
     if cmp:
         titles = dict_subplot_titles[algo_name][quality_type]
         subplot_titles = [titles[index]
-                      for index, item in enumerate(traces_all)
-                      for key, _ in item.items()]
+                          for index, item in enumerate(traces_all)
+                          for key, _ in item.items()]
 
     else:
-        subplot_titles = [key.split('*')[1][:-7] if index % 3 == 1 else ""
-                      for index, item in enumerate(traces_all)
-                      for key, _ in item.items()]
+
+        subplot_titles = get_subplot_titles(key, model_type, traces_all)
 
     fig = make_subplots(rows=len(cols), cols=3,
                         subplot_titles=subplot_titles,

@@ -37,7 +37,7 @@ def get_models_v2(str_base=f'{os.path.join(os.getcwd(), "models")}\\DQN_v1_multi
         str_bases = list(dict.fromkeys([re.sub(
             r'\d*[a-z]*_steps', '*_steps', item) for item in str_base[quality_type]]))
     files = defaultdict(list)
-    [files[lr].append(glob.glob(lr)) for lr in str_bases]
+    [files[lr].append(sorted(glob.glob(lr), key=os.path.getmtime)) for lr in str_bases]
     return files
 
 

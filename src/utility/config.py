@@ -232,7 +232,7 @@ def get_params_for_testing(*args, **kwargs):
     for item in model_names:
         dir_name = r'%s\DQN_v%s_%s' % (MODEL_DIR, V, item)
         if kwargs['model_dir'] == '1':
-            files = glob.glob(dir_name + '*q_eval')
+            files = glob.glob(dir_name + '*q_next')
             model = load_model
         else:
             files = glob.glob(dir_name + '*.zip')
