@@ -10,8 +10,8 @@ from src.utility.utils import load_data, move_files, get_tts_qs
 from src.environments.deltaiot_env import DeltaIotEnv
 import numpy as np
 from src.drl4sao.custom_dqn.eps_dec_types import EpsDecTypeOne, EpsDecTypeTwo
-from src.environments.env_helpers import RewardMcOne, RewardMcTwo,\
-        RewardMcThree, RewardMcFour, RewardMcFive
+from src.environments.env_helpers import RewardMcOne, RewardMcTwo, \
+    RewardMcThree, RewardMcFour, RewardMcFive
 
 GET_CWD = os.getcwd()
 
@@ -67,7 +67,7 @@ EPS_DEC_TYPE = EpsDecTypeTwo()
 if VERSION == 'DeltaIoTv1':
     INPUT_DIMS = 3
     TIME_STEPS = 216
-    ENERGY_THRESH = 13.20
+    ENERGY_THRESH = 12.90
     PACKET_THRESH = 15.0
     LATENCY_THRESH = 10.0
     N_ACTIONS = 216
@@ -180,7 +180,7 @@ def get_params_for_training(*args, **kwargs):
 
     # agent params
     DEEP_AGENT_PARAMS = {
-        'algo_type':kwargs['algo_type'],
+        'algo_type': kwargs['algo_type'],
         'env': ENV,
         'eps_min': kwargs['eps_min'],
         'n_games': kwargs['n_games'],
@@ -240,11 +240,11 @@ def get_params_for_testing(*args, **kwargs):
         if len(files) > 0:
             MODEL_DICS[item] = files
     DEEP_AGENT_PARAMS = {
-                         'model_dics': MODEL_DICS, 
-                         'algo_name': kwargs['algo_name'],
-                         'quality_type': kwargs['quality_type'], 
-                         'cmp': kwargs['cmp'],
-                         'model_dir':kwargs['model_dir'],
-                         'load_model': model
-                         }
+        'model_dics': MODEL_DICS,
+        'algo_name': kwargs['algo_name'],
+        'quality_type': kwargs['quality_type'],
+        'cmp': kwargs['cmp'],
+        'model_dir': kwargs['model_dir'],
+        'load_model': model
+    }
     return DEEP_AGENT_PARAMS

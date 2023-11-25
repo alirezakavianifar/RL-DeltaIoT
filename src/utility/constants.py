@@ -33,7 +33,7 @@ cmp_methods = ["DLASER", 'Reference', 'Random']
 mapping_title = {'EnergyConsumption': 'DRL4SAO',
                  'PacketLoss': 'DRL4SAO',
                  'Latency': 'DRL4SAO',
-                 'EnergyConsumptionTTS': 'Set-point: EC in [13.20 +- 0.1]',
+                 'EnergyConsumptionTTS': 'Set-point: EC in [12.90 +- 0.1]',
                  'PacketLossTTS': 'Threshold: PL < 15%',
                  'LatencyTTS': 'Threshold: LA < 10%',
                  'selected_energy_on_others': 'Selected Energy Consumption impact on other properties',
@@ -44,7 +44,7 @@ mapping_title = {'EnergyConsumption': 'DRL4SAO',
 box_plots = {'single_obj': {'EnergyConsumption': 'DRL4SAO',
                             'PacketLoss': 'DRL4SAO',
                             'Latency': 'DRL4SAO'},
-             'multi_obj': {'tts': {'EnergyConsumptionTTS': 'Set-point: EC in [13.20 +- 0.1]',
+             'multi_obj': {'tts': {'EnergyConsumptionTTS': 'Set-point: EC in [12.90 +- 0.1]',
                            'PacketLossTTS': 'Threshold: PL < 15%',
                                    'LatencyTTS': 'Threshold: LA < 10%'},
                            'tto': {'EnergyConsumptionTT': 'Minimize EC',
@@ -75,7 +75,7 @@ selected_on_others = {'selected_item_energy': 'energy consumption',
 dict_subplot_titles = {
     'DQN_v1':
     {
-        'multi': ["Set-point: EC in [13.2 ± 0.1]", "PL < 15%", "Threshold: LA < 10%"],
+        'multi': ["Set-point: EC in [12.90 ± 0.1]", "PL < 15%", "Threshold: LA < 10%"],
         'multi_tto': ["Minimize EC", "PL < 15%", "Threshold: LA < 10%"]
     },
     'DQN_v2':

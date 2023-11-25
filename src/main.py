@@ -15,7 +15,6 @@ if __name__ == '__main__':
 
     DEEP_AGENT_PARAMS = config.get_params.main(standalone_mode=False)
 
-
     if DEEP_AGENT_PARAMS['training']:
         if DEEP_AGENT_PARAMS['algo_type'] == 1:
             dqn(agent_params=DEEP_AGENT_PARAMS)
@@ -24,7 +23,7 @@ if __name__ == '__main__':
     else:
 
         model_dics = get_models(lambda: get_models_v2(
-            DEEP_AGENT_PARAMS['model_dics'], 
+            DEEP_AGENT_PARAMS['model_dics'],
             DEEP_AGENT_PARAMS['algo_name'],
             DEEP_AGENT_PARAMS['quality_type'],
             DEEP_AGENT_PARAMS['model_dir'],
@@ -37,12 +36,12 @@ if __name__ == '__main__':
                 for item in values:
                     [it.split('=') for it in item.split('-')[2:-1]]
                     items = item.split('-')[2:]
-                
 
             chosen_model_params = {
-                'lr': '0.0001', 'eps_dec': '0.01961', 'batch_size': '64', 'gamma': '1.0'}
+                'lr': '0.0001', 'eps_min': '0.001', 'batch_size': '64', 'gamma': '1.0'}
 
-            model_dics = get_chosen_model(model_dics, chosen_model_params)
+            model_dics = get_chosen_model(
+                model_dics, chosen_model_params, DEEP_AGENT_PARAMS['model_dir'])
 
         models = config.get_models(
             model_names=model_dics, model_load_type=DEEP_AGENT_PARAMS['load_model'])

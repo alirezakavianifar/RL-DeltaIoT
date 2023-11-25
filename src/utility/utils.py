@@ -69,7 +69,7 @@ def return_next_item(lst, normalize=True, normalize_cols=['energyconsumption', '
     '''
     A generator function which returns the next data frame from given repository
     '''
-    for item in lst:
+    for index, item in enumerate(lst):
         df = pd.read_json(item)
         if normalize:
             scaler = MinMaxScaler()
@@ -117,11 +117,15 @@ def load_data(path=None, load_all=False, version='', shuffle=False, fraction=1.0
     return train_lst, test_lst
 
 
-def get_chosen_model(model_dics, params):
+def get_chosen_model(model_dics, params, model_type):
     model_dics_ = defaultdict(list)
     for key, item in model_dics.items():
-        if key == os.path.join(os.getcwd(), 'models', f"DQN_v2_multi-n_games=*-lr={params['lr']}-eps_dec={params['eps_dec']}-batch_size={params['batch_size']}-gamma={params['gamma']}-q_next"):
-            model_dics_[key] = [[model_dics[key][0][2]]]
+        if model_type == "1":
+            if key == os.path.join(os.getcwd(), 'models', f"DQN_v1_multi-n_games=*-lr={params['lr']}-eps_min={params['eps_dec']}-batch_size={params['batch_size']}-gamma={params['gamma']}-q_next"):
+                model_dics_[key] = [[model_dics[key][0][2]]]
+        elif model_type == "2":
+            if key == os.path.join(os.getcwd(), 'models', f"DQN_v1_multi-lr={params['lr']}-eps_min={params['eps_min']}-batch_size={params['batch_size']}-gamma={params['gamma']}_*_steps"):
+                model_dics_[key] = [[model_dics[key][0][2]]]
             return model_dics_
 
 
