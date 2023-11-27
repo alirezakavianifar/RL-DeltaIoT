@@ -15,6 +15,7 @@ import os
 import sys
 import plotly.express as px
 from plotly.subplots import make_subplots
+import itertools
 
 sys.path.append(r'D:\projects\tensorflow_gpu\experiments')
 sys.path.append(r'D:\projects\tensorflow_gpu\src\experiments')
@@ -137,9 +138,13 @@ def read_from_html(file_path):
     with open(file_path) as f:
         html = f.read()
     call_arg_str = re.findall(r'Plotly\.newPlot\((.*)\)', html[-2**16:])[0]
-    call_args = json.loads(f'[{call_arg_str}]')[1]
-
-    return call_args
+    lst = json.loads(f'[{call_arg_str}]')[1]
+    reference = itertools.islice(lst, 0, None, 2)
+    dlaser = itertools.islice(lst, 1, None, 2)
+    res = list(itertools.chain(reference, dlaser))
+    res = {"Reference":pd.DataFrame({'latency':res[0]['y'], 'packetloss':res[1]['y'], 'energyconsumption':res[2]['y']}),
+           "DLASER+":pd.DataFrame({'latency':res[3]['y'], 'packetloss':res[4]['y'], 'energyconsumption':res[5]['y']}) }
+    return res
 
 
 
@@ -259,5 +264,5 @@ def read_from_html(file_path):
 
 if __name__ == '__main__':
     # plot_quality_properties(plot_type=PLOT_TYPE, for_type=FOR_TYPE, path=PATH)
-    read_from_html(r'E:\projects\RL-DeltaIoT\fig\Fig15-a.htm')
+    res = read_from_html(os.path.join(os.getcwd(), 'fig', 'Fig15-a.htm'))
     print('f')
