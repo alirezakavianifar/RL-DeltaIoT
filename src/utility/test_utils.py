@@ -1,3 +1,6 @@
+import plotly
+import json
+import re
 import plotly.graph_objects as go
 from src.utility.plot_helper import visualize_data
 import seaborn as sns
@@ -12,7 +15,6 @@ import os
 import sys
 import plotly.express as px
 from plotly.subplots import make_subplots
-
 
 sys.path.append(r'D:\projects\tensorflow_gpu\experiments')
 sys.path.append(r'D:\projects\tensorflow_gpu\src\experiments')
@@ -129,6 +131,16 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
                    quality_type=quality_type, 
                    model_type=model_type
                    )
+    
+
+def read_from_html(file_path):
+    with open(file_path) as f:
+        html = f.read()
+    call_arg_str = re.findall(r'Plotly\.newPlot\((.*)\)', html[-2**16:])[0]
+    call_args = json.loads(f'[{call_arg_str}]')
+    plotly_json = {'data': call_args[1], 'layout': call_args[2]}    
+    return plotly.io.from_json(json.dumps(plotly_json['data']))
+
 
 
 # def plot_quality_properties(plot_type=PLOT_TYPE, for_type=PLOT_TYPE, path=PATH):

@@ -70,9 +70,6 @@ def return_next_item(lst, normalize=True, normalize_cols=['energyconsumption', '
     A generator function which returns the next data frame from given repository
     '''
     for index, item in enumerate(lst):
-        print(index)
-        if index == 10:
-            print('f')
         df = pd.read_json(item)
         if normalize:
             scaler = MinMaxScaler()
@@ -127,9 +124,9 @@ def get_chosen_model(model_dics, params, model_type):
             if key == os.path.join(os.getcwd(), 'models', f"DQN_v1_multi-n_games=*-lr={params['lr']}-eps_min={params['eps_dec']}-batch_size={params['batch_size']}-gamma={params['gamma']}-q_next"):
                 model_dics_[key] = [[model_dics[key][0][2]]]
         elif model_type == "2":
-            if key == os.path.join(os.getcwd(), 'models', f"DQN_v1_multi-lr={params['lr']}-eps_min={params['eps_min']}-batch_size={params['batch_size']}-gamma={params['gamma']}_*_steps"):
-                model_dics_[key] = [[model_dics[key][0][2]]]
-            return model_dics_
+            if key == os.path.join(os.getcwd(), 'models', f"DQN_v1_multi-lr={params['lr']}-eps_min={params['eps_min']}-batch_size={params['batch_size']}-gamma={params['gamma']}_*_steps.zip"):
+                model_dics_[key] = item
+    return model_dics_
 
 
 def get_tts_qs(df, packet_thresh, latency_thresh, energy_thresh):

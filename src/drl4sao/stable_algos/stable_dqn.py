@@ -14,7 +14,7 @@ def stable_dqn(agent_params):
     checkpoint_callback = CheckpointCallback(save_freq=1, save_path=save_path,
                                              name_prefix=f"{name}-lr={agent_params['lr']}-eps_min={agent_params['eps_min']}-batch_size={agent_params['batch_size']}-gamma={agent_params['gamma']}")
     eval_callback = EvalCallback(
-        env, callback_on_new_best=checkpoint_callback, eval_freq=1000, verbose=1, n_eval_episodes=1)
+        env, callback_on_new_best=checkpoint_callback, eval_freq=10000, verbose=1, n_eval_episodes=5)
 
     model = DQN("MlpPolicy",
                 env,
@@ -28,5 +28,5 @@ def stable_dqn(agent_params):
                 tensorboard_log=agent_params['log_path'],
                 verbose=1)
 
-    model.learn(total_timesteps=(agent_params['n_games']) * agent_params['n_actions'], log_interval=1,
+    model.learn(total_timesteps=((agent_params['n_games'] - 30) * agent_params['n_actions']), log_interval=1,
                 callback=eval_callback)
