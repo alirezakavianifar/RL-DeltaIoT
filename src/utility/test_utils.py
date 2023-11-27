@@ -137,9 +137,9 @@ def read_from_html(file_path):
     with open(file_path) as f:
         html = f.read()
     call_arg_str = re.findall(r'Plotly\.newPlot\((.*)\)', html[-2**16:])[0]
-    call_args = json.loads(f'[{call_arg_str}]')
-    plotly_json = {'data': call_args[1], 'layout': call_args[2]}    
-    return plotly.io.from_json(json.dumps(plotly_json['data']))
+    call_args = json.loads(f'[{call_arg_str}]')[1]
+
+    return call_args
 
 
 
@@ -257,5 +257,7 @@ def read_from_html(file_path):
 #     fig.show()
 
 
-# if __name__ == '__main__':
-#     plot_quality_properties(plot_type=PLOT_TYPE, for_type=FOR_TYPE, path=PATH)
+if __name__ == '__main__':
+    # plot_quality_properties(plot_type=PLOT_TYPE, for_type=FOR_TYPE, path=PATH)
+    read_from_html(r'E:\projects\RL-DeltaIoT\fig\Fig15-a.htm')
+    print('f')
