@@ -70,6 +70,9 @@ def return_next_item(lst, normalize=True, normalize_cols=['energyconsumption', '
     A generator function which returns the next data frame from given repository
     '''
     for index, item in enumerate(lst):
+        print(index)
+        if index == 40:
+            print('f')
         df = pd.read_json(item)
         if normalize:
             scaler = MinMaxScaler()
