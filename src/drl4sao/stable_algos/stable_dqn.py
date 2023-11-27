@@ -8,13 +8,13 @@ from stable_baselines3.common.monitor import Monitor
 
 def stable_dqn(agent_params):
     env = Monitor(env=TimeLimit(agent_params['env'],
-                    max_episode_steps=agent_params['n_actions']))
+                    max_episode_steps=agent_params['n_actions']), allow_early_resets=True)
     name = agent_params['chkpt_dir'].rsplit('\\', 1)[1]
     save_path = agent_params['chkpt_dir'].rsplit('\\', 1)[0]
     checkpoint_callback = CheckpointCallback(save_freq=1, save_path=save_path,
                                              name_prefix=f"{name}-lr={agent_params['lr']}-eps_min={agent_params['eps_min']}-batch_size={agent_params['batch_size']}-gamma={agent_params['gamma']}")
     eval_callback = EvalCallback(
-        env, callback_on_new_best=checkpoint_callback, eval_freq=2000, verbose=1)
+        env, callback_on_new_best=checkpoint_callback, eval_freq=1000, verbose=1, n_eval_episodes=1)
 
     model = DQN("MlpPolicy",
                 env,

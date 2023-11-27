@@ -71,7 +71,7 @@ def return_next_item(lst, normalize=True, normalize_cols=['energyconsumption', '
     '''
     for index, item in enumerate(lst):
         print(index)
-        if index == 40:
+        if index == 10:
             print('f')
         df = pd.read_json(item)
         if normalize:
