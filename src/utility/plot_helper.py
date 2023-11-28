@@ -34,7 +34,7 @@ def get_subplot_titles(key, model_type, traces_all):
 
 def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
                  vesrion='v1', cmp=True, algo_name=None,
-                 quality_type=None, model_type=None, *args, **kwargs):
+                 quality_type=None, model_type=None, cmp_dir=None, *args, **kwargs):
     if group_col is not None:
         x = group_col
     figs = []
@@ -43,9 +43,9 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
     evals = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     for key, values in cols.items():
         for k, v in values.items():
-            if not cmp:
-                if k in cmp_methods:
-                    continue
+            # if not cmp:
+            #     if k in cmp_methods:
+            #         continue
             for k_, v_ in v.items():
                 evals[key][k_][k].append(v_)
 
@@ -302,7 +302,7 @@ def visualize(cols, group=True, group_col=None, other_plots=['3dsurface'], vesri
 
 
 def visualize_data(cols, normalize=True, group=True, group_col=None, cmp=True, algo_name=None,
-                   quality_type=None, model_type=None, *args, **kwargs):
+                   quality_type=None, model_type=None, cmp_dir=None, *args, **kwargs):
 
     if normalize:
         scaled_cols = {}
@@ -316,7 +316,7 @@ def visualize_data(cols, normalize=True, group=True, group_col=None, cmp=True, a
     app = Dash(__name__)
 
     figs = visualize_v3(cols=cols, group=group, group_col=group_col, cmp=cmp, algo_name=algo_name,
-                        quality_type=quality_type, model_type=model_type)
+                        quality_type=quality_type, model_type=model_type, cmp_dir=cmp_dir)
 
     divs = []
     divs.append(html.H3("DeltaIoT Case"))

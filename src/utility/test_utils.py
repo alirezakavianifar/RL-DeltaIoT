@@ -77,9 +77,11 @@ def predict_action(features, model, model_type='1'):
     return predicted_multi
 
 
-def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=None,
+def test_phase(data, models, energy_coef=None, 
+               packet_coef=None, latency_coef=None,
                energy_thresh=None, packet_thresh=None, latency_thresh=None,
-               num_features=17, cmp=True, algo_name=None, quality_type=None, model_type=None, *args, **kwargs):
+               num_features=17, cmp=True, algo_name=None,
+               quality_type=None, model_type=None, cmp_dir=None, *args, **kwargs):
     log_dir = os.path.join(PATH_TRACE, VERSION)
 
     if data is None:
@@ -90,7 +92,7 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
     # Compare res with other methods
     i = 0
     res = read_from_html(os.path.join(
-                os.getcwd(), 'fig', 'Fig15-a.htm'))
+                os.getcwd(), 'fig', cmp_dir['tts']))
 
     while (True):
         try:
@@ -134,7 +136,8 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
                    cmp=cmp,
                    algo_name=algo_name,
                    quality_type=quality_type,
-                   model_type=model_type
+                   model_type=model_type,
+                   cmd_dir=cmp_dir
                    )
 
 

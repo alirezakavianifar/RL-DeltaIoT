@@ -26,6 +26,11 @@ TRAINING = True
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
 V = 2
+
+if V == 1:
+    CMP_DIR = {'tts':'Fig15-a.htm'}
+else:
+    CMP_DIR = {'tts':'Fig15-b.htm'}
 VERSION = 'DeltaIoTv%s' % V
 ALGO_NAME = 'DQN_v%s' % V
 # Quality types
@@ -37,7 +42,7 @@ REWARD_TYPES = {'energy': 'rm2', 'packet': 'rm2',
 # Reward mechanism: rm1=threshold, rm2=minimum, rm3=multi, rm4=multi_tt, rm5=multi_tto
 REWARD_TYPE = REWARD_TYPES['multi']
 # QUALITY_TYPE could be energy, packet, latency, multi, multi_tt, multi_tto
-QUALITY_TYPE = QUALITY_TYPES['multi']
+QUALITY_TYPE = QUALITY_TYPES['multi_tto']
 # deep type could be either tensor or torch
 DEEP_TYPE = 'tensor'
 # deep types could be a collection of dqn, ddpg, ppo or etc...
@@ -174,8 +179,13 @@ def wrapper_get_params_for_training(is_training, *args, **kwargs):
 def get_params_for_training(*args, **kwargs):
 
     if kwargs['environment'] == 'DeltaIoT':
+        if kwargs['quality_type'] == 'multi':
+            reward_type = RewardMcThree
+        elif kwargs['quality_type'] == 'multi_tto':
+            reward_type = RewardMcFive
+
         ENV = DeltaIotEnv(data_dir=TRAIN_LST, timesteps=TIME_STEPS, n_actions=N_ACTIONS, n_obs_space=N_OBS_SPACE,
-                          reward_type=RewardMcThree, energy_coef=ENERGY_COEF, packet_coef=PACKET_COEF, latency_coef=LATENCY_COEF,
+                          reward_type=reward_type, energy_coef=ENERGY_COEF, packet_coef=PACKET_COEF, latency_coef=LATENCY_COEF,
                           packet_thresh=PACKET_THRESH, latency_thresh=LATENCY_THRESH, energy_thresh=ENERGY_THRESH)
 
     # agent params
@@ -245,6 +255,7 @@ def get_params_for_testing(*args, **kwargs):
         'quality_type': kwargs['quality_type'],
         'cmp': kwargs['cmp'],
         'model_dir': kwargs['model_dir'],
-        'load_model': model
+        'load_model': model,
+        'cmp_dir': CMP_DIR
     }
     return DEEP_AGENT_PARAMS

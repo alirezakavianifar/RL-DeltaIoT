@@ -80,8 +80,8 @@ dict_subplot_titles = {
     },
     'DQN_v2':
     {
-        'multi': ["Set-point: EC in [67 ± 0.3]", "PL < 15%", "Threshold: LA < 10%"],
-        'multi_tto': ["Minimize EC", "PL < 15%", "Threshold: LA < 10%"],
+        'multi': ["Set-point: EC in [67 ± 0.3]", "Threshold: PL < 15%", "Threshold: LA < 10%"],
+        'multi_tto': ["Minimize EC", "Threshold: PL < 15%", "Threshold: LA < 10%"],
     }
 
 }

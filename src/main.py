@@ -38,7 +38,7 @@ if __name__ == '__main__':
                     items = item.split('-')[2:]
 
             chosen_model_params = {
-                'lr': '0.0001', 'eps_min': '0.001', 'batch_size': '64', 'gamma': '1.0'}
+                'lr': '0.0001', 'eps_min': '0.001', 'batch_size': '64', 'gamma': '0.99'}
 
             model_dics = get_chosen_model(
                 model_dics, chosen_model_params, DEEP_AGENT_PARAMS['model_dir'])
@@ -58,4 +58,5 @@ if __name__ == '__main__':
             cmp=DEEP_AGENT_PARAMS['cmp'],
             algo_name=DEEP_AGENT_PARAMS['algo_name'],
             quality_type=DEEP_AGENT_PARAMS['quality_type'],
-            model_type=DEEP_AGENT_PARAMS['model_dir'])
+            model_type=DEEP_AGENT_PARAMS['model_dir'],
+            cmp_dir=DEEP_AGENT_PARAMS['cmp_dir'])
