@@ -28,7 +28,7 @@ mapping = {'selected_item_energy': 'DRL4SAO',
            'latency_DLASeR+': 'DLASeR',
            }
 
-cmp_methods = ["DLASER", 'Reference', 'Random']
+cmp_methods = ["DLASER", "DLASER+", 'Reference', 'Random']
 
 mapping_title = {'EnergyConsumption': 'DRL4SAO',
                  'PacketLoss': 'DRL4SAO',

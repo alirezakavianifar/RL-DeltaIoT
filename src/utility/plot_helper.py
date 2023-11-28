@@ -17,7 +17,8 @@ def return_name(name, model_type):
         return name.split('=')[1].split('-')[0]
     if model_type == '2':
         # return name.rsplit('_',2)[-2]
-        return int(int(name.rsplit('_', 2)[-2])/216)
+        # return int(int(name.rsplit('_', 2)[-2])/216)
+        return int(int(name.rsplit('_', 2)[-2]))
 
 
 def get_subplot_titles(key, model_type, traces_all):

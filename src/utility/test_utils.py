@@ -76,6 +76,7 @@ def predict_action(features, model, model_type='1'):
         predicted_multi = model.predict(features)[0].flatten().item()
     return predicted_multi
 
+
 def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=None,
                energy_thresh=None, packet_thresh=None, latency_thresh=None,
                num_features=17, cmp=True, algo_name=None, quality_type=None, model_type=None, *args, **kwargs):
@@ -86,35 +87,39 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
 
     all_data = return_next_item(data, normalize=False)
     evals = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    # Compare res with other methods
+    i = 0
+    res = read_from_html(os.path.join(
+                os.getcwd(), 'fig', 'Fig15-a.htm'))
 
     while (True):
         try:
             df = next(all_data)
+            i += 1
             for keys, values in models.items():
                 for key, value in values.items():
                     features = df[['energyconsumption', 'packetloss',
                                    'latency']].iloc[1:2, :].to_numpy()
-                    predicted_multi = predict_action(features, value[0], model_type=model_type)
+                    predicted_multi = predict_action(
+                        features, value[0], model_type=model_type)
                     evals[keys][key]['energy'].append(
                         df.iloc[predicted_multi]['energyconsumption'])
                     evals[keys][key]['packet'].append(
                         df.iloc[predicted_multi]['packetloss'])
                     evals[keys][key]['latency'].append(
                         df.iloc[predicted_multi]['latency'])
-                df_truth = get_tts_qs(df, packet_thresh=15, latency_thresh=10, energy_thresh=13.2)[
-                    ['energyconsumption', 'packetloss', 'latency']]
-                evals[keys]['DLASER']['energy'].append(
-                    create_dummy(df_truth['energyconsumption'].item()))
-                evals[keys]['DLASER']['packet'].append(
-                    create_dummy(df_truth['packetloss'].item()))
-                evals[keys]['DLASER']['latency'].append(
-                    create_dummy(df_truth['latency'].item()))
                 evals[keys]['Reference']['energy'].append(
-                    df_truth['energyconsumption'].item())
+                    res['Reference']['energyconsumption'][i])
                 evals[keys]['Reference']['packet'].append(
-                    df_truth['packetloss'].item())
+                    res['Reference']['packetloss'][i])
                 evals[keys]['Reference']['latency'].append(
-                    df_truth['latency'].item())
+                    res['Reference']['latency'][i])
+                evals[keys]['DLASER+']['energy'].append(
+                    res['DLASER+']['energyconsumption'][i])
+                evals[keys]['DLASER+']['packet'].append(
+                    res['DLASER+']['packetloss'][i])
+                evals[keys]['DLASER+']['latency'].append(
+                    res['DLASER+']['latency'][i])
                 evals[keys]['Random']['energy'].append(
                     df['energyconsumption'].sample().item())
                 evals[keys]['Random']['packet'].append(
@@ -122,17 +127,16 @@ def test_phase(data, models, energy_coef=None, packet_coef=None, latency_coef=No
                 evals[keys]['Random']['latency'].append(
                     df['latency'].sample().item())
         except Exception as e:
-            print(e)
             break
     visualize_data(evals,
                    normalize=False,
                    group=True,
                    cmp=cmp,
                    algo_name=algo_name,
-                   quality_type=quality_type, 
+                   quality_type=quality_type,
                    model_type=model_type
                    )
-    
+
 
 def read_from_html(file_path):
     with open(file_path) as f:
@@ -142,10 +146,9 @@ def read_from_html(file_path):
     reference = itertools.islice(lst, 0, None, 2)
     dlaser = itertools.islice(lst, 1, None, 2)
     res = list(itertools.chain(reference, dlaser))
-    res = {"Reference":pd.DataFrame({'latency':res[0]['y'], 'packetloss':res[1]['y'], 'energyconsumption':res[2]['y']}),
-           "DLASER+":pd.DataFrame({'latency':res[3]['y'], 'packetloss':res[4]['y'], 'energyconsumption':res[5]['y']}) }
+    res = {"Reference": {'latency': res[0]['y'], 'packetloss': res[1]['y'], 'energyconsumption': res[2]['y']},
+           "DLASER+": {'latency': res[3]['y'], 'packetloss': res[4]['y'], 'energyconsumption': res[5]['y']}}
     return res
-
 
 
 # def plot_quality_properties(plot_type=PLOT_TYPE, for_type=PLOT_TYPE, path=PATH):
@@ -260,7 +263,6 @@ def read_from_html(file_path):
 #     with open("final.html", 'a') as f:
 #         f.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
 #     fig.show()
-
 
 if __name__ == '__main__':
     # plot_quality_properties(plot_type=PLOT_TYPE, for_type=FOR_TYPE, path=PATH)

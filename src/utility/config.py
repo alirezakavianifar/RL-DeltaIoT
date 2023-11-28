@@ -25,7 +25,7 @@ TRAINING = True
 # If True then compare different methods
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
-V = 1
+V = 2
 VERSION = 'DeltaIoTv%s' % V
 ALGO_NAME = 'DQN_v%s' % V
 # Quality types
