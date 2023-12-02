@@ -28,9 +28,9 @@ CMP = True
 V = 2
 
 if V == 1:
-    CMP_DIR = {'tts':'Fig15-a.htm'}
+    CMP_DIR = {'tts': 'Fig15-a.htm'}
 else:
-    CMP_DIR = {'tts':'Fig15-b.htm'}
+    CMP_DIR = {'tts': 'Fig15-b.htm'}
 VERSION = 'DeltaIoTv%s' % V
 ALGO_NAME = 'DQN_v%s' % V
 # Quality types
@@ -42,7 +42,7 @@ REWARD_TYPES = {'energy': 'rm2', 'packet': 'rm2',
 # Reward mechanism: rm1=threshold, rm2=minimum, rm3=multi, rm4=multi_tt, rm5=multi_tto
 REWARD_TYPE = REWARD_TYPES['multi']
 # QUALITY_TYPE could be energy, packet, latency, multi, multi_tt, multi_tto
-QUALITY_TYPE = QUALITY_TYPES['multi_tto']
+QUALITY_TYPE = QUALITY_TYPES['multi']
 # deep type could be either tensor or torch
 DEEP_TYPE = 'tensor'
 # deep types could be a collection of dqn, ddpg, ppo or etc...

@@ -8,7 +8,7 @@ from stable_baselines3.common.monitor import Monitor
 
 def stable_dqn(agent_params):
     env = Monitor(env=TimeLimit(agent_params['env'],
-                    max_episode_steps=agent_params['n_actions']), allow_early_resets=True)
+                                max_episode_steps=agent_params['n_actions']), allow_early_resets=True)
     name = agent_params['chkpt_dir'].rsplit('\\', 1)[1]
     save_path = agent_params['chkpt_dir'].rsplit('\\', 1)[0]
     checkpoint_callback = CheckpointCallback(save_freq=1, save_path=save_path,
@@ -26,7 +26,10 @@ def stable_dqn(agent_params):
                 exploration_initial_eps=agent_params['epsilon'],
                 exploration_final_eps=agent_params['eps_min'],
                 tensorboard_log=agent_params['log_path'],
+                device='cuda',
                 verbose=1)
 
-    model.learn(total_timesteps=((agent_params['n_games'] - 30) * agent_params['n_actions']), log_interval=1,
+    # model.learn(total_timesteps=((agent_params['n_games'] - 30) * agent_params['n_actions']), log_interval=1,
+    #             callback=eval_callback)
+    model.learn(total_timesteps=130000, log_interval=1,
                 callback=eval_callback)
