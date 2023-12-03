@@ -25,12 +25,12 @@ TRAINING = True
 # If True then compare different methods
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
-V = 2
+V = 1
 
 if V == 1:
-    CMP_DIR = {'tts': 'Fig15-a.htm'}
+    CMP_DIR = {'tts': 'Fig15-a.htm', 'tto':'Fig14-a.htm'}
 else:
-    CMP_DIR = {'tts': 'Fig15-b.htm'}
+    CMP_DIR = {'tts': 'Fig15-b.htm', 'tto':'Fig14-b.htm'}
 VERSION = 'DeltaIoTv%s' % V
 ALGO_NAME = 'DQN_v%s' % V
 # Quality types

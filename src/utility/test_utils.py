@@ -92,7 +92,7 @@ def test_phase(data, models, energy_coef=None,
     # Compare res with other methods
     i = 0
     res = read_from_html(os.path.join(
-                os.getcwd(), 'fig', cmp_dir['tts']))
+                os.getcwd(), 'fig', cmp_dir['tto']))
 
     while (True):
         try:
@@ -146,11 +146,18 @@ def read_from_html(file_path):
         html = f.read()
     call_arg_str = re.findall(r'Plotly\.newPlot\((.*)\)', html[-2**16:])[0]
     lst = json.loads(f'[{call_arg_str}]')[1]
-    reference = itertools.islice(lst, 0, None, 2)
-    dlaser = itertools.islice(lst, 1, None, 2)
+    
+    lst_names = list(dict.fromkeys([ls['name'] for ls in lst]))
+    new_lst = []
+        
+    for item in lst_names:
+        new_lst.append(itertools.islice(lst, 0, None, len(lst_names)))
+        
+    reference = itertools.islice(lst, 0, None, len(lst_names))
+    dlaser = itertools.islice(lst, 1, None, len(lst_names))
     res = list(itertools.chain(reference, dlaser))
-    res = {"Reference": {'latency': res[0]['y'], 'packetloss': res[1]['y'], 'energyconsumption': res[2]['y']},
-           "DLASER+": {'latency': res[3]['y'], 'packetloss': res[4]['y'], 'energyconsumption': res[5]['y']}}
+    res = {res[0]['name']: {'latency': res[0]['y'], 'packetloss': res[1]['y'], 'energyconsumption': res[2]['y']},
+           res[3]['name']: {'latency': res[3]['y'], 'packetloss': res[4]['y'], 'energyconsumption': res[5]['y']}}
     return res
 
 
