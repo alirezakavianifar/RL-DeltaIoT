@@ -97,7 +97,7 @@ def test_phase(data, models, energy_coef=None,
     while (True):
         try:
             df = next(all_data)
-            i += 1
+            
             for keys, values in models.items():
                 for key, value in values.items():
                     features = df[['energyconsumption', 'packetloss',
@@ -110,24 +110,21 @@ def test_phase(data, models, energy_coef=None,
                         df.iloc[predicted_multi]['packetloss'])
                     evals[keys][key]['latency'].append(
                         df.iloc[predicted_multi]['latency'])
-                evals[keys]['Reference']['energy'].append(
-                    res['Reference']['energyconsumption'][i])
-                evals[keys]['Reference']['packet'].append(
-                    res['Reference']['packetloss'][i])
-                evals[keys]['Reference']['latency'].append(
-                    res['Reference']['latency'][i])
-                evals[keys]['DLASER+']['energy'].append(
-                    res['DLASER+']['energyconsumption'][i])
-                evals[keys]['DLASER+']['packet'].append(
-                    res['DLASER+']['packetloss'][i])
-                evals[keys]['DLASER+']['latency'].append(
-                    res['DLASER+']['latency'][i])
-                evals[keys]['Random']['energy'].append(
-                    df['energyconsumption'].sample().item())
-                evals[keys]['Random']['packet'].append(
-                    df['packetloss'].sample().item())
-                evals[keys]['Random']['latency'].append(
-                    df['latency'].sample().item())
+                for k, v in res.items():
+                    evals[keys][k]['energy'].append(
+                        res[k]['energyconsumption'][0][i])
+                    evals[keys][k]['packet'].append(
+                        res[k]['packetloss'][0][i])
+                    evals[keys][k]['latency'].append(
+                        res[k]['latency'][0][i])
+                    evals[keys]['Random']['energy'].append(
+                        df['energyconsumption'].sample().item())
+                    evals[keys]['Random']['packet'].append(
+                        df['packetloss'].sample().item())
+                    evals[keys]['Random']['latency'].append(
+                        df['latency'].sample().item())
+            
+            i += 1
         except Exception as e:
             break
     visualize_data(evals,
@@ -146,19 +143,19 @@ def read_from_html(file_path):
         html = f.read()
     call_arg_str = re.findall(r'Plotly\.newPlot\((.*)\)', html[-2**16:])[0]
     lst = json.loads(f'[{call_arg_str}]')[1]
-    
     lst_names = list(dict.fromkeys([ls['name'] for ls in lst]))
     new_lst = []
-        
-    for item in lst_names:
-        new_lst.append(itertools.islice(lst, 0, None, len(lst_names)))
-        
-    reference = itertools.islice(lst, 0, None, len(lst_names))
-    dlaser = itertools.islice(lst, 1, None, len(lst_names))
-    res = list(itertools.chain(reference, dlaser))
-    res = {res[0]['name']: {'latency': res[0]['y'], 'packetloss': res[1]['y'], 'energyconsumption': res[2]['y']},
-           res[3]['name']: {'latency': res[3]['y'], 'packetloss': res[4]['y'], 'energyconsumption': res[5]['y']}}
-    return res
+    for index, item in enumerate(lst_names):
+        new_lst.append(itertools.islice(lst, index, None, len(lst_names)))
+
+    res = list(itertools.chain(*new_lst))
+    res_indeices = np.split(np.arange(len(lst)), len(lst_names))
+    final_res = defaultdict(lambda: defaultdict(list))
+    for ind, item in enumerate(res_indeices):
+        final_res[res[item[0]]['name']]['latency'].append(res[item[0]]['y'])
+        final_res[res[item[0]]['name']]['packetloss'].append(res[item[1]]['y'])
+        final_res[res[item[0]]['name']]['energyconsumption'].append(res[item[2]]['y'])
+    return final_res
 
 
 # def plot_quality_properties(plot_type=PLOT_TYPE, for_type=PLOT_TYPE, path=PATH):
