@@ -28,21 +28,21 @@ CMP = True
 V = 2
 
 if V == 1:
-    CMP_DIR = {'tts': 'Fig15-a.htm', 'tto':'Fig14-a.htm'}
+    CMP_DIR = {'tts': 'Fig15-a.htm', 'tto': 'Fig14-a.htm'}
 else:
-    CMP_DIR = {'tts': 'Fig15-b.htm', 'tto':'Fig14-b.htm'}
+    CMP_DIR = {'tts': 'Fig15-b.htm', 'tto': 'Fig14-b.htm'}
 VERSION = 'DeltaIoTv%s' % V
 ALGO_NAME = 'DQN_v%s' % V
 # Quality types
 QUALITY_TYPES = {'energy': 'energy', 'packet': 'packet',
-                 'latency': 'latency', 'multi': 'multi', 'multi_tto': 'multi_tto'}
+                 'latency': 'latency', 'multi': 'multi', 'multi_tto': 'multi_tto', 'multi_tt': 'multi_tt'}
 # Reward types
 REWARD_TYPES = {'energy': 'rm2', 'packet': 'rm2',
                 'latency': 'rm2', 'multi': 'rm3', 'multi_tto': 'rm5', 'multi_tt': 'rm4'}
 # Reward mechanism: rm1=threshold, rm2=minimum, rm3=multi, rm4=multi_tt, rm5=multi_tto
-REWARD_TYPE = REWARD_TYPES['multi']
+REWARD_TYPE = REWARD_TYPES['multi_tt']
 # QUALITY_TYPE could be energy, packet, latency, multi, multi_tt, multi_tto
-QUALITY_TYPE = QUALITY_TYPES['multi']
+QUALITY_TYPE = QUALITY_TYPES['multi_tt']
 # deep type could be either tensor or torch
 DEEP_TYPE = 'tensor'
 # deep types could be a collection of dqn, ddpg, ppo or etc...
@@ -73,8 +73,8 @@ if VERSION == 'DeltaIoTv1':
     INPUT_DIMS = 3
     TIME_STEPS = 216
     ENERGY_THRESH = 12.90
-    PACKET_THRESH = 15.0
-    LATENCY_THRESH = 10.0
+    PACKET_THRESH = 10.0
+    LATENCY_THRESH = 5.0
     N_ACTIONS = 216
     NETWORK_LAYERS = [50, 25, 15]
     DATA_DIR = os.path.join(GET_CWD, 'data', 'DeltaIoTv1')
@@ -183,7 +183,8 @@ def get_params_for_training(*args, **kwargs):
             reward_type = RewardMcThree
         elif kwargs['quality_type'] == 'multi_tto':
             reward_type = RewardMcFive
-
+        elif kwargs['quality_type'] == 'multi_tt':
+            reward_type = RewardMcFour
         ENV = DeltaIotEnv(data_dir=TRAIN_LST, timesteps=TIME_STEPS, n_actions=N_ACTIONS, n_obs_space=N_OBS_SPACE,
                           reward_type=reward_type, energy_coef=ENERGY_COEF, packet_coef=PACKET_COEF, latency_coef=LATENCY_COEF,
                           packet_thresh=PACKET_THRESH, latency_thresh=LATENCY_THRESH, energy_thresh=ENERGY_THRESH)

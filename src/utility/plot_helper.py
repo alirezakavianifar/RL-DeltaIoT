@@ -44,8 +44,8 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
     for key, values in cols.items():
         for k, v in values.items():
             # if not cmp:
-                # if k in cmp_methods:
-                #     continue
+            # if k in cmp_methods:
+            #     continue
             for k_, v_ in v.items():
                 evals[key][k_][k].append(v_)
 
@@ -69,8 +69,8 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
             traces_all.append(traces)
 
     if cmp:
-        # titles = dict_subplot_titles[algo_name][quality_type]
-        titles = dict_subplot_titles[algo_name]['multi_tto']
+        titles = dict_subplot_titles[algo_name][quality_type]
+        # titles = dict_subplot_titles[algo_name]['multi_tto']
         subplot_titles = [titles[index]
                           for index, item in enumerate(traces_all)
                           for key, _ in item.items()]

@@ -31,5 +31,5 @@ def stable_dqn(agent_params):
 
     # model.learn(total_timesteps=((agent_params['n_games'] - 30) * agent_params['n_actions']), log_interval=1,
     #             callback=eval_callback)
-    model.learn(total_timesteps=130000, log_interval=1,
+    model.learn(total_timesteps=600000, log_interval=1,
                 callback=eval_callback)
