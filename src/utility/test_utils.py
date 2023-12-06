@@ -77,7 +77,7 @@ def predict_action(features, model, model_type='1'):
     return predicted_multi
 
 
-def test_phase(data, models, energy_coef=None, 
+def test_phase(data, models, energy_coef=None,
                packet_coef=None, latency_coef=None,
                energy_thresh=None, packet_thresh=None, latency_thresh=None,
                num_features=17, cmp=True, algo_name=None,
@@ -92,12 +92,12 @@ def test_phase(data, models, energy_coef=None,
     # Compare res with other methods
     i = 0
     res = read_from_html(os.path.join(
-                os.getcwd(), 'fig', cmp_dir['tto']))
+        os.getcwd(), 'fig', cmp_dir['tto']))
 
     while (True):
         try:
             df = next(all_data)
-            
+
             for keys, values in models.items():
                 for key, value in values.items():
                     features = df[['energyconsumption', 'packetloss',
@@ -123,7 +123,7 @@ def test_phase(data, models, energy_coef=None,
                         df['packetloss'].sample().item())
                     evals[keys]['Random']['latency'].append(
                         df['latency'].sample().item())
-            
+
             i += 1
         except Exception as e:
             break
@@ -154,7 +154,8 @@ def read_from_html(file_path):
     for ind, item in enumerate(res_indeices):
         final_res[res[item[0]]['name']]['latency'].append(res[item[0]]['y'])
         final_res[res[item[0]]['name']]['packetloss'].append(res[item[1]]['y'])
-        final_res[res[item[0]]['name']]['energyconsumption'].append(res[item[2]]['y'])
+        final_res[res[item[0]]['name']]['energyconsumption'].append(
+            res[item[2]]['y'])
     return final_res
 
 

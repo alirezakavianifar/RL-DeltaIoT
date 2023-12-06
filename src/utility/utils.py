@@ -120,11 +120,13 @@ def load_data(path=None, load_all=False, version='', shuffle=False, fraction=1.0
 def get_chosen_model(model_dics, params, model_type):
     model_dics_ = defaultdict(list)
     for key, item in model_dics.items():
+        # v = key.split('\\')[-1].split('_')[1]
+        model_name = key.split('\\')[-1].split('-')[0]
         if model_type == "1":
-            if key == os.path.join(os.getcwd(), 'models', f"DQN_v1_multi-n_games=*-lr={params['lr']}-eps_min={params['eps_dec']}-batch_size={params['batch_size']}-gamma={params['gamma']}-q_next"):
+            if key == os.path.join(os.getcwd(), 'models', f"{model_name}-n_games=*-lr={params['lr']}-eps_min={params['eps_dec']}-batch_size={params['batch_size']}-gamma={params['gamma']}-q_next"):
                 model_dics_[key] = [[model_dics[key][0][2]]]
         elif model_type == "2":
-            if key == os.path.join(os.getcwd(), 'models', f"DQN_v1_multi-lr={params['lr']}-eps_min={params['eps_min']}-batch_size={params['batch_size']}-gamma={params['gamma']}_*_steps.zip"):
+            if key == os.path.join(os.getcwd(), 'models', f"{model_name}-lr={params['lr']}-eps_min={params['eps_min']}-batch_size={params['batch_size']}-gamma={params['gamma']}_*_steps.zip"):
                 model_dics_[key] = item
     return model_dics_
 
@@ -148,7 +150,7 @@ def get_tts_qs(df, packet_thresh, latency_thresh, energy_thresh):
             df_tts_final = df.loc[df['energyconsumption']
                                   == df['energyconsumption'].min()].iloc[-1:, :]
     except:
-        print('f')
+        pass
     return df_tts_final
 
 

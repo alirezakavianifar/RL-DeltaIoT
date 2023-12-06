@@ -83,7 +83,7 @@ dict_subplot_titles = {
     {
         'multi': ["Set-point: EC in [67 ± 0.3]", "Threshold: PL < 15%", "Threshold: LA < 10%"],
         'multi_tto': ["Minimize EC", "Threshold: PL < 15%", "Threshold: LA < 10%"],
-        'multi_tt': ["Minimize EC", "Threshold: PL < 10%", "Threshold: LA < 5%"],
+        'multi_tt': ["Minimize EC", "Threshold: PL < 15%", "Threshold: LA < 10%"],
     }
 
 }
