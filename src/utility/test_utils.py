@@ -92,7 +92,7 @@ def test_phase(data, models, energy_coef=None,
     # Compare res with other methods
     i = 0
     res = read_from_html(os.path.join(
-        os.getcwd(), 'fig', cmp_dir['tto']))
+        os.getcwd(), 'fig', cmp_dir['tts']))
 
     while (True):
         try:
