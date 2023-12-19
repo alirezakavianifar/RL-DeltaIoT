@@ -4,7 +4,7 @@ import os
 import click
 import glob
 from tensorflow.keras.models import load_model
-from stable_baselines3 import DQN
+from stable_baselines3 import DQN, PPO
 from collections import defaultdict
 from src.utility.utils import load_data, move_files, get_tts_qs
 from src.environments.deltaiot_env import DeltaIotEnv
@@ -225,7 +225,7 @@ def is_test(ctx, param, value):
 
 
 @click.command()
-@click.option('--training', prompt=True, is_flag=True, callback=is_test,
+@click.option('--training', prompt=PROMPT, is_flag=True, callback=is_test,
               expose_value=True, is_eager=True)
 def get_params(*args, **kwargs):
     return wrapper_get_params_for_training(is_training=kwargs['training'])
@@ -234,21 +234,24 @@ def get_params(*args, **kwargs):
 @click.command()
 @click.option('--algo_name', prompt=PROMPT, default=ALGO_NAME)
 @click.option('--quality_type', prompt=PROMPT, default=QUALITY_TYPE)
-@click.option('--model_dir', '-m', prompt=True, default='1', type=click.Choice(['1', '2']), multiple=False)
-@click.option('--model_names', prompt=True, default='multi')
-@click.option('--cmp', prompt=True, default=CMP)
+@click.option('--model_dir', '-m', prompt=PROMPT, default='1', type=click.Choice(['1', '2']), multiple=False)
+@click.option('--model_names', prompt=PROMPT, default='multi')
+@click.option('--cmp', prompt=PROMPT, default=CMP)
 def get_params_for_testing(*args, **kwargs):
     MODEL_DICS = {}
     model_names = kwargs['model_names'].split(',')
 
     for item in model_names:
-        dir_name = r'%s\DQN_v%s_%s' % (MODEL_DIR, V, item)
+        dir_name = r'%s\%s_v%s_%s' % (MODEL_DIR, ALGO_NAME.split('_')[0], V, item)
         if kwargs['model_dir'] == '1':
             files = glob.glob(dir_name + '*q_next')
             model = load_model
         else:
             files = glob.glob(dir_name + '*.zip')
-            model = DQN.load
+            if ALGO_NAME.split('_')[0] == 'DQN':
+                model = DQN.load
+            elif ALGO_NAME.split('_')[0] == "PPO":
+                model = PPO.load
         if len(files) > 0:
             MODEL_DICS[item] = files
     DEEP_AGENT_PARAMS = {

@@ -38,7 +38,7 @@ if __name__ == '__main__':
                     items = item.split('-')[2:]
 
             chosen_model_params = {
-                'lr': '0.0001', 'eps_min': '0.001', 'batch_size': '64', 'gamma': '0.98'}
+                'lr': '0.0001', 'eps_min': '0.001', 'batch_size': '64', 'gamma': '1.0'}
 
             model_dics = get_chosen_model(
                 model_dics, chosen_model_params, DEEP_AGENT_PARAMS['model_dir'])
