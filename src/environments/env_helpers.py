@@ -6,6 +6,11 @@ class IRewardMCOne(metaclass=ABCMeta):
     def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None):
         pass
 
+    
+class IRewardForHindsight(metaclass=ABCMeta):
+    @abstractmethod
+    def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None):
+        pass
 
 class RewardMcOne(IRewardMCOne):
     def __init__(self) -> None:
