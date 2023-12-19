@@ -1,9 +1,11 @@
 import os
-from stable_baselines3 import DQN, PPO
+from stable_baselines3 import DQN, PPO, HerReplayBuffer
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.callbacks import EvalCallback
 from gymnasium.wrappers.time_limit import TimeLimit
 from stable_baselines3.common.monitor import Monitor
+
+from stable_baselines3.her.goal_selection_strategy import GoalSelectionStrategy
 
 
 def stable_dqn(agent_params):
