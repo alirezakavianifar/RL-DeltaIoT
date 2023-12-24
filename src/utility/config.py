@@ -26,7 +26,11 @@ TRAINING = True
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
 V = 2
+<<<<<<< HEAD
 ALGO_NAME = 'DQN'
+=======
+ALGO_NAME = 'PPO'
+>>>>>>> b0e03efc48e457594d13e8f070a1f619ca7aa5db
 
 if V == 1:
     CMP_DIR = {'tts': 'Fig15-a.htm', 'tto': 'Fig14-a.htm'}
@@ -242,7 +246,8 @@ def get_params_for_testing(*args, **kwargs):
     model_names = kwargs['model_names'].split(',')
 
     for item in model_names:
-        dir_name = r'%s\%s_v%s_%s' % (MODEL_DIR, ALGO_NAME.split('_')[0], V, item)
+        dir_name = r'%s\%s_v%s_%s' % (
+            MODEL_DIR, ALGO_NAME.split('_')[0], V, item)
         if kwargs['model_dir'] == '1':
             files = glob.glob(dir_name + '*q_next')
             model = load_model

@@ -32,7 +32,7 @@ def stable_dqn(agent_params):
                     tensorboard_log=agent_params['log_path'],
                     device='cuda',
                     verbose=1)
-        
+
     if algo_name == "PPO":
         model = PPO("MlpPolicy",
                     env,
@@ -45,5 +45,5 @@ def stable_dqn(agent_params):
                     verbose=1)
     # model.learn(total_timesteps=((agent_params['n_games'] - 30) * agent_params['n_actions']), log_interval=1,
     #             callback=eval_callback)
-    model.learn(total_timesteps=58320, log_interval=1,
+    model.learn(total_timesteps=500_000, log_interval=1,
                 callback=eval_callback)
