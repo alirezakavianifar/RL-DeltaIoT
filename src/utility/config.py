@@ -25,8 +25,8 @@ TRAINING = True
 # If True then compare different methods
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
-V = 1
-ALGO_NAME = 'PPO'
+V = 2
+ALGO_NAME = 'DQN'
 
 if V == 1:
     CMP_DIR = {'tts': 'Fig15-a.htm', 'tto': 'Fig14-a.htm'}

@@ -44,8 +44,8 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
     for key, values in cols.items():
         for k, v in values.items():
             # if not cmp:
-            # if k in cmp_methods:
-            #     continue
+            #     if k in cmp_methods:
+            #         continue
             for k_, v_ in v.items():
                 evals[key][k_][k].append(v_)
 
