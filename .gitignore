@@ -26,7 +26,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 data/DeltaIoTv2
-*.docx
+
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -153,6 +153,7 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
