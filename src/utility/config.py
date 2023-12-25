@@ -26,7 +26,7 @@ TRAINING = True
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
 V = 2
-ALGO_NAME = 'PPO'
+ALGO_NAME = 'DQN'
 
 if V == 1:
     CMP_DIR = {'tts': 'Fig15-a.htm', 'tto': 'Fig14-a.htm'}
