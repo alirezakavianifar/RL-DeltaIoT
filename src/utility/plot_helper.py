@@ -27,7 +27,7 @@ def get_subplot_titles(key, model_type, traces_all):
                 for index, item in enumerate(traces_all)
                 for key, _ in item.items()]
     if model_type == '2':
-        return [key.split('*')[0].rsplit('\\', 1)[1][13:-1].replace('-', ', ') if index % 3 == 1 else ""
+        return [key.split('*')[0].rsplit('\\', 1)[1][16:-1].replace('-', ', ') if index % 3 == 1 else ""
                 for index, item in enumerate(traces_all)
                 for key, _ in item.items()]
 
@@ -44,8 +44,8 @@ def visualize_v3(cols, group=True, group_col=None, other_plots=['3dsurface'],
     for key, values in cols.items():
         for k, v in values.items():
             # if not cmp:
-            # if k in cmp_methods:
-            #     continue
+            #     if k in cmp_methods:
+            #         continue
             for k_, v_ in v.items():
                 evals[key][k_][k].append(v_)
 
