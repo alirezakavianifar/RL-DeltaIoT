@@ -60,3 +60,4 @@ if __name__ == '__main__':
             quality_type=DEEP_AGENT_PARAMS['quality_type'],
             model_type=DEEP_AGENT_PARAMS['model_dir'],
             cmp_dir=DEEP_AGENT_PARAMS['cmp_dir'])
+        print("g")
