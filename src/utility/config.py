@@ -25,7 +25,10 @@ TRAINING = True
 # If True then compare different methods
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
-V = 2
+V = 1
+# Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxPolicy
+POLICY = 'SoftmaxPolicy'
+
 ALGO_NAME = 'DQN'
 
 if V == 1:
@@ -214,6 +217,7 @@ def get_params_for_training(*args, **kwargs):
         'log_path': kwargs['log_path'],
         'chkpt_dir': kwargs['chkpt_dir'],
         'warmup_count': kwargs['warmup_count'],
+        'policy': POLICY,
     }
     return DEEP_AGENT_PARAMS
 

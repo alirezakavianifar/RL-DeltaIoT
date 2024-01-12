@@ -24,9 +24,9 @@ class DeltaIotEnv(gym.Env):
                                             high=np.full(
                                                 shape=n_obs_space, fill_value=100, dtype=np.float32),
                                             dtype=float)
-        self.data = data_dir
+        self.data_dir = data_dir
         self.info = {}
-        self.data = return_next_item(self.data, normalize=False)
+        self.data = return_next_item(self.data_dir, normalize=False)
         self.reward = 0
         self.reward_type = reward_type()
         self.terminated = False
@@ -65,7 +65,12 @@ class DeltaIotEnv(gym.Env):
         self.time_steps = self.init_time_steps
         self.terminated = False
         self.truncated = False
-        self.df = next(self.data)
+        try:
+            self.df = next(self.data)
+        except:
+            self.data = return_next_item(self.data_dir, normalize=False)
+            self.df = next(self.data)
+            
         rand_num = np.random.randint(self.df.count().iloc[0])
         self.obs = self.df.iloc[rand_num][[
             'energyconsumption', 'packetloss', 'latency']].to_numpy(dtype=float).flatten()

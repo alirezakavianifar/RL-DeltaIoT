@@ -9,8 +9,19 @@ loss_object = tf.keras.losses.SparseCategoricalCrossentropy()
 checkpoint_filepath = os.path.join(os.getcwd(), 'logs')
 
 
+import os
+import numpy as np
+import tensorflow as tf
+
+
 class Agent:
     def __init__(self, agent_params):
+        """
+        Initializes the Agent class.
+
+        Parameters:
+            - agent_params: Dictionary containing parameters for the agent.
+        """
         self.gamma = agent_params['gamma']
         self.n_games = agent_params['n_games']
         self.epsilon = agent_params['epsilon']
@@ -27,8 +38,8 @@ class Agent:
         self.chkpt_dir = agent_params['chkpt_dir']
         self.action_space = [i for i in range(int(agent_params['n_actions']))]
         self.learn_step_counter = 0
-        # self.fname = agent_params['fname']
 
+        # Initialize ReplayBuffer and DeepQNetwork instances
         self.memory = ReplayBuffer(
             agent_params['mem_size'], agent_params['input_dims'], agent_params['n_actions'])
 
@@ -36,13 +47,19 @@ class Agent:
             agent_params['input_dims'], agent_params['n_actions'], network_layers=agent_params['network_layers'])
         self.q_eval.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=agent_params['lr']))
+
         self.q_next = DeepQNetwork(
             agent_params['input_dims'], agent_params['n_actions'], network_layers=agent_params['network_layers'])
         self.q_next.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=agent_params['lr']))
 
     def save_models(self, iteration):
+        """
+        Saves the Q-network models.
 
+        Parameters:
+            - iteration: Iteration or episode number.
+        """
         saving_dir = (f'{self.chkpt_dir}-n_games={iteration}-lr={self.lr}'
                       f'-eps_dec={str("{:.5f}".format(self.eps_dec))}'
                       f'-batch_size={str(self.batch_size)}-gamma={str(self.gamma)}')
@@ -51,6 +68,9 @@ class Agent:
         print('... models saved successfully ...')
 
     def load_models(self):
+        """
+        Loads the Q-network models.
+        """
         self.q_eval = tf.keras.models.load_model(self.chkpt_dir + '_' + 'lr=' + str(self.lr) +
                                                  '_' + 'eps_dec=' + str(self.eps_dec) + '_' +
                                                  str(self.batch_size) + '_' + str(self.gamma) + '_' + 'q_eval')
@@ -60,10 +80,27 @@ class Agent:
         print('... models loaded successfully ...')
 
     def store_transition(self, state, action, reward, state_, done, her=False):
+        """
+        Stores a transition in the replay buffer.
+
+        Parameters:
+            - state: Current state.
+            - action: Chosen action.
+            - reward: Obtained reward.
+            - state_: Next state.
+            - done: Whether the episode is done.
+            - her: Flag for Hindsight Experience Replay (HER).
+        """
         self.memory.store_transition(
             (state, action, reward, state_, done))
 
     def sample_memory(self):
+        """
+        Samples a batch of experiences from the replay buffer.
+
+        Returns:
+            Tuple of tensors containing states, actions, rewards, next states, and done flags.
+        """
         states = []
         rewards = []
         dones = []
@@ -87,6 +124,15 @@ class Agent:
         return states, actions, rewards, states_, dones
 
     def choose_action(self, observation):
+        """
+        Chooses an action based on the current observation.
+
+        Parameters:
+            - observation: Current observation.
+
+        Returns:
+            Chosen action.
+        """
         if np.random.random() > self.epsilon:
             state = tf.convert_to_tensor([observation], dtype=tf.float32)
             actions = self.q_eval(state)
@@ -96,16 +142,27 @@ class Agent:
         return action
 
     def replace_target_network(self):
+        """
+        Replaces the target Q-network with the evaluation Q-network.
+        """
         if self.learn_step_counter > 0:
             if self.learn_step_counter % self.replace_target_cnt == 0:
                 self.q_next.set_weights(self.q_eval.get_weights())
 
     def decrement_epsilon(self):
-
+        """
+        Decrements the exploration parameter epsilon.
+        """
         self.epsilon = self.eps_dec_type.eps_dec_type(
             self.epsilon, self.eps_min, self.n_games, self.eps_dec)
 
     def learn(self):
+        """
+        Performs the Q-learning update.
+
+        Returns:
+            The training loss.
+        """
         if self.memory.mem_cntr < self.batch_size * 2:
             return None
 
@@ -140,4 +197,8 @@ class Agent:
         return train_loss
 
     def reset_states(self):
+        """
+        Resets the states of the agent.
+        """
         train_loss.reset_states()
+

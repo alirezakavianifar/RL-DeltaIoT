@@ -32,7 +32,8 @@ def get_models_v2(str_base=f'{os.path.join(os.getcwd(), "models")}\\DQN_v1_multi
     
     if model_dir == '1':
         str_bases = list(dict.fromkeys([re.sub(
-            r'n_games=\d*[a-z]*', 'n_games=*', item) for item in str_base[quality_type]]))
+            r'n_games=\d*[a-z]*', 'n_games=*', item) for item in str_base
+            ]))
     elif model_dir == '2':
         str_bases = list(dict.fromkeys([re.sub(
             r'\d*[a-z]*_steps', '*_steps', item) for item in str_base[quality_type]]))
