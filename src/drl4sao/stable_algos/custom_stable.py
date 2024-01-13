@@ -45,6 +45,7 @@ class CustomDQN(DQN):
         device: Union[th.device, str] = "auto",
         init_setup_model: bool = True,
         deterministic: bool = True,
+        temprature: float = 1.0,
         ):
         super().__init__(
             policy,
@@ -76,6 +77,7 @@ class CustomDQN(DQN):
         state: Optional[Tuple[np.ndarray, ...]] = None,
         episode_start: Optional[np.ndarray] = None,
         deterministic: bool = False,
+        temprature: float = 1.0,
     ) -> Tuple[np.ndarray, Optional[Tuple[np.ndarray, ...]]]:
         """
         Overrides the base_class predict function to include epsilon-greedy exploration.
@@ -87,6 +89,7 @@ class CustomDQN(DQN):
         :return: the model's action and the next state
             (used in recurrent policies)
         """
+        
         if type(self.policy) == MlpPolicy:
             if not deterministic and np.random.rand() < self.exploration_rate:
                 if self.policy.is_vectorized_observation(observation):
@@ -101,7 +104,7 @@ class CustomDQN(DQN):
                 action, state = self.policy.predict(observation, state, episode_start, deterministic)
             return action, state
         else:
-            action, state = self.policy.predict(observation, state, episode_start, deterministic)
+            action, state = self.policy.predict(observation, state, episode_start, deterministic, temprature)
             return action, state
 
     

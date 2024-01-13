@@ -27,7 +27,7 @@ CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
 V = 1
 # Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxPolicy
-POLICY = 'SoftmaxPolicy'
+POLICY = 'BoltzmannPolicy'
 
 ALGO_NAME = 'DQN'
 
