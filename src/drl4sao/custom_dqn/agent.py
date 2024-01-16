@@ -123,7 +123,7 @@ class Agent:
         states_ = tf.convert_to_tensor(states_, dtype=tf.float32)
         return states, actions, rewards, states_, dones
 
-    def choose_action(self, observation):
+    def choose_action(self, observation, divisions=None):
         """
         Chooses an action based on the current observation.
 
@@ -133,12 +133,21 @@ class Agent:
         Returns:
             Chosen action.
         """
-        if np.random.random() > self.epsilon:
-            state = tf.convert_to_tensor([observation], dtype=tf.float32)
-            actions = self.q_eval(state)
-            action = tf.math.argmax(actions, axis=1).numpy()[0]
+        if divisions is None:
+            if np.random.random() > self.epsilon:
+                state = tf.convert_to_tensor([observation], dtype=tf.float32)
+                actions = self.q_eval(state)
+                action = tf.math.argmax(actions, axis=1).numpy()[0]
+            else:
+                action = np.random.choice(self.action_space)
         else:
-            action = np.random.choice(self.action_space)
+            if np.random.random() > self.epsilon:
+                state = tf.convert_to_tensor([observation], dtype=tf.float32)
+                actions = self.q_eval(state)
+                action = tf.math.argmax(actions, axis=1).numpy()[0]
+            else:
+                action = np.random.choice(divisions['clusters'][int(np.random.choice(list(divisions['clusters'].keys())))])
+
         return action
 
     def replace_target_network(self):

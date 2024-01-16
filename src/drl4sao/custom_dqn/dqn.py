@@ -40,12 +40,12 @@ def dqn(agent_params=None):
     # Main loop for training episodes
     for i in range(agent_params['n_games']):
         done = False
-        observation = env.reset()[0]
+        observation, info = env.reset()
         score = 0
 
         # Inner loop for each time step in an episode
         while not done:
-            action = agent.choose_action(observation)
+            action = agent.choose_action(observation, info)
             observation_, reward, done, truncated, info = env.step(action)
             score += reward
 

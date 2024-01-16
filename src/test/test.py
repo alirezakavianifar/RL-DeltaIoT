@@ -51,13 +51,7 @@ def getdata():
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
-
-
-
-
-
 if __name__ == '__main__':
     X, y = getdata()
     X, y = pca_analysis(X, y)
-
     kmeans_analysis(X, n_clusters=4)

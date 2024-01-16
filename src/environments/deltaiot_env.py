@@ -6,7 +6,7 @@ import pandas as pd
 from gymnasium import spaces
 from sklearn.preprocessing import StandardScaler
 
-from src.utility.utils import utility, return_next_item
+from src.utility.utils import utility, return_next_item, pca_analysis, kmeans_analysis
 
 class DeltaIotEnv(gym.Env):
     """Custom Environment that follows gym interface."""
@@ -70,14 +70,18 @@ class DeltaIotEnv(gym.Env):
         try:
             self.df = next(self.data).drop('verification_times', axis=1)
             scaler = StandardScaler()
-            self.df = pd.DataFrame(scaler.fit_transform(
+            X = pd.DataFrame(scaler.fit_transform(
                 self.df['features'].values.tolist()))
+            X, _ = pca_analysis(X)
+            self.info['clusters'] = kmeans_analysis(X)
         except:
             self.data = return_next_item(self.data_dir, normalize=False)
             self.df = next(self.data).drop('verification_times', axis=1)
             scaler = StandardScaler()
-            self.df = pd.DataFrame(scaler.fit_transform(
+            X = pd.DataFrame(scaler.fit_transform(
                 self.df['features'].values.tolist()))
+            X, _ = pca_analysis(X)
+            self.info['clusters'] = kmeans_analysis(X)
             
         rand_num = np.random.randint(self.df.count().iloc[0])
         self.obs = self.df.iloc[rand_num][[
