@@ -32,6 +32,8 @@ def getdata():
             scaler = StandardScaler()
             df_X = pd.DataFrame(scaler.fit_transform(
                 df['features'].values.tolist()))
+            X, y = pca_analysis(df_X)
+            kmeans_analysis(X, n_clusters=4)
             lst_X.append(df_X)
             # df['y'] = 1 if ((df['energyconsumption'] < 12.9) & (df['packetloss'] < 10) & (df['latency'] < 5)).all() else 0
             df['y'] = df.apply(lambda x: if_satisfied(x), axis=1)
@@ -54,7 +56,7 @@ def kmeans_analysis(X, n_clusters=4):
     # Get cluster centers and labels
     centers = kmeans.cluster_centers_
     labels = kmeans.labels_
-    
+
     # Initialize a dictionary to store indices for each cluster
     cluster_indices = {i: [] for i in range(n_clusters)}
 
@@ -75,7 +77,7 @@ def kmeans_analysis(X, n_clusters=4):
     print('f')
 
 
-def pca_analysis(X, y):
+def pca_analysis(X, y=None):
 
     # Apply PCA to reduce the data to 2 principal components
     pca = PCA(n_components=2)
