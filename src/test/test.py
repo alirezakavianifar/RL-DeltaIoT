@@ -10,18 +10,19 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 
+
 def if_satisfied(row):
     if row['energyconsumption'] < 12.9 and row['packetloss'] < 10 and row['latency'] < 5:
         return 1
     else:
         return 0
-    
+
 
 def getdata():
     lst_X = []
     lst_y = []
     lst_train, lst_test = load_data(
-        r'D:\projects\RL-DeltaIoT\data\DeltaIoTv1\train')
+        r'D:\projects\RL-DelataIoT-fortest\RL-DeltaIoT\data\DeltaIoTv1\train')
 
     df_handler = return_next_item(lst_train, normalize=False)
 
@@ -29,7 +30,8 @@ def getdata():
         while (True):
             df = next(df_handler).drop('verification_times', axis=1)
             scaler = StandardScaler()
-            df_X = pd.DataFrame(scaler.fit_transform(df['features'].values.tolist()))
+            df_X = pd.DataFrame(scaler.fit_transform(
+                df['features'].values.tolist()))
             lst_X.append(df_X)
             # df['y'] = 1 if ((df['energyconsumption'] < 12.9) & (df['packetloss'] < 10) & (df['latency'] < 5)).all() else 0
             df['y'] = df.apply(lambda x: if_satisfied(x), axis=1)
@@ -52,6 +54,13 @@ def kmeans_analysis(X, n_clusters=4):
     # Get cluster centers and labels
     centers = kmeans.cluster_centers_
     labels = kmeans.labels_
+    
+    # Initialize a dictionary to store indices for each cluster
+    cluster_indices = {i: [] for i in range(n_clusters)}
+
+# Populate the dictionary with indices
+    for i, label in enumerate(labels):
+        cluster_indices[label].append(i)
 
     # Plot the data points and cluster centers
     plt.scatter(X[:, 0], X[:, 1], c=labels,
@@ -73,10 +82,9 @@ def pca_analysis(X, y):
     X_pca = pca.fit_transform(X)
     return X_pca, y
 
+
 if __name__ == '__main__':
     X, y = getdata()
-    X , y = pca_analysis(X, y)
-    
+    X, y = pca_analysis(X, y)
+
     kmeans_analysis(X, n_clusters=4)
-
-
