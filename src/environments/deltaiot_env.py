@@ -2,7 +2,9 @@ import glob
 import os
 import gymnasium as gym
 import numpy as np
+import pandas as pd
 from gymnasium import spaces
+from sklearn.preprocessing import StandardScaler
 
 from src.utility.utils import utility, return_next_item
 
@@ -66,10 +68,16 @@ class DeltaIotEnv(gym.Env):
         self.terminated = False
         self.truncated = False
         try:
-            self.df = next(self.data)
+            self.df = next(self.data).drop('verification_times', axis=1)
+            scaler = StandardScaler()
+            self.df = pd.DataFrame(scaler.fit_transform(
+                self.df['features'].values.tolist()))
         except:
             self.data = return_next_item(self.data_dir, normalize=False)
-            self.df = next(self.data)
+            self.df = next(self.data).drop('verification_times', axis=1)
+            scaler = StandardScaler()
+            self.df = pd.DataFrame(scaler.fit_transform(
+                self.df['features'].values.tolist()))
             
         rand_num = np.random.randint(self.df.count().iloc[0])
         self.obs = self.df.iloc[rand_num][[

@@ -4,7 +4,10 @@ import tensorflow as tf
 import random
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
 from tqdm import tqdm
 from collections import defaultdict
 import shutil
@@ -25,6 +28,82 @@ def timeit(func):
         return result, total_time
     return measure_time
 
+def pca_analysis(X, y=None):
+    """
+    Perform Principal Component Analysis (PCA) on the input data.
+
+    Parameters:
+    - X: array-like or pd.DataFrame
+        The input data for PCA.
+    - y: array-like or None, optional (default=None)
+        Target variable. If provided, it is returned as is in the output.
+        If not provided, it remains None.
+
+    Returns:
+    - X_pca: array-like
+        The reduced data matrix with 2 principal components.
+    - y: array-like or None
+        The target variable if provided. Otherwise, None.
+
+    Example:
+    X_train_pca, y_train = pca_analysis(X_train, y_train)
+    X_test_pca, y_test = pca_analysis(X_test, y_test)
+    """
+
+    # Apply PCA to reduce the data to 2 principal components
+    pca = PCA(n_components=2)
+    X_pca = pca.fit_transform(X)
+
+    return X_pca, y
+
+
+
+def kmeans_analysis(X, n_clusters=4, plotting=False):
+    """
+    Perform K-means clustering on the input data.
+
+    Parameters:
+    - X: ndarray
+        Input data matrix.
+    - n_clusters: int, optional (default=4)
+        Number of clusters to form.
+    - plotting: bool, optional (default=False)
+        Whether to plot the data points and cluster centers.
+
+    Returns:
+    - cluster_indices: dict
+        A dictionary where keys are cluster labels and values are lists
+        containing the indices of data points assigned to each cluster.
+    """
+
+    # Apply K-means clustering
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    kmeans.fit(X)
+
+    # Get cluster centers and labels
+    centers = kmeans.cluster_centers_
+    labels = kmeans.labels_
+
+    # Initialize a dictionary to store indices for each cluster
+    cluster_indices = {i: [] for i in range(n_clusters)}
+
+    # Populate the dictionary with indices
+    for i, label in enumerate(labels):
+        cluster_indices[label].append(i)
+
+    # Plot the data points and cluster centers if specified
+    if plotting:
+        plt.scatter(X[:, 0], X[:, 1], c=labels,
+                    cmap='viridis', alpha=0.7, edgecolors='k')
+        plt.scatter(centers[:, 0], centers[:, 1], c='red',
+                    marker='X', s=200, label='Cluster Centers')
+        plt.title('K-means Clustering')
+        plt.xlabel('Feature 1')
+        plt.ylabel('Feature 2')
+        plt.legend()
+        plt.show()
+
+    return cluster_indices
 
 def set_log_dir(name, path):
     # current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -32,6 +111,46 @@ def set_log_dir(name, path):
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
     return train_summary_writer
 
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+
+def return_next_item(lst, normalize=True, normalize_cols=['energyconsumption', 'packetloss', 'latency']):
+    '''
+    A generator function which returns the next data frame from the given repository.
+
+    Parameters:
+    - lst (list): A list containing items, where each item represents data in JSON format.
+    - normalize (bool, optional): A flag indicating whether to normalize certain columns in the DataFrame. Default is True.
+    - normalize_cols (list, optional): A list of column names to be normalized if 'normalize' is True. Default includes 'energyconsumption', 'packetloss', and 'latency'.
+
+    Returns:
+    - DataFrame: The next data frame from the given repository, with optional normalization applied to specified columns.
+
+    Usage:
+    - Call this function in a loop to iterate through a list of items (JSON data) and receive a DataFrame for each iteration.
+    
+    Example:
+    ```python
+    data_repository = [...]  # List containing JSON data items
+    data_generator = return_next_item(data_repository, normalize=True)
+    
+    for dataframe in data_generator:
+        # Process the DataFrame as needed
+        print(dataframe)
+    ```
+
+    Notes:
+    - The function uses a generator approach, allowing the iteration over the list of JSON data items to yield a DataFrame at each step.
+    - If normalization is enabled, the specified columns are normalized using Min-Max scaling.
+    - Normalization is applied in-place to the DataFrame.
+    '''
+    for index, item in enumerate(lst):
+        df = pd.read_json(item)
+        if normalize:
+            scaler = MinMaxScaler()
+            for item in normalize_cols:
+                df[item] = scaler.fit_transform(df[item].values.reshape(-1, 1))
+        yield df
 
 def utility(energy_coef, packet_coef, latency_coef, energy_consumption, packet_loss, latency):
 
@@ -39,11 +158,41 @@ def utility(energy_coef, packet_coef, latency_coef, energy_consumption, packet_l
 
 
 def move_files(files, dst, *args, **kwargs):
-    """Copy files from src to destination"""
-    for file in tqdm(files):
-        file_name = file.rsplit('\\', 1)[1]
+    """
+    Copy files from source to destination.
+
+    Parameters:
+    - files (list): List of source file paths to be copied.
+    - dst (str): Destination directory where files will be copied.
+    - *args: Variable positional arguments (not used in the function).
+    - **kwargs: Variable keyword arguments (not used in the function).
+
+    Returns:
+    None
+
+    Note:
+    The function uses the `shutil.copyfile` method to copy each file from the source
+    directory to the destination directory. The progress of the file copying process
+    is displayed using the `tqdm` progress bar.
+
+    Example:
+    move_files(['/path/to/source/file1.txt', '/path/to/source/file2.txt'],
+               '/path/to/destination/')
+    """
+    for file in tqdm(files, desc="Copying Files"):
+        # Extract the file name from the full path
+        file_name = file.rsplit(os.sep, 1)[1]
+
+        # Create the final destination path
         final_dst = os.path.join(dst, file_name)
+
+        # Copy the file to the destination
         shutil.copyfile(file, final_dst)
+
+# Example usage:
+# move_files(['/path/to/source/file1.txt', '/path/to/source/file2.txt'],
+#            '/path/to/destination/')
+
 
 
 def scale_data(data):

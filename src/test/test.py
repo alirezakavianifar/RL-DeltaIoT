@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
 from sklearn.datasets import make_blobs
 from sklearn.decomposition import PCA
 from sklearn.datasets import load_iris
@@ -9,6 +8,8 @@ from src.utility.utils import load_data, return_next_item
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+
+from src.utility.utils import pca_analysis, kmeans_analysis
 
 
 def if_satisfied(row):
@@ -47,42 +48,12 @@ def getdata():
     return X, y
 
 
-def kmeans_analysis(X, n_clusters=4):
-
-    # Apply K-means clustering
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-    kmeans.fit(X)
-
-    # Get cluster centers and labels
-    centers = kmeans.cluster_centers_
-    labels = kmeans.labels_
-
-    # Initialize a dictionary to store indices for each cluster
-    cluster_indices = {i: [] for i in range(n_clusters)}
-
-# Populate the dictionary with indices
-    for i, label in enumerate(labels):
-        cluster_indices[label].append(i)
-
-    # Plot the data points and cluster centers
-    plt.scatter(X[:, 0], X[:, 1], c=labels,
-                cmap='viridis', alpha=0.7, edgecolors='k')
-    plt.scatter(centers[:, 0], centers[:, 1], c='red',
-                marker='X', s=200, label='Cluster Centers')
-    plt.title('K-means Clustering')
-    plt.xlabel('Feature 1')
-    plt.ylabel('Feature 2')
-    plt.legend()
-    plt.show()
-    print('f')
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
 
 
-def pca_analysis(X, y=None):
 
-    # Apply PCA to reduce the data to 2 principal components
-    pca = PCA(n_components=2)
-    X_pca = pca.fit_transform(X)
-    return X_pca, y
+
 
 
 if __name__ == '__main__':
