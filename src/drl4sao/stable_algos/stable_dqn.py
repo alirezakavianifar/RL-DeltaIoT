@@ -1,5 +1,6 @@
 import os
-from stable_baselines3 import DQN, PPO, HerReplayBuffer
+# from stable_baselines3 import DQN, PPO, HerReplayBuffer
+from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.callbacks import EvalCallback
 from gymnasium.wrappers.time_limit import TimeLimit
@@ -34,7 +35,8 @@ def stable_dqn(agent_params):
                     tensorboard_log=agent_params['log_path'],
                     device='cuda',
                     verbose=1,
-                    deterministic=False)
+                    deterministic=False,
+                 )
 
     if algo_name == "PPO":
         model = PPO("MlpPolicy",

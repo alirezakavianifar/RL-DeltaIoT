@@ -6,14 +6,14 @@ import torch as th
 from gymnasium import spaces
 from torch.nn import functional as F
 
-from stable_baselines3 import DQN
+from src.drl4sao.stable_algos.rl_algos.dqn import DQN
 from stable_baselines3.common.buffers import ReplayBuffer
 from stable_baselines3.common.off_policy_algorithm import OffPolicyAlgorithm
 from stable_baselines3.common.policies import BasePolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import get_linear_fn, get_parameters_by_name, polyak_update
-from stable_baselines3.dqn.policies import CnnPolicy, DQNPolicy, MlpPolicy, MultiInputPolicy, QNetwork, SoftmaxPolicy
-
+from stable_baselines3.dqn.policies import CnnPolicy, DQNPolicy, MlpPolicy, MultiInputPolicy, QNetwork
+from src.drl4sao.stable_algos.custom_policies.policies import SoftmaxDQNPolicy
 
 
 class CustomDQN(DQN):
@@ -45,7 +45,6 @@ class CustomDQN(DQN):
         device: Union[th.device, str] = "auto",
         init_setup_model: bool = True,
         deterministic: bool = True,
-        temprature: float = 1.0,
         ):
         super().__init__(
             policy,
@@ -70,6 +69,7 @@ class CustomDQN(DQN):
         )
 
         self.deterministic = deterministic
+        
 
     def predict(
         self,
@@ -77,7 +77,6 @@ class CustomDQN(DQN):
         state: Optional[Tuple[np.ndarray, ...]] = None,
         episode_start: Optional[np.ndarray] = None,
         deterministic: bool = False,
-        temprature: float = 1.0,
     ) -> Tuple[np.ndarray, Optional[Tuple[np.ndarray, ...]]]:
         """
         Overrides the base_class predict function to include epsilon-greedy exploration.
@@ -103,9 +102,15 @@ class CustomDQN(DQN):
             else:
                 action, state = self.policy.predict(observation, state, episode_start, deterministic)
             return action, state
-        else:
-            action, state = self.policy.predict(observation, state, episode_start, deterministic, temprature)
-            return action, state
+        elif type(self.policy) == SoftmaxDQNPolicy:
+            q_values, state = self.policy.predict(observation, state, episode_start, deterministic)
+            exp_values = np.exp((q_values - np.max(q_values)) / 1.0)
+            # Calculate softmax probabilities
+            probabilities = exp_values / exp_values.sum()
+            # Select action based on probabilities
+            selected_action = np.random.choice(len(q_values), p=probabilities)
+            return selected_action, state
+        
 
     
     

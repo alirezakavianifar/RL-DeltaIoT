@@ -25,9 +25,11 @@ TRAINING = True
 # If True then compare different methods
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
-V = 2
-# Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxPolicy
-POLICY = 'MlpPolicy'
+V = 1
+# Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy
+POLICY = 'SoftmaxDQNPolicy'
+# Policy parameters for BoltzmannPolicy
+TEMPRATURE = 0.5
 
 ALGO_NAME = 'DQN'
 
@@ -39,10 +41,12 @@ VERSION = 'DeltaIoTv%s' % V
 ALGO_NAME = f'{ALGO_NAME}_v%s' % V
 # Quality types
 QUALITY_TYPES = {'energy': 'energy', 'packet': 'packet',
-                 'latency': 'latency', 'multi': 'multi', 'multi_tto': 'multi_tto', 'multi_tt': 'multi_tt'}
+                 'latency': 'latency', 'multi': 'multi', 
+                 'multi_tto': 'multi_tto', 'multi_tt': 'multi_tt'}
 # Reward types
 REWARD_TYPES = {'energy': 'rm2', 'packet': 'rm2',
-                'latency': 'rm2', 'multi': 'rm3', 'multi_tto': 'rm5', 'multi_tt': 'rm4'}
+                'latency': 'rm2', 'multi': 'rm3', 
+                'multi_tto': 'rm5', 'multi_tt': 'rm4'}
 # Reward mechanism: rm1=threshold, rm2=minimum, rm3=multi, rm4=multi_tt, rm5=multi_tto
 REWARD_TYPE = REWARD_TYPES['multi']
 # QUALITY_TYPE could be energy, packet, latency, multi, multi_tt, multi_tto
@@ -218,6 +222,7 @@ def get_params_for_training(*args, **kwargs):
         'chkpt_dir': kwargs['chkpt_dir'],
         'warmup_count': kwargs['warmup_count'],
         'policy': POLICY,
+        'temprature': TEMPRATURE,
     }
     return DEEP_AGENT_PARAMS
 

@@ -69,19 +69,19 @@ class DeltaIotEnv(gym.Env):
         self.truncated = False
         try:
             self.df = next(self.data).drop('verification_times', axis=1)
-            scaler = StandardScaler()
-            X = pd.DataFrame(scaler.fit_transform(
-                self.df['features'].values.tolist()))
-            X, _ = pca_analysis(X)
-            self.info['clusters'] = kmeans_analysis(X)
+            # scaler = StandardScaler()
+            # X = pd.DataFrame(scaler.fit_transform(
+            #     self.df['features'].values.tolist()))
+            # X, _ = pca_analysis(X)
+            # self.info['clusters'] = kmeans_analysis(X)
         except:
             self.data = return_next_item(self.data_dir, normalize=False)
             self.df = next(self.data).drop('verification_times', axis=1)
-            scaler = StandardScaler()
-            X = pd.DataFrame(scaler.fit_transform(
-                self.df['features'].values.tolist()))
-            X, _ = pca_analysis(X)
-            self.info['clusters'] = kmeans_analysis(X)
+            # scaler = StandardScaler()
+            # X = pd.DataFrame(scaler.fit_transform(
+            #     self.df['features'].values.tolist()))
+            # X, _ = pca_analysis(X)
+            # self.info['clusters'] = kmeans_analysis(X)
             
         rand_num = np.random.randint(self.df.count().iloc[0])
         self.obs = self.df.iloc[rand_num][[
