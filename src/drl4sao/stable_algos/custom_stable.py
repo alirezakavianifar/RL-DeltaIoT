@@ -13,7 +13,7 @@ from stable_baselines3.common.policies import BasePolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import get_linear_fn, get_parameters_by_name, polyak_update
 from stable_baselines3.dqn.policies import CnnPolicy, DQNPolicy, MlpPolicy, MultiInputPolicy, QNetwork
-from src.drl4sao.stable_algos.custom_policies.policies import SoftmaxDQNPolicy
+from src.drl4sao.stable_algos.custom_policies.policies import SoftmaxDQNPolicy, BoltzmannDQNPolicy
 
 
 class CustomDQN(DQN):
@@ -45,7 +45,8 @@ class CustomDQN(DQN):
         device: Union[th.device, str] = "auto",
         init_setup_model: bool = True,
         deterministic: bool = True,
-        ):
+        temprature: float = 1.0
+    ):
         super().__init__(
             policy,
             env,
@@ -57,6 +58,9 @@ class CustomDQN(DQN):
             gamma,
             train_freq,
             gradient_steps,
+            exploration_fraction=exploration_fraction,
+            exploration_initial_eps=exploration_initial_eps,
+            exploration_final_eps=exploration_final_eps,
             replay_buffer_class=replay_buffer_class,
             replay_buffer_kwargs=replay_buffer_kwargs,
             policy_kwargs=policy_kwargs,
@@ -69,7 +73,7 @@ class CustomDQN(DQN):
         )
 
         self.deterministic = deterministic
-        
+        self.temprature = temprature
 
     def predict(
         self,
@@ -88,41 +92,46 @@ class CustomDQN(DQN):
         :return: the model's action and the next state
             (used in recurrent policies)
         """
-        
+
         if type(self.policy) == MlpPolicy:
             if not deterministic and np.random.rand() < self.exploration_rate:
                 if self.policy.is_vectorized_observation(observation):
                     if isinstance(observation, dict):
-                        n_batch = observation[next(iter(observation.keys()))].shape[0]
+                        n_batch = observation[next(
+                            iter(observation.keys()))].shape[0]
                     else:
                         n_batch = observation.shape[0]
-                    action = np.array([self.action_space.sample() for _ in range(n_batch)])
+                    action = np.array([self.action_space.sample()
+                                      for _ in range(n_batch)])
                 else:
                     action = np.array(self.action_space.sample())
             else:
-                action, state = self.policy.predict(observation, state, episode_start, deterministic)
+                action, state = self.policy.predict(
+                    observation, state, episode_start, deterministic)
             return action, state
         elif type(self.policy) == SoftmaxDQNPolicy:
-            q_values, state = self.policy.predict(observation, state, episode_start, deterministic)
-            exp_values = np.exp((q_values - np.max(q_values)) / 1.0)
+            q_values, state = self.policy.predict(
+                observation, state, episode_start, deterministic)
+            exp_values = np.exp(
+                (q_values - np.max(q_values)) / self.exploration_rate)
             # Calculate softmax probabilities
             probabilities = exp_values / exp_values.sum()
             # Select action based on probabilities
-            selected_action = np.random.choice(len(q_values), p=probabilities)
+            selected_action = np.array(
+                [np.random.choice(len(q_values), p=probabilities)])
             return selected_action, state
-        
+        elif type(self.policy) == BoltzmannDQNPolicy:
+            q_values, state = self.policy.predict(
+                observation, state, episode_start, deterministic)
+            # Ensure numerical stability by subtracting the maximum Q-value
+            q_values = q_values - np.max(q_values)
 
-    
-    
+            # Compute the probabilities using the Boltzmann distribution
+            probabilities = np.exp(q_values / self.exploration_rate) / \
+                np.sum(np.exp(q_values / self.exploration_rate))
 
-    
+            # Sample an action based on the probabilities
+            selected_action = np.array(
+                [np.random.choice(len(q_values), p=probabilities)])
 
-
-    
-
-
-
-    
-
-
-
+            return selected_action, state
