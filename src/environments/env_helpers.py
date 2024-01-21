@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-
+import numpy as np
 
 class IRewardMCOne(metaclass=ABCMeta):
     @abstractmethod
@@ -46,17 +46,27 @@ class RewardMcThree(IRewardMCOne):
     def __init__(self) -> None:
         pass
 
+
+
     def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None,
                    energy_thresh=None, packet_thresh=None, latency_thresh=None):
-        if ((packet_loss < packet_thresh) and
-                (latency < latency_thresh) and
-                ((energy_thresh - 0.1) < energy_consumption) and
-                (energy_consumption < energy_thresh)):
-            reward = 1.0
-        else:
-            reward = -0.02
+        # Calculate individual penalty/reward for each criterion
+        packet_loss_penalty = max(0, packet_loss - packet_thresh)
+        latency_penalty = max(0, latency - latency_thresh)
 
-        return reward
+        # Calculate a penalty for being outside the energy consumption range
+        energy_penalty = 0
+        if float(energy_consumption) < (energy_thresh - 0.1):
+            energy_penalty = (energy_thresh - 0.1) - energy_consumption
+        elif float(energy_consumption) > (energy_thresh + 0.1):
+            energy_penalty = energy_consumption - (energy_thresh + 0.1)
+
+        # Calculate overall reward by combining penalties
+        overall_reward = 1.0 - (packet_loss_penalty + latency_penalty + energy_penalty)
+        overall_reward = 1 / (1 + np.exp(-overall_reward))
+
+
+        return overall_reward
 
 
 class RewardMcFour(IRewardMCOne):

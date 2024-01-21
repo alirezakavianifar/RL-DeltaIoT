@@ -74,7 +74,8 @@ class DeltaIotEnv(gym.Env):
             #     self.df['features'].values.tolist()))
             # X, _ = pca_analysis(X)
             # self.info['clusters'] = kmeans_analysis(X)
-        except:
+        except Exception as e:
+            print(e)
             self.data = return_next_item(self.data_dir, normalize=False)
             self.df = next(self.data).drop('verification_times', axis=1)
             # scaler = StandardScaler()

@@ -195,15 +195,18 @@ def move_files(files, dst, *args, **kwargs):
 
 
 
-def scale_data(data):
+def scale_data(data, vals={'energy_thresh':12.9, 'packet_thresh':10, 'latency_thresh':5}):
     '''
     This function scales the data
     '''
+    normalized_value = {}
     data = data.to_numpy().reshape(-1, 1)
     scaler = MinMaxScaler()
     data = scaler.fit_transform(data)
     data = pd.DataFrame(data)
-    return data
+    for k, v in vals.item():
+        normalized_value[k] = (v - 12) / (13 - 12)
+    return data, normalized_value
 
 
 # Create dummy data for DLASeR
@@ -214,16 +217,15 @@ def create_dummy(data):
     return data + s
 
 
-def return_next_item(lst, normalize=True, normalize_cols=['energyconsumption', 'packetloss', 'latency']):
+def return_next_item(lst, normalize=True, normalize_cols=['energyconsumption', 'packetloss', 'latency'],
+                      energy_thresh=12.9, packet_thresh=10, latency_thresh=5):
     '''
     A generator function which returns the next data frame from given repository
     '''
     for index, item in enumerate(lst):
         df = pd.read_json(item)
         if normalize:
-            scaler = MinMaxScaler()
-            for item in normalize_cols:
-                df[item] = scale_data(df[item])
+            df = scale_data(df)
         yield df
 
 
@@ -321,8 +323,8 @@ def get_tt_qs(df, packet_thresh, latency_thresh, energy_thresh):
 
 
 def scale_data(data):
-    data = data.to_numpy().reshape(-1, 1)
+    # data = data.to_numpy().reshape(-1, 1)
     scaler = MinMaxScaler()
-    data = scaler.fit_transform(data)
-    data = pd.DataFrame(data)
+    data = scaler.fit_transform(data.iloc[:,-3:])
+    # data = pd.DataFrame(data)
     return data

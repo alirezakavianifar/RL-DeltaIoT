@@ -29,7 +29,7 @@ V = 1
 # Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy
 POLICY = 'BoltzmannDQNPolicy'
 # Policy parameters for BoltzmannPolicy
-EXPLORATION_FRACTION = 0.1
+EXPLORATION_FRACTION = 0.2
 
 ALGO_NAME = 'DQN'
 
