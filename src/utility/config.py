@@ -26,10 +26,13 @@ TRAINING = True
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
 V = 1
-# Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy
-POLICY = 'BoltzmannDQNPolicy'
+# Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy, UCBDQNPolicy
+POLICY = 'UCBDQNPolicy'
 # Policy parameters for BoltzmannPolicy
-EXPLORATION_FRACTION = 0.2
+EXPLORATION_FRACTION = 0.6
+
+# Total timesteps
+TOTAL_TIMESTEPS = 174_960
 
 ALGO_NAME = 'DQN'
 
@@ -80,6 +83,7 @@ EPS_DEC_TYPE = EpsDecTypeTwo()
 if VERSION == 'DeltaIoTv1':
     INPUT_DIMS = 3
     TIME_STEPS = 216
+    NUM_PULLS = np.zeros(TIME_STEPS)
     ENERGY_THRESH = 12.90
     PACKET_THRESH = 10.0
     LATENCY_THRESH = 5.0
@@ -92,6 +96,7 @@ if VERSION == 'DeltaIoTv1':
 else:
     INPUT_DIMS = 42
     TIME_STEPS = 4096
+    NUM_PULLS = np.zeros(TIME_STEPS)
     ENERGY_THRESH = 67.30
     PACKET_THRESH = 15.0
     LATENCY_THRESH = 10.0
@@ -223,6 +228,8 @@ def get_params_for_training(*args, **kwargs):
         'warmup_count': kwargs['warmup_count'],
         'policy': POLICY,
         'exploration_fraction': EXPLORATION_FRACTION,
+        'total_timesteps': TOTAL_TIMESTEPS,
+        'num_pulls': NUM_PULLS,
     }
     return DEEP_AGENT_PARAMS
 
@@ -253,6 +260,8 @@ def get_params_for_testing(*args, **kwargs):
     for item in model_names:
         dir_name = r'%s\%s_v%s_%s' % (
             MODEL_DIR, ALGO_NAME.split('_')[0], V, item)
+        # dir_name = r'%s\%s_v%s_%s' % (
+        #     MODEL_DIR, POLICY, V, item)
         if kwargs['model_dir'] == '1':
             files = glob.glob(dir_name + '*q_next')
             model = load_model

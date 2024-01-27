@@ -277,7 +277,7 @@ def get_chosen_model(model_dics, params, model_type):
             if key == os.path.join(os.getcwd(), 'models', f"{model_name}-n_games=*-lr={params['lr']}-eps_min={params['eps_dec']}-batch_size={params['batch_size']}-gamma={params['gamma']}-q_next"):
                 model_dics_[key] = [[model_dics[key][0][2]]]
         elif model_type == "2":
-            if key == os.path.join(os.getcwd(), 'models', f"{model_name}-lr={params['lr']}-eps_min={params['eps_min']}-batch_size={params['batch_size']}-gamma={params['gamma']}_*_steps.zip"):
+            if key == os.path.join(os.getcwd(), 'models', f"{model_name}-policy={params['policy']}-lr={params['lr']}-eps_min={params['eps_min']}-batch_size={params['batch_size']}-gamma={params['gamma']}-exploration_fraction={params['exploration_fraction']}_*_steps.zip"):
                 model_dics_[key] = item
     return model_dics_
 

@@ -34,11 +34,12 @@ if __name__ == '__main__':
 
             for key, values in DEEP_AGENT_PARAMS['model_dics'].items():
                 for item in values:
-                    [it.split('=') for it in item.split('-')[2:-1]]
+                    [it.split('=') for it in item.split('-')[2:]]
                     items = item.split('-')[2:]
 
             chosen_model_params = {
-                'lr': '0.0001', 'eps_min': '0.001', 'batch_size': '64', 'gamma': '1.0'}
+                'lr': '0.0001', 'eps_min': '0.001', 'batch_size': '64',
+                  'gamma': '1.0', 'exploration_fraction': '0.6'}
 
             model_dics = get_chosen_model(
                 model_dics, chosen_model_params, DEEP_AGENT_PARAMS['model_dir'])

@@ -13,7 +13,8 @@ from stable_baselines3.common.policies import BasePolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import get_linear_fn, get_parameters_by_name, polyak_update
 from stable_baselines3.dqn.policies import CnnPolicy, DQNPolicy, MlpPolicy, MultiInputPolicy, QNetwork
-from src.drl4sao.stable_algos.custom_policies.policies import SoftmaxDQNPolicy, BoltzmannDQNPolicy
+from src.drl4sao.stable_algos.custom_policies.policies import SoftmaxDQNPolicy,\
+      BoltzmannDQNPolicy, UCBDQNPolicy
 
 
 class CustomDQN(DQN):
@@ -45,7 +46,9 @@ class CustomDQN(DQN):
         device: Union[th.device, str] = "auto",
         init_setup_model: bool = True,
         deterministic: bool = True,
-        temprature: float = 1.0
+        temprature: float = 1.0,
+        total_timesteps: int = 10_000,
+        num_pulls: int = 1,
     ):
         super().__init__(
             policy,
@@ -74,6 +77,8 @@ class CustomDQN(DQN):
 
         self.deterministic = deterministic
         self.temprature = temprature
+        self.total_timesteps = total_timesteps
+        self.num_pulls = num_pulls
 
     def predict(
         self,
@@ -133,5 +138,19 @@ class CustomDQN(DQN):
             # Sample an action based on the probabilities
             selected_action = np.array(
                 [np.random.choice(len(q_values), p=probabilities)])
+
+            return selected_action, state
+        elif type(self.policy) == UCBDQNPolicy:
+            # Exploration-exploitation trade-off using UCB
+            q_values, state = self.policy.predict(
+            observation, state, episode_start, deterministic)
+
+            exploration_term = self.exploration_rate * \
+                np.sqrt(np.log(self.total_timesteps + 1) / (np.maximum(1, np.sum(self.num_pulls))))
+            ucb_values = q_values + exploration_term
+            selected_action = np.array([np.argmax(ucb_values)])
+            
+            # Update exploration statistics
+            self.num_pulls[selected_action] += 1
 
             return selected_action, state
