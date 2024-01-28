@@ -27,9 +27,9 @@ CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
 V = 1
 # Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy, UCBDQNPolicy
-POLICY = 'UCBDQNPolicy'
+POLICY = 'BoltzmannDQNPolicy'
 # Policy parameters for BoltzmannPolicy
-EXPLORATION_FRACTION = 0.6
+EXPLORATION_FRACTION = 0.3
 
 # Total timesteps
 TOTAL_TIMESTEPS = 174_960
