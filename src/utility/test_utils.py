@@ -73,7 +73,14 @@ def predict_action(features, model, model_type='1'):
         predicted_multi = np.argsort(
             model(features)).flatten()[-1:].item()
     elif model_type == '2':
-        predicted_multi = model.predict(features)[0].flatten().item()
+        try:
+            predicted_multi = model.predict(features)[0].flatten()
+            if predicted_multi.size > 1:
+                predicted_multi = np.argmax(model.predict(features)[0].flatten())
+            if predicted_multi.size == 1:
+                predicted_multi = predicted_multi.item()
+        except:
+            print('a')
     return predicted_multi
 
 
