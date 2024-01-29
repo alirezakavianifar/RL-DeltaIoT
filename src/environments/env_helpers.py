@@ -3,7 +3,8 @@ import numpy as np
 
 class IRewardMCOne(metaclass=ABCMeta):
     @abstractmethod
-    def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None):
+    def get_reward(self, util=None, desired_util=None, energy_consumption=None, packet_loss=None, latency=None,
+                   energy_thresh=None, packet_thresh=None, latency_thresh=None, setpoint_thresh=None):
         pass
 
     
@@ -17,7 +18,7 @@ class RewardMcOne(IRewardMCOne):
         self.ut = 9999
 
     def get_reward(self, util=None, desired_util=None, energy_consumption=None, packet_loss=None, latency=None,
-                   energy_thresh=None, packet_thresh=None, latency_thresh=None):
+                   energy_thresh=None, packet_thresh=None, latency_thresh=None, setpoint_thresh=None):
         self.ut = desired_util
         if util <= desired_util:
             reward = 1.0
@@ -32,7 +33,7 @@ class RewardMcTwo(IRewardMCOne):
         self.ut = 9999
 
     def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None,
-                   energy_thresh=None, packet_thresh=None, latency_thresh=None):
+                   energy_thresh=None, packet_thresh=None, latency_thresh=None, setpoint_thresh=None):
         if ut <= self.ut:
             reward = 1.0
             self.ut = ut
@@ -49,7 +50,7 @@ class RewardMcThree(IRewardMCOne):
 
 
     def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None,
-                   energy_thresh=None, packet_thresh=None, latency_thresh=None):
+                   energy_thresh=None, packet_thresh=None, latency_thresh=None, setpoint_thresh=None):
         # Calculate individual penalty/reward for each criterion
         packet_loss_penalty = max(0, packet_loss - packet_thresh)
         latency_penalty = max(0, latency - latency_thresh)
@@ -74,7 +75,7 @@ class RewardMcFour(IRewardMCOne):
         pass
 
     def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None,
-                   energy_thresh=None, packet_thresh=None, latency_thresh=None):
+                   energy_thresh=None, packet_thresh=None, latency_thresh=None, setpoint_thresh=None):
         if ((packet_loss < packet_thresh) and
                 (latency < latency_thresh)):
             reward = 1.0
@@ -89,7 +90,7 @@ class RewardMcFive(IRewardMCOne):
         self.energy_consumption = 9999
 
     def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None,
-                   energy_thresh=None, packet_thresh=None, latency_thresh=None):
+                   energy_thresh=None, packet_thresh=None, latency_thresh=None, setpoint_thresh=None):
         if ((packet_loss < packet_thresh) and
                 (latency < latency_thresh) and
                 (energy_consumption < self.energy_consumption)):

@@ -29,7 +29,7 @@ V = 2
 # Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy, UCBDQNPolicy
 POLICY = 'UCBDQNPolicy'
 # Policy parameters for BoltzmannPolicy
-EXPLORATION_FRACTION = 0.4
+EXPLORATION_FRACTION = 0.7
 
 ALGO_NAME = 'DQN'
 
@@ -82,6 +82,7 @@ if VERSION == 'DeltaIoTv1':
     TOTAL_TIMESTEPS = 174_960
     INPUT_DIMS = 3
     TIME_STEPS = 216
+    SETPOINT_THRESH = 0.1
     NUM_PULLS = np.zeros(TIME_STEPS)
     ENERGY_THRESH = 12.90
     PACKET_THRESH = 10.0
@@ -96,8 +97,9 @@ else:
     TOTAL_TIMESTEPS = 1_105_920
     INPUT_DIMS = 42
     TIME_STEPS = 4096
+    SETPOINT_THRESH = 0.3
     NUM_PULLS = np.zeros(TIME_STEPS)
-    ENERGY_THRESH = 67.30
+    ENERGY_THRESH = 67.0
     PACKET_THRESH = 15.0
     LATENCY_THRESH = 10.0
     NETWORK_LAYERS = [150, 120, 100, 50, 25]
