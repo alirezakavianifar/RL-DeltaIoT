@@ -15,7 +15,7 @@ class DeltaIotEnv(gym.Env):
 
     def __init__(self, n_actions, n_obs_space, data_dir, reward_type,
                  energy_coef=0.8, packet_coef=0.2, latency_coef=0.0,
-                 energy_thresh=13.2, packet_thresh=15, latency_thresh=10, timesteps=216):
+                 energy_thresh=13.2, packet_thresh=15, latency_thresh=10, timesteps=216, setpoint_thresh=0.1):
         super().__init__()
         # Define action and observation space
         # They must be gym.spaces objects
@@ -40,6 +40,7 @@ class DeltaIotEnv(gym.Env):
         self.packet_thresh = packet_thresh
         self.latency_thresh = latency_thresh
         self.init_time_steps = timesteps
+        self.setpoint_thresh = setpoint_thresh
 
     def step(self, action):
         self.obs = self.df.iloc[action][[
@@ -55,7 +56,7 @@ class DeltaIotEnv(gym.Env):
         self.reward = self.reward_type.get_reward(ut=ut, energy_consumption=energy_consumption,
                                                   packet_loss=packet_loss, latency=latency,
                                                   energy_thresh=self.energy_thresh, packet_thresh=self.packet_thresh,
-                                                  latency_thresh=self.latency_thresh)
+                                                  latency_thresh=self.latency_thresh, setpoint_thresh=self.setpoint_thresh)
         self.time_steps -= 1
         if self.time_steps == 0:
             self.terminated = True

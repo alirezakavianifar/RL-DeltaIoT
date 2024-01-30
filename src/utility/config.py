@@ -201,8 +201,9 @@ def get_params_for_training(*args, **kwargs):
         elif kwargs['quality_type'] == 'multi_tt':
             reward_type = RewardMcFour
         ENV = DeltaIotEnv(data_dir=TRAIN_LST, timesteps=TIME_STEPS, n_actions=N_ACTIONS, n_obs_space=N_OBS_SPACE,
-                          reward_type=reward_type, energy_coef=ENERGY_COEF, packet_coef=PACKET_COEF, latency_coef=LATENCY_COEF,
-                          packet_thresh=PACKET_THRESH, latency_thresh=LATENCY_THRESH, energy_thresh=ENERGY_THRESH)
+                          reward_type=reward_type, energy_coef=ENERGY_COEF, packet_coef=PACKET_COEF, 
+                          latency_coef=LATENCY_COEF, packet_thresh=PACKET_THRESH,
+                           latency_thresh=LATENCY_THRESH, energy_thresh=ENERGY_THRESH, setpoint_thresh=SETPOINT_THRESH)
 
     # agent params
     DEEP_AGENT_PARAMS = {
@@ -232,6 +233,7 @@ def get_params_for_training(*args, **kwargs):
         'exploration_fraction': EXPLORATION_FRACTION,
         'total_timesteps': TOTAL_TIMESTEPS,
         'num_pulls': NUM_PULLS,
+        'setpoint_thresh': SETPOINT_THRESH,
     }
     return DEEP_AGENT_PARAMS
 

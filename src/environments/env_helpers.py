@@ -57,10 +57,10 @@ class RewardMcThree(IRewardMCOne):
 
         # Calculate a penalty for being outside the energy consumption range
         energy_penalty = 0
-        if float(energy_consumption) < (energy_thresh - 0.1):
-            energy_penalty = (energy_thresh - 0.1) - energy_consumption
-        elif float(energy_consumption) > (energy_thresh + 0.1):
-            energy_penalty = energy_consumption - (energy_thresh + 0.1)
+        if float(energy_consumption) < (energy_thresh - setpoint_thresh):
+            energy_penalty = (energy_thresh - setpoint_thresh) - energy_consumption
+        elif float(energy_consumption) > (energy_thresh + setpoint_thresh):
+            energy_penalty = energy_consumption - (energy_thresh + setpoint_thresh)
 
         # Calculate overall reward by combining penalties
         overall_reward = 1.0 - (packet_loss_penalty + latency_penalty + energy_penalty)

@@ -39,7 +39,8 @@ def stable_dqn(agent_params):
                           verbose=1,
                           deterministic=False,
                           total_timesteps=agent_params['total_timesteps'],
-                          num_pulls = agent_params['num_pulls']
+                          num_pulls = agent_params['num_pulls'],
+                          setpoint_thresh = agent_params['setpoint_thresh'],
                           )
 
     if algo_name == "PPO":

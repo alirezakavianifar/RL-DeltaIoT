@@ -49,6 +49,7 @@ class CustomDQN(DQN):
         temprature: float = 1.0,
         total_timesteps: int = 10_000,
         num_pulls: int = 1,
+        setpoint_thresh: float = 0.1,
     ):
         super().__init__(
             policy,
@@ -79,6 +80,7 @@ class CustomDQN(DQN):
         self.temprature = temprature
         self.total_timesteps = total_timesteps
         self.num_pulls = num_pulls
+        self.setpoint_thresh = setpoint_thresh
 
     def predict(
         self,
