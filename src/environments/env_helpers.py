@@ -34,13 +34,24 @@ class RewardMcTwo(IRewardMCOne):
 
     def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None,
                    energy_thresh=None, packet_thresh=None, latency_thresh=None, setpoint_thresh=None):
-        if ut <= self.ut:
-            reward = 1.0
-            self.ut = ut
-        else:
-            reward = -0.02
+        # Define constants
+        GOAL_REWARD = 100.0
+        TIME_STEP_PENALTY = 0
 
-        return reward
+        # Calculate distance between current position and goal position
+        distance_to_goal = abs(energy_consumption - energy_thresh)
+
+        # Positive reward for reaching the goal, inversely proportional to distance
+        if energy_consumption == energy_thresh:
+            return GOAL_REWARD
+        elif distance_to_goal > 0:
+            goal_reward = GOAL_REWARD / distance_to_goal
+        else:
+            goal_reward = GOAL_REWARD
+
+
+        # Small negative reward for each time step to encourage efficiency
+        return goal_reward + TIME_STEP_PENALTY
 
 
 class RewardMcThree(IRewardMCOne):
@@ -76,11 +87,18 @@ class RewardMcFour(IRewardMCOne):
 
     def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None,
                    energy_thresh=None, packet_thresh=None, latency_thresh=None, setpoint_thresh=None):
-        if ((packet_loss < packet_thresh) and
-                (latency < latency_thresh)):
-            reward = 1.0
-        else:
-            reward = -0.02
+        # Define weights for each objective
+        weight_packet_loss = 1.0
+        weight_latency = 1.0
+
+        # Calculate the deviation from the target values
+        deviation_packet_loss = max(0, packet_loss - packet_thresh)  # Ensure it's non-negative
+        deviation_latency = max(0, latency - latency_thresh)  # Ensure it's non-negative
+
+        # Calculate the overall reward using a weighted sum
+        reward = (
+            weight_packet_loss * (1 - deviation_packet_loss / packet_thresh) +
+            weight_latency * (1 - deviation_latency / latency_thresh))
 
         return reward
 
@@ -91,13 +109,22 @@ class RewardMcFive(IRewardMCOne):
 
     def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None,
                    energy_thresh=None, packet_thresh=None, latency_thresh=None, setpoint_thresh=None):
-        if ((packet_loss < packet_thresh) and
-                (latency < latency_thresh) and
-                (energy_consumption < self.energy_consumption)):
-            self.energy_consumption = energy_consumption
-            reward = 1.0
-        else:
-            reward = -0.02
+        # Define weights for each objective
+        weight_packet_loss = 1.0
+        weight_latency = 1.0
+        weight_energy = -1.0  # Negative weight to minimize energy consumption
+
+        # Calculate the deviation from the target values
+        deviation_packet_loss = max(0, packet_loss - packet_thresh)  # Ensure it's non-negative
+        deviation_latency = max(0, latency - latency_thresh)  # Ensure it's non-negative
+        deviation_energy = max(0, energy_consumption - setpoint_thresh)  # Ensure it's non-negative
+
+        # Calculate the overall reward using a weighted sum
+        reward = (
+            weight_packet_loss * (1 - deviation_packet_loss / packet_thresh) +
+            weight_latency * (1 - deviation_latency / latency_thresh) +
+            weight_energy * (1 - deviation_energy / (energy_thresh + setpoint_thresh))
+        )
 
         return reward
 

@@ -8,12 +8,16 @@ from stable_baselines3 import DQN, PPO
 from collections import defaultdict
 from src.utility.utils import load_data, move_files, get_tts_qs
 from src.environments.deltaiot_env import DeltaIotEnv
+from src.environments.bdbc_allNumeric_env import BDBC_AllNumeric
 import numpy as np
 from src.drl4sao.custom_dqn.eps_dec_types import EpsDecTypeOne, EpsDecTypeTwo
 from src.environments.env_helpers import RewardMcOne, RewardMcTwo, \
     RewardMcThree, RewardMcFour, RewardMcFive
 
 GET_CWD = os.getcwd()
+
+# Type of Environment, either DeltaIoT, or BDBC_AllNumeric
+ENV_NAME = 'BDBC_AllNumeric'
 
 PROMPT = True
 # FROM_SCRATCH is used if we want to split data into training and testing from scratch
@@ -77,57 +81,70 @@ EPS = 1.0
 LOG_PATH = os.path.join(GET_CWD, 'logs')
 EPS_DEC_TYPE = EpsDecTypeTwo()
 
-if VERSION == 'DeltaIoTv1':
-    # Total timesteps
-    TOTAL_TIMESTEPS = 174_960
-    WARMUP_COUNT = 1_075
-    INPUT_DIMS = 3
-    TIME_STEPS = 216
-    SETPOINT_THRESH = 0.1
-    NUM_PULLS = np.zeros(TIME_STEPS)
-    ENERGY_THRESH = 12.90
-    PACKET_THRESH = 10.0
-    LATENCY_THRESH = 5.0
-    N_ACTIONS = 216
-    NETWORK_LAYERS = [50, 25, 15]
-    DATA_DIR = os.path.join(GET_CWD, 'data', 'DeltaIoTv1')
-    # DATA_DIR = r'D:\projects\papers\Deep Learning for Effective and Efficient  Reduction of Large Adaptation Spaces in Self-Adaptive Systems\DLASeR_plus_online_material\dlaser_plus\raw\DeltaIoTv1'
-    N_STATES = 216
-    N_OBS_SPACE = 3
-else:
+if ENV_NAME == 'DeltaIoT':
+    if VERSION == 1:
+        # Total timesteps
+        TOTAL_TIMESTEPS = 174_960
+        WARMUP_COUNT = 1_075
+        INPUT_DIMS = 3
+        TIME_STEPS = 216
+        SETPOINT_THRESH = 0.1
+        NUM_PULLS = np.zeros(TIME_STEPS)
+        ENERGY_THRESH = 12.90
+        PACKET_THRESH = 10.0
+        LATENCY_THRESH = 5.0
+        N_ACTIONS = 216
+        NETWORK_LAYERS = [50, 25, 15]
+        DATA_DIR = os.path.join(GET_CWD, 'data', 'DeltaIoTv1')
+        # DATA_DIR = r'D:\projects\papers\Deep Learning for Effective and Efficient  Reduction of Large Adaptation Spaces in Self-Adaptive Systems\DLASeR_plus_online_material\dlaser_plus\raw\DeltaIoTv1'
+        N_STATES = 216
+        N_OBS_SPACE = 3
+    else:
+        TOTAL_TIMESTEPS = 1_105_920
+        WARMUP_COUNT = 20_480
+        INPUT_DIMS = 42
+        TIME_STEPS = 4096
+        SETPOINT_THRESH = 0.3
+        NUM_PULLS = np.zeros(TIME_STEPS)
+        ENERGY_THRESH = 67.0
+        PACKET_THRESH = 15.0
+        LATENCY_THRESH = 10.0
+        NETWORK_LAYERS = [150, 120, 100, 50, 25]
+        N_STATES = 4096
+        N_ACTIONS = 4096
+        N_OBS_SPACE = 3
+        DATA_DIR = os.path.join(GET_CWD, 'data', 'DeltaIoTv2')
+    # Create Training and testing Data Directory
+    TRAIN_DIR = os.path.join(DATA_DIR, 'train')
+    os.makedirs(TRAIN_DIR, exist_ok=True)
+    TEST_DIR = os.path.join(DATA_DIR, 'test')
+    os.makedirs(TEST_DIR, exist_ok=True)
+    if FROM_SCRATCH:
+        TRAIN_LST, TEST_LST = load_data(
+            path=DATA_DIR, load_all=False, version='', shuffle=False, fraction=1.0, test_size=0.2, return_train_test=True)
+
+        move_files(TRAIN_LST, TRAIN_DIR)
+        move_files(TEST_LST, TEST_DIR)
+    else:
+        TRAIN_LST = glob.glob(os.path.join(TRAIN_DIR, "*.json"))
+        TEST_LST = glob.glob(os.path.join(TEST_DIR, "*.json"))
+
+    NUMGAMES = len(TRAIN_LST)
+        
+if ENV_NAME == "BDBC_AllNumeric":
     TOTAL_TIMESTEPS = 1_105_920
     WARMUP_COUNT = 20_480
     INPUT_DIMS = 42
     TIME_STEPS = 4096
-    SETPOINT_THRESH = 0.3
     NUM_PULLS = np.zeros(TIME_STEPS)
-    ENERGY_THRESH = 67.0
-    PACKET_THRESH = 15.0
-    LATENCY_THRESH = 10.0
     NETWORK_LAYERS = [150, 120, 100, 50, 25]
     N_STATES = 4096
     N_ACTIONS = 4096
-    N_OBS_SPACE = 3
-    DATA_DIR = os.path.join(GET_CWD, 'data', 'DeltaIoTv2')
-# Create Training and testing Data Directory
-
-TRAIN_DIR = os.path.join(DATA_DIR, 'train')
-os.makedirs(TRAIN_DIR, exist_ok=True)
-TEST_DIR = os.path.join(DATA_DIR, 'test')
-os.makedirs(TEST_DIR, exist_ok=True)
-
-if FROM_SCRATCH:
-    TRAIN_LST, TEST_LST = load_data(
-        path=DATA_DIR, load_all=False, version='', shuffle=False, fraction=1.0, test_size=0.2, return_train_test=True)
-
-    move_files(TRAIN_LST, TRAIN_DIR)
-    move_files(TEST_LST, TEST_DIR)
-else:
-    TRAIN_LST = glob.glob(os.path.join(TRAIN_DIR, "*.json"))
-    TEST_LST = glob.glob(os.path.join(TEST_DIR, "*.json"))
+    N_OBS_SPACE = 1
+    DATA_DIR = os.path.join(GET_CWD, 'data', 'BDBC_AllNumeric')
+    NUMGAMES = 1000
 
 
-NUMGAMES = len(TRAIN_LST)
 EPSILON = 1
 EPS_MIN = 0.001
 EPS_STEP_SIZE = 1
@@ -137,7 +154,6 @@ LR = 0.0001
 MEM_SIZE = 1024
 BATCH_SIZE = 64
 REPLACE = 100
-ENV_NAME = 'DeltaIoT'
 ALGO = 'DeltaIOTAgent'
 
 ALGORITHMS = ['SARSA', 'Q_LEARNING', 'DOUBLE_Q_LEARNING']
@@ -172,7 +188,7 @@ def wrapper_get_params_for_training(is_training, *args, **kwargs):
 
 @click.command()
 @click.option('--algo_type', prompt=PROMPT, default=ALGO_TYPE)
-@click.option('--environment', prompt=PROMPT, default="DeltaIoT")
+@click.option('--environment', prompt=PROMPT, default=ENV_NAME)
 @click.option('--warmup_count', prompt=PROMPT, default=WARMUP_COUNT)
 @click.option('--lr', prompt=PROMPT, default=LR)
 @click.option('--n_games', prompt=PROMPT, default=NUMGAMES)
@@ -205,7 +221,12 @@ def get_params_for_training(*args, **kwargs):
                           reward_type=reward_type, energy_coef=ENERGY_COEF, packet_coef=PACKET_COEF,
                           latency_coef=LATENCY_COEF, packet_thresh=PACKET_THRESH,
                           latency_thresh=LATENCY_THRESH, energy_thresh=ENERGY_THRESH, setpoint_thresh=SETPOINT_THRESH)
-
+    elif kwargs['environment'] == 'BDBC_AllNumeric':
+        reward_type = RewardMcTwo
+        ENV = BDBC_AllNumeric(data_dir=DATA_DIR, timesteps=TIME_STEPS, n_actions=N_ACTIONS, n_obs_space=N_OBS_SPACE,
+                                reward_type=reward_type, energy_coef=ENERGY_COEF, packet_coef=PACKET_COEF,
+                                latency_coef=LATENCY_COEF, packet_thresh=PACKET_THRESH,
+                                latency_thresh=LATENCY_THRESH, energy_thresh=ENERGY_THRESH, setpoint_thresh=SETPOINT_THRESH)
     # agent params
     DEEP_AGENT_PARAMS = {
         'algo_type': kwargs['algo_type'],
