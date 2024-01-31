@@ -29,7 +29,7 @@ V = 2
 # Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy, UCBDQNPolicy
 POLICY = 'UCBDQNPolicy'
 # Policy parameters for BoltzmannPolicy
-EXPLORATION_FRACTION = 0.7
+EXPLORATION_FRACTION = 0.2
 
 ALGO_NAME = 'DQN'
 
@@ -80,6 +80,7 @@ EPS_DEC_TYPE = EpsDecTypeTwo()
 if VERSION == 'DeltaIoTv1':
     # Total timesteps
     TOTAL_TIMESTEPS = 174_960
+    WARMUP_COUNT = 1_075
     INPUT_DIMS = 3
     TIME_STEPS = 216
     SETPOINT_THRESH = 0.1
@@ -95,6 +96,7 @@ if VERSION == 'DeltaIoTv1':
     N_OBS_SPACE = 3
 else:
     TOTAL_TIMESTEPS = 1_105_920
+    WARMUP_COUNT = 20_480
     INPUT_DIMS = 42
     TIME_STEPS = 4096
     SETPOINT_THRESH = 0.3
@@ -137,7 +139,6 @@ BATCH_SIZE = 64
 REPLACE = 100
 ENV_NAME = 'DeltaIoT'
 ALGO = 'DeltaIOTAgent'
-WARMUP_COUNT = 100
 
 ALGORITHMS = ['SARSA', 'Q_LEARNING', 'DOUBLE_Q_LEARNING']
 TOTAT_TIMES = []
@@ -201,9 +202,9 @@ def get_params_for_training(*args, **kwargs):
         elif kwargs['quality_type'] == 'multi_tt':
             reward_type = RewardMcFour
         ENV = DeltaIotEnv(data_dir=TRAIN_LST, timesteps=TIME_STEPS, n_actions=N_ACTIONS, n_obs_space=N_OBS_SPACE,
-                          reward_type=reward_type, energy_coef=ENERGY_COEF, packet_coef=PACKET_COEF, 
+                          reward_type=reward_type, energy_coef=ENERGY_COEF, packet_coef=PACKET_COEF,
                           latency_coef=LATENCY_COEF, packet_thresh=PACKET_THRESH,
-                           latency_thresh=LATENCY_THRESH, energy_thresh=ENERGY_THRESH, setpoint_thresh=SETPOINT_THRESH)
+                          latency_thresh=LATENCY_THRESH, energy_thresh=ENERGY_THRESH, setpoint_thresh=SETPOINT_THRESH)
 
     # agent params
     DEEP_AGENT_PARAMS = {
