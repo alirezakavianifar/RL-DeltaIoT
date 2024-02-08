@@ -6,7 +6,7 @@ import pandas as pd
 from gymnasium import spaces
 from sklearn.preprocessing import StandardScaler
 
-from src.utility.utils import utility, return_next_item, pca_analysis, kmeans_analysis
+from src.utility.utils import utility, pca_analysis, kmeans_analysis, iterate_dataframe
 
 class BDBC_AllNumeric(gym.Env):
     """Custom Environment that follows gym interface."""
@@ -28,7 +28,7 @@ class BDBC_AllNumeric(gym.Env):
                                             dtype=float)
         self.data_dir = data_dir
         self.info = {}
-        self.data = return_next_item(self.data_dir, normalize=False)
+        self.data = iterate_dataframe(pd.read_csv(os.path.join(self.data_dir, 'BDBC_AllNumeric.csv')))
         self.reward = 0
         self.reward_type = reward_type()
         self.terminated = False
@@ -43,20 +43,13 @@ class BDBC_AllNumeric(gym.Env):
         self.setpoint_thresh = setpoint_thresh
 
     def step(self, action):
-        self.obs = self.df.iloc[action][[
-            'energyconsumption', 'packetloss', 'latency']].to_numpy(dtype=float).flatten()
+        self.obs = self.data.iloc[action].iloc[-1]
 
-        energy_consumption = self.obs[0].flatten()
-        packet_loss = self.obs[1].flatten()
-        latency = self.obs[2].flatten()
-
-        ut = utility(self.energy_coef, self.packet_coef, self.latency_coef,
-                     energy_consumption, packet_loss, latency)
-
-        self.reward = self.reward_type.get_reward(ut=ut, energy_consumption=energy_consumption,
-                                                  packet_loss=packet_loss, latency=latency,
-                                                  energy_thresh=self.energy_thresh, packet_thresh=self.packet_thresh,
-                                                  latency_thresh=self.latency_thresh, setpoint_thresh=self.setpoint_thresh)
+        self.reward = self.reward_type.get_reward(ut=0, energy_consumption=self.obs,
+                                                  packet_loss=0, latency=0,
+                                                  energy_thresh=39.0, packet_thresh=self.packet_thresh,
+                                                  latency_thresh=self.latency_thresh, 
+                                                  setpoint_thresh=self.setpoint_thresh)
         self.time_steps -= 1
         if self.time_steps == 0:
             self.terminated = True
@@ -69,7 +62,7 @@ class BDBC_AllNumeric(gym.Env):
         self.terminated = False
         self.truncated = False
         try:
-            self.df = next(self.data).drop('verification_times', axis=1)
+            self.df = self.data.sample(n=1)
             # scaler = StandardScaler()
             # X = pd.DataFrame(scaler.fit_transform(
             #     self.df['features'].values.tolist()))
@@ -77,17 +70,15 @@ class BDBC_AllNumeric(gym.Env):
             # self.info['clusters'] = kmeans_analysis(X)
         except Exception as e:
             print(e)
-            self.data = return_next_item(self.data_dir, normalize=False)
-            self.df = next(self.data).drop('verification_times', axis=1)
+            self.data = iterate_dataframe(pd.read_csv(os.path.join(self.data_dir, 'BDBC_AllNumeric.csv')))
+            self.df = next(self.data)
             # scaler = StandardScaler()
             # X = pd.DataFrame(scaler.fit_transform(
             #     self.df['features'].values.tolist()))
             # X, _ = pca_analysis(X)
             # self.info['clusters'] = kmeans_analysis(X)
             
-        rand_num = np.random.randint(self.df.count().iloc[0])
-        self.obs = self.df.iloc[rand_num][[
-            'energyconsumption', 'packetloss', 'latency']].to_numpy(dtype=float).flatten()
+        self.obs = self.df.iloc[:, -1].iloc[0]
         return self.obs, self.info
 
     def render(self):

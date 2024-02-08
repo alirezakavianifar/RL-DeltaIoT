@@ -228,6 +228,9 @@ def return_next_item(lst, normalize=True, normalize_cols=['energyconsumption', '
             df = scale_data(df)
         yield df
 
+# Iterate through each item in the DataFrame in a generator-like fashion
+def iterate_dataframe(df):
+    return df
 
 def load_data(path=None, load_all=False, version='', shuffle=False, fraction=1.0, test_size=0.2, return_train_test=True):
     json_files = glob.glob(os.path.join(path, version, "*.json"))

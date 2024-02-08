@@ -31,27 +31,45 @@ class RewardMcOne(IRewardMCOne):
 class RewardMcTwo(IRewardMCOne):
     def __init__(self) -> None:
         self.ut = 9999
+        self.previous_performance = None
 
     def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None,
                    energy_thresh=None, packet_thresh=None, latency_thresh=None, setpoint_thresh=None):
         # Define constants
-        GOAL_REWARD = 100.0
-        TIME_STEP_PENALTY = 0
+        """
+        Reward function to encourage increase in performance and penalize decrease.
 
-        # Calculate distance between current position and goal position
-        distance_to_goal = abs(energy_consumption - energy_thresh)
+        Parameters:
+        - current_performance: The current performance value.
 
-        # Positive reward for reaching the goal, inversely proportional to distance
-        if energy_consumption == energy_thresh:
-            return GOAL_REWARD
-        elif distance_to_goal > 0:
-            goal_reward = GOAL_REWARD / distance_to_goal
+        Returns:
+        - reward: The reward for the current state.
+        """
+        # Define constants
+        MAX_REWARD = 100.0
+        MIN_REWARD = 0.0
+        PENALTY_FACTOR = 0.5  # Adjust this factor based on the desired penalty strength
+
+        # Initial reward for the first step
+        if self.previous_performance is None:
+            self.previous_performance = energy_consumption
+            return MAX_REWARD
+
+        # Calculate reward based on performance change
+        performance_change = energy_consumption - self.previous_performance
+
+        if performance_change >= 0:
+            # Increase in performance, provide full reward
+            reward = MAX_REWARD
         else:
-            goal_reward = GOAL_REWARD
+            # Decrease in performance, penalize based on distance to previous performance
+            penalty = abs(performance_change) * PENALTY_FACTOR
+            reward = max(MIN_REWARD, MAX_REWARD - penalty)
 
+        # Update previous performance for the next step
+        self.previous_performance = energy_consumption
 
-        # Small negative reward for each time step to encourage efficiency
-        return goal_reward + TIME_STEP_PENALTY
+        return reward
 
 
 class RewardMcThree(IRewardMCOne):

@@ -17,7 +17,7 @@ from src.environments.env_helpers import RewardMcOne, RewardMcTwo, \
 GET_CWD = os.getcwd()
 
 # Type of Environment, either DeltaIoT, or BDBC_AllNumeric
-ENV_NAME = 'BDBC_AllNumeric'
+ENV_NAME = 'DeltaIoT'
 
 PROMPT = True
 # FROM_SCRATCH is used if we want to split data into training and testing from scratch
@@ -36,6 +36,7 @@ POLICY = 'UCBDQNPolicy'
 EXPLORATION_FRACTION = 0.2
 
 ALGO_NAME = 'DQN'
+SETPOINT_THRESH = 0.1
 
 if V == 1:
     CMP_DIR = {'tts': 'Fig15-a.htm', 'tto': 'Fig14-a.htm'}
@@ -132,17 +133,17 @@ if ENV_NAME == 'DeltaIoT':
     NUMGAMES = len(TRAIN_LST)
         
 if ENV_NAME == "BDBC_AllNumeric":
-    TOTAL_TIMESTEPS = 1_105_920
-    WARMUP_COUNT = 20_480
+    TOTAL_TIMESTEPS = 60_000
+    WARMUP_COUNT = 100
     INPUT_DIMS = 42
-    TIME_STEPS = 4096
+    TIME_STEPS = 100
     NUM_PULLS = np.zeros(TIME_STEPS)
     NETWORK_LAYERS = [150, 120, 100, 50, 25]
-    N_STATES = 4096
-    N_ACTIONS = 4096
+    N_STATES = 2560
+    N_ACTIONS = 2560
     N_OBS_SPACE = 1
     DATA_DIR = os.path.join(GET_CWD, 'data', 'BDBC_AllNumeric')
-    NUMGAMES = 1000
+    NUMGAMES = 500
 
 
 EPSILON = 1
@@ -224,9 +225,9 @@ def get_params_for_training(*args, **kwargs):
     elif kwargs['environment'] == 'BDBC_AllNumeric':
         reward_type = RewardMcTwo
         ENV = BDBC_AllNumeric(data_dir=DATA_DIR, timesteps=TIME_STEPS, n_actions=N_ACTIONS, n_obs_space=N_OBS_SPACE,
-                                reward_type=reward_type, energy_coef=ENERGY_COEF, packet_coef=PACKET_COEF,
-                                latency_coef=LATENCY_COEF, packet_thresh=PACKET_THRESH,
-                                latency_thresh=LATENCY_THRESH, energy_thresh=ENERGY_THRESH, setpoint_thresh=SETPOINT_THRESH)
+                                reward_type=reward_type, energy_coef=0, packet_coef=0,
+                                latency_coef=0, packet_thresh=0,
+                                latency_thresh=0, energy_thresh=0, setpoint_thresh=0)
     # agent params
     DEEP_AGENT_PARAMS = {
         'algo_type': kwargs['algo_type'],
