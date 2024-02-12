@@ -33,10 +33,10 @@ V = 2
 # Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy, UCBDQNPolicy
 POLICY = 'UCBDQNPolicy'
 # Policy parameters for BoltzmannPolicy
-EXPLORATION_FRACTION = 0.2
+EXPLORATION_FRACTION = 0.1
 
 ALGO_NAME = 'DQN'
-SETPOINT_THRESH = 0.1
+SETPOINT_THRESH = {'lower_bound': 12.9 - 0.1, 'upper_bound': 12.9 + 1.0}
 
 if V == 1:
     CMP_DIR = {'tts': 'Fig15-a.htm', 'tto': 'Fig14-a.htm'}
@@ -89,7 +89,8 @@ if ENV_NAME == 'DeltaIoT':
         WARMUP_COUNT = 1_075
         INPUT_DIMS = 3
         TIME_STEPS = 216
-        SETPOINT_THRESH = 0.1
+        SETPOINT_THRESH = {'lower_bound': 12.9 -
+                           0.1, 'upper_bound': 12.9 + 1.0}
         NUM_PULLS = np.zeros(TIME_STEPS)
         ENERGY_THRESH = 12.90
         PACKET_THRESH = 10.0
@@ -105,7 +106,8 @@ if ENV_NAME == 'DeltaIoT':
         WARMUP_COUNT = 20_480
         INPUT_DIMS = 42
         TIME_STEPS = 4096
-        SETPOINT_THRESH = 0.3
+        SETPOINT_THRESH = {'lower_bound': 67.0 -
+                           0.3, 'upper_bound': 67.0 + 0.3}
         NUM_PULLS = np.zeros(TIME_STEPS)
         ENERGY_THRESH = 67.0
         PACKET_THRESH = 15.0
@@ -131,7 +133,7 @@ if ENV_NAME == 'DeltaIoT':
         TEST_LST = glob.glob(os.path.join(TEST_DIR, "*.json"))
 
     NUMGAMES = len(TRAIN_LST)
-        
+
 if ENV_NAME == "BDBC_AllNumeric":
     TOTAL_TIMESTEPS = 60_000
     WARMUP_COUNT = 100
@@ -225,9 +227,9 @@ def get_params_for_training(*args, **kwargs):
     elif kwargs['environment'] == 'BDBC_AllNumeric':
         reward_type = RewardMcTwo
         ENV = BDBC_AllNumeric(data_dir=DATA_DIR, timesteps=TIME_STEPS, n_actions=N_ACTIONS, n_obs_space=N_OBS_SPACE,
-                                reward_type=reward_type, energy_coef=0, packet_coef=0,
-                                latency_coef=0, packet_thresh=0,
-                                latency_thresh=0, energy_thresh=0, setpoint_thresh=0)
+                              reward_type=reward_type, energy_coef=0, packet_coef=0,
+                              latency_coef=0, packet_thresh=0,
+                              latency_thresh=0, energy_thresh=0, setpoint_thresh=0)
     # agent params
     DEEP_AGENT_PARAMS = {
         'algo_type': kwargs['algo_type'],
