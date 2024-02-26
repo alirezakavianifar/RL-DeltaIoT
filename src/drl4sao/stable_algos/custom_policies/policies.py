@@ -604,3 +604,4 @@ class UCBDQNPolicy(BasePolicy):
         """
         self.q_net.set_training_mode(mode)
         self.training = mode
+

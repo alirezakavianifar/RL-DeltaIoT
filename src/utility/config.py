@@ -29,11 +29,11 @@ TRAINING = True
 # If True then compare different methods
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
-V = 2
+V = 1
 # Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy, UCBDQNPolicy
 POLICY = 'UCBDQNPolicy'
 # Policy parameters for BoltzmannPolicy
-EXPLORATION_FRACTION = 0.1
+EXPLORATION_FRACTION = 0.3
 
 ALGO_NAME = 'DQN'
 SETPOINT_THRESH = {'lower_bound': 12.9 - 0.1, 'upper_bound': 12.9 + 1.0}
@@ -83,7 +83,7 @@ LOG_PATH = os.path.join(GET_CWD, 'logs')
 EPS_DEC_TYPE = EpsDecTypeTwo()
 
 if ENV_NAME == 'DeltaIoT':
-    if VERSION == 1:
+    if V == 1:
         # Total timesteps
         TOTAL_TIMESTEPS = 174_960
         WARMUP_COUNT = 1_075
