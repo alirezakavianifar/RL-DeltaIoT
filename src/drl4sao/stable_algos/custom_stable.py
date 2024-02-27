@@ -14,7 +14,8 @@ from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedul
 from stable_baselines3.common.utils import get_linear_fn, get_parameters_by_name, polyak_update
 from stable_baselines3.dqn.policies import CnnPolicy, DQNPolicy, MlpPolicy, MultiInputPolicy, QNetwork
 from src.drl4sao.stable_algos.custom_policies.policies import SoftmaxDQNPolicy,\
-      BoltzmannDQNPolicy, UCBDQNPolicy
+      BoltzmannDQNPolicy, UCBDQNPolicy, BayesianUCBDQNPolicy
+from src.drl4sao.stable_algos.custom_policies.bayesian_ucb import BayesianUCB
 
 
 class CustomDQN(DQN):
@@ -50,6 +51,7 @@ class CustomDQN(DQN):
         total_timesteps: int = 10_000,
         num_pulls: int = 1,
         setpoint_thresh: float = 0.1,
+        bayesian_ucb: BayesianUCBDQNPolicy = None
     ):
         super().__init__(
             policy,
@@ -81,6 +83,9 @@ class CustomDQN(DQN):
         self.total_timesteps = total_timesteps
         self.num_pulls = num_pulls
         self.setpoint_thresh = setpoint_thresh
+        # Initialize Bayesian UCB for each action
+        # self.bayesian_ucb = BayesianUCB(len(self.num_pulls))
+        self.bayesian_ucb = bayesian_ucb
 
     def predict(
         self,
@@ -156,3 +161,23 @@ class CustomDQN(DQN):
             self.num_pulls[selected_action] += 1
 
             return selected_action, state
+        elif type(self.policy) == BayesianUCBDQNPolicy:
+            # Exploration-exploitation trade-off using UCB
+            q_values, state = self.policy.predict(
+            observation, state, episode_start, deterministic)
+
+            exploration_term = self.exploration_rate * \
+                np.sqrt(np.log(self.total_timesteps + 1) / (np.maximum(1, np.sum(self.num_pulls))))
+            ucb_values = q_values + exploration_term
+            # Use Bayesian UCB to select action
+            selected_action = np.array([self.bayesian_ucb.select_arm()])
+            
+            # Update exploration statistics
+            self.num_pulls[selected_action] += 1
+
+            return selected_action, state
+
+            
+        
+
+        

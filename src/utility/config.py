@@ -30,10 +30,10 @@ TRAINING = True
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
 V = 1
-# Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy, UCBDQNPolicy
+# Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy, UCBDQNPolicy, BayesianUCBDQNPolicy
 POLICY = 'UCBDQNPolicy'
 # Policy parameters for BoltzmannPolicy
-EXPLORATION_FRACTION = 0.3
+EXPLORATION_FRACTION = 0.5
 
 ALGO_NAME = 'DQN'
 SETPOINT_THRESH = {'lower_bound': 12.9 - 0.1, 'upper_bound': 12.9 + 1.0}

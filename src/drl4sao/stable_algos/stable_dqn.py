@@ -7,6 +7,7 @@ from gymnasium.wrappers.time_limit import TimeLimit
 from stable_baselines3.common.monitor import Monitor
 
 from src.drl4sao.stable_algos.custom_stable import CustomDQN
+from src.drl4sao.stable_algos.custom_policies.bayesian_ucb import BayesianUCB
 
 from stable_baselines3.her.goal_selection_strategy import GoalSelectionStrategy
 
@@ -22,6 +23,9 @@ def stable_dqn(agent_params):
                                              name_prefix=f"{name}-policy={agent_params['policy']}-lr={agent_params['lr']}-eps_min={agent_params['eps_min']}-batch_size={agent_params['batch_size']}-gamma={agent_params['gamma']}-exploration_fraction={agent_params['exploration_fraction']}")
     eval_callback = EvalCallback(
         env, callback_on_new_best=checkpoint_callback, eval_freq=10_000, verbose=1, n_eval_episodes=5)
+    
+    # Initialize Bayesian UCB for each action
+    bayesian_ucb = BayesianUCB(agent_params['n_actions'])
 
     if algo_name == 'DQN':
         model = CustomDQN(agent_params['policy'],
@@ -41,6 +45,7 @@ def stable_dqn(agent_params):
                           total_timesteps=agent_params['total_timesteps'],
                           num_pulls = agent_params['num_pulls'],
                           setpoint_thresh = agent_params['setpoint_thresh'],
+                          bayesian_ucb=bayesian_ucb
                           )
 
     if algo_name == "PPO":

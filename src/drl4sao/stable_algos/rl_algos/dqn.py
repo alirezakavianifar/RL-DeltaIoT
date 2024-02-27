@@ -7,13 +7,13 @@ from gymnasium import spaces
 from torch.nn import functional as F
 
 from stable_baselines3.common.buffers import ReplayBuffer
-from stable_baselines3.common.off_policy_algorithm import OffPolicyAlgorithm
 from stable_baselines3.common.policies import BasePolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import get_linear_fn, get_parameters_by_name, polyak_update
 from stable_baselines3.dqn.policies import CnnPolicy, DQNPolicy, MlpPolicy, MultiInputPolicy, QNetwork
 from src.drl4sao.stable_algos.custom_policies.policies import SoftmaxDQNPolicy,\
-      BoltzmannDQNPolicy, UCBDQNPolicy
+      BoltzmannDQNPolicy, UCBDQNPolicy, BayesianUCBDQNPolicy
+from src.drl4sao.stable_algos.custom_policies.off_policy_algorithm import OffPolicyAlgorithm
 
 SelfDQN = TypeVar("SelfDQN", bound="DQN")
 
@@ -70,7 +70,8 @@ class DQN(OffPolicyAlgorithm):
         "MultiInputPolicy": MultiInputPolicy,
         "SoftmaxDQNPolicy": SoftmaxDQNPolicy,
         "BoltzmannDQNPolicy": BoltzmannDQNPolicy,
-        "UCBDQNPolicy": UCBDQNPolicy
+        "UCBDQNPolicy": UCBDQNPolicy,
+        "BayesianUCBDQNPolicy": BayesianUCBDQNPolicy
     }
     # Linear schedule will be defined in `_setup_model()`
     exploration_schedule: Schedule
