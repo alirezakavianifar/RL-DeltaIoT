@@ -76,7 +76,8 @@ def predict_action(features, model, model_type='1'):
         try:
             predicted_multi = model.predict(features)[0].flatten()
             if predicted_multi.size > 1:
-                predicted_multi = np.argmax(model.predict(features)[0].flatten())
+                predicted_multi = np.argmax(
+                    model.predict(features)[0].flatten())
             if predicted_multi.size == 1:
                 predicted_multi = predicted_multi.item()
         except:
@@ -279,7 +280,58 @@ def read_from_html(file_path):
 #         f.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
 #     fig.show()
 
+def exponential_moving_average(data, alpha=0.01):
+    ema = [data[0]]
+    for value in data[1:]:
+        ema.append(alpha * value + (1 - alpha) * ema[-1])
+    return np.array(ema)
+
+def read_from_tensorboardlog(smoothed=True, filtered=None):
+    import matplotlib.pyplot as plt
+    from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
+
+    # Specify the path to your TensorBoard log directory
+    log_dir = r'D:\projects\RL-DelataIoT-fortest\RL-DeltaIoT\logs'
+    log_dirs = [f.path for f in os.scandir(log_dir) if f.is_dir()]
+    for log_dir in log_dirs:
+        if filtered is not None:
+            if log_dir.split('-')[3].split('\\')[2] != filtered:
+                continue      
+        log_dir = os.path.join(log_dir, 'DQN_1')
+        tag_name = log_dir.split('policy=')[1].split('-')[0]
+    # Create an EventAccumulator to load TensorBoard events
+        event_acc = EventAccumulator(log_dir)
+        event_acc.Reload()
+
+        # Get the scalar data from the events
+        scalar_data = {
+            tag: [(event.step, event.value) for event in event_acc.Scalars(tag)]
+            for tag in event_acc.Tags()['scalars']
+        }
+
+        # Plot the scalar data using Matplotlib
+        for tag, data in scalar_data.items():
+            if tag == 'rollout/ep_rew_mean':
+                steps, values = zip(*data)
+                if smoothed:
+
+                    # Apply exponential moving average for smoothing
+                    values = exponential_moving_average(values)
+                
+                plt.plot(steps, values, label=tag_name)
+
+    plt.xlabel('Step')
+    plt.ylabel('Value')
+    plt.legend()
+    plt.show()
+
+
+
+
+
+
 if __name__ == '__main__':
     # plot_quality_properties(plot_type=PLOT_TYPE, for_type=FOR_TYPE, path=PATH)
+    read_from_tensorboardlog(filtered='DQN_v2_multi')
     res = read_from_html(os.path.join(os.getcwd(), 'fig', 'Fig15-a.htm'))
     print('f')

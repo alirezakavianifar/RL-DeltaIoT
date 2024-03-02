@@ -106,6 +106,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         use_sde_at_warmup: bool = False,
         sde_support: bool = True,
         supported_action_spaces: Optional[Tuple[Type[spaces.Space], ...]] = None,
+        bayesian_ucb=None
     ):
         super().__init__(
             policy=policy,
@@ -558,6 +559,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
 
             # Rescale and perform action
             new_obs, rewards, dones, infos = env.step(actions)
+            self.bayesian_ucb.update(actions, rewards)
 
             self.num_timesteps += env.num_envs
             num_collected_steps += 1

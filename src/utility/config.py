@@ -29,14 +29,14 @@ TRAINING = True
 # If True then compare different methods
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
-V = 1
+V = 2
 # Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy, UCBDQNPolicy, BayesianUCBDQNPolicy
-POLICY = 'UCBDQNPolicy'
+POLICY = 'SoftmaxDQNPolicy'
 # Policy parameters for BoltzmannPolicy
-EXPLORATION_FRACTION = 0.5
+EXPLORATION_FRACTION = 0.1
 
 ALGO_NAME = 'DQN'
-SETPOINT_THRESH = {'lower_bound': 12.9 - 0.1, 'upper_bound': 12.9 + 1.0}
+SETPOINT_THRESH = {'lower_bound': 12.9 - 0.1, 'upper_bound': 12.9 + 0.1}
 
 if V == 1:
     CMP_DIR = {'tts': 'Fig15-a.htm', 'tto': 'Fig14-a.htm'}
@@ -90,7 +90,7 @@ if ENV_NAME == 'DeltaIoT':
         INPUT_DIMS = 3
         TIME_STEPS = 216
         SETPOINT_THRESH = {'lower_bound': 12.9 -
-                           0.1, 'upper_bound': 12.9 + 1.0}
+                           0.1, 'upper_bound': 12.9 + 0.1}
         NUM_PULLS = np.zeros(TIME_STEPS)
         ENERGY_THRESH = 12.90
         PACKET_THRESH = 10.0
@@ -103,6 +103,7 @@ if ENV_NAME == 'DeltaIoT':
         N_OBS_SPACE = 3
     else:
         TOTAL_TIMESTEPS = 1_105_920
+        TOTAL_TIMESTEPS = 552_920
         WARMUP_COUNT = 20_480
         INPUT_DIMS = 42
         TIME_STEPS = 4096

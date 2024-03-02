@@ -106,6 +106,7 @@ class DQN(OffPolicyAlgorithm):
         seed: Optional[int] = None,
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
+        bayesian_ucb=None
     ) -> None:
         super().__init__(
             policy,
@@ -131,6 +132,7 @@ class DQN(OffPolicyAlgorithm):
             optimize_memory_usage=optimize_memory_usage,
             supported_action_spaces=(spaces.Discrete,),
             support_multi_env=True,
+            bayesian_ucb=bayesian_ucb
         )
 
         self.exploration_initial_eps = exploration_initial_eps

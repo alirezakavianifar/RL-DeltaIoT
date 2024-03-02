@@ -8,8 +8,6 @@ from torch.nn import functional as F
 
 from src.drl4sao.stable_algos.rl_algos.dqn import DQN
 from stable_baselines3.common.buffers import ReplayBuffer
-from stable_baselines3.common.off_policy_algorithm import OffPolicyAlgorithm
-from stable_baselines3.common.policies import BasePolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import get_linear_fn, get_parameters_by_name, polyak_update
 from stable_baselines3.dqn.policies import CnnPolicy, DQNPolicy, MlpPolicy, MultiInputPolicy, QNetwork
@@ -76,6 +74,7 @@ class CustomDQN(DQN):
             device=device,
             seed=seed,
             optimize_memory_usage=optimize_memory_usage,
+            bayesian_ucb=bayesian_ucb
         )
 
         self.deterministic = deterministic
@@ -168,9 +167,11 @@ class CustomDQN(DQN):
 
             exploration_term = self.exploration_rate * \
                 np.sqrt(np.log(self.total_timesteps + 1) / (np.maximum(1, np.sum(self.num_pulls))))
-            ucb_values = q_values + exploration_term
             # Use Bayesian UCB to select action
-            selected_action = np.array([self.bayesian_ucb.select_arm()])
+            ucb_values = q_values + exploration_term * self.bayesian_ucb.get_ucb_values()
+
+            selected_action = np.array([np.argmax(ucb_values)])
+
             
             # Update exploration statistics
             self.num_pulls[selected_action] += 1
