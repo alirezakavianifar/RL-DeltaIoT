@@ -29,9 +29,9 @@ TRAINING = True
 # If True then compare different methods
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
-V = 2
+V = 1
 # Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy, UCBDQNPolicy, BayesianUCBDQNPolicy
-POLICY = 'SoftmaxDQNPolicy'
+POLICY = 'MlpPolicy'
 # Policy parameters for BoltzmannPolicy
 EXPLORATION_FRACTION = 0.1
 
@@ -53,9 +53,9 @@ REWARD_TYPES = {'energy': 'rm2', 'packet': 'rm2',
                 'latency': 'rm2', 'multi': 'rm3',
                 'multi_tto': 'rm5', 'multi_tt': 'rm4'}
 # Reward mechanism: rm1=threshold, rm2=minimum, rm3=multi, rm4=multi_tt, rm5=multi_tto
-REWARD_TYPE = REWARD_TYPES['multi']
+REWARD_TYPE = REWARD_TYPES['multi_tt']
 # QUALITY_TYPE could be energy, packet, latency, multi, multi_tt, multi_tto
-QUALITY_TYPE = QUALITY_TYPES['multi']
+QUALITY_TYPE = QUALITY_TYPES['multi_tt']
 # deep type could be either tensor or torch
 DEEP_TYPE = 'tensor'
 # deep types could be a collection of dqn, ddpg, ppo or etc...

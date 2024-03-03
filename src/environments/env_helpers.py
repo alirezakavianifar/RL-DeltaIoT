@@ -109,8 +109,8 @@ class RewardMcFour(IRewardMCOne):
     def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None,
                    energy_thresh=None, packet_thresh=None, latency_thresh=None, setpoint_thresh=None):
         # Define weights for each objective
-        weight_packet_loss = 1.0
-        weight_latency = 1.0
+        weight_packet_loss = 0.5
+        weight_latency = 0.5
 
         # Calculate the deviation from the target values
         deviation_packet_loss = max(0, packet_loss - packet_thresh)  # Ensure it's non-negative

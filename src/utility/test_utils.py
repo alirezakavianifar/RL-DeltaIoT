@@ -16,6 +16,8 @@ import sys
 import plotly.express as px
 from plotly.subplots import make_subplots
 import itertools
+import matplotlib.pyplot as plt
+from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
 sys.path.append(r'D:\projects\tensorflow_gpu\experiments')
 sys.path.append(r'D:\projects\tensorflow_gpu\src\experiments')
@@ -100,7 +102,7 @@ def test_phase(data, models, energy_coef=None,
     # Compare res with other methods
     i = 0
     res = read_from_html(os.path.join(
-        os.getcwd(), 'fig', cmp_dir['tts']))
+        os.getcwd(), 'fig', cmp_dir['tto']))
 
     while (True):
         try:
@@ -286,20 +288,21 @@ def exponential_moving_average(data, alpha=0.01):
         ema.append(alpha * value + (1 - alpha) * ema[-1])
     return np.array(ema)
 
-def read_from_tensorboardlog(smoothed=True, filtered=None):
-    import matplotlib.pyplot as plt
-    from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
-
+def read_from_tensorboardlog(smoothed=True, filtered=None, policies=None, 
+                             tags=[], titles=['Training Phase', 'Evaluation Phase']):
     # Specify the path to your TensorBoard log directory
-    log_dir = r'D:\projects\RL-DelataIoT-fortest\RL-DeltaIoT\logs'
+    log_dir = r'D:\projects\RL-DeltaIoT\logs'
     log_dirs = [f.path for f in os.scandir(log_dir) if f.is_dir()]
+    # Plot the scalar data using Matplotlib
+    fig, axs = plt.subplots(len(tags), 1, figsize=(12, 8))
     for log_dir in log_dirs:
-        if filtered is not None:
-            if log_dir.split('-')[3].split('\\')[2] != filtered:
+        if ((filtered is not None) or (policies is not None)):
+            if ((log_dir.split('-')[1].split('\\')[2].upper() != filtered) or
+                  (log_dir.split('=')[1].split('-')[0].upper() not in policies)):
                 continue      
         log_dir = os.path.join(log_dir, 'DQN_1')
         tag_name = log_dir.split('policy=')[1].split('-')[0]
-    # Create an EventAccumulator to load TensorBoard events
+        # Create an EventAccumulator to load TensorBoard events
         event_acc = EventAccumulator(log_dir)
         event_acc.Reload()
 
@@ -309,29 +312,33 @@ def read_from_tensorboardlog(smoothed=True, filtered=None):
             for tag in event_acc.Tags()['scalars']
         }
 
-        # Plot the scalar data using Matplotlib
+        index = 0
         for tag, data in scalar_data.items():
-            if tag == 'rollout/ep_rew_mean':
+            if tag in tags:
                 steps, values = zip(*data)
                 if smoothed:
 
                     # Apply exponential moving average for smoothing
                     values = exponential_moving_average(values)
                 
-                plt.plot(steps, values, label=tag_name)
+                axs[index].plot(steps, values, label=tag_name)
+                axs[index].set_title(titles[index])
+                axs[index].set_xlabel('Steps')  # Set x-axis label for the second subplot
+                axs[index].set_ylabel('Mean Reward')  # Set y-axis label for the second subplot
+                axs[index].legend()
+                index += 1
 
-    plt.xlabel('Step')
-    plt.ylabel('Value')
-    plt.legend()
+    # Adjust layout to prevent clipping of titles
+    plt.tight_layout()
+
+    # Show the plots
     plt.show()
-
-
-
-
-
 
 if __name__ == '__main__':
     # plot_quality_properties(plot_type=PLOT_TYPE, for_type=FOR_TYPE, path=PATH)
-    read_from_tensorboardlog(filtered='DQN_v2_multi')
+    read_from_tensorboardlog(filtered='DQN_V1_MULTI_TT', 
+                             policies=['MLPPOLICY', 'UCBDQNPOLICY'],
+                             tags=['rollout/ep_rew_mean',
+                                   'eval/mean_reward'])
     res = read_from_html(os.path.join(os.getcwd(), 'fig', 'Fig15-a.htm'))
     print('f')

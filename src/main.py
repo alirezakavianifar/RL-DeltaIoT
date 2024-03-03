@@ -38,8 +38,9 @@ if __name__ == '__main__':
                     items = item.split('-')[2:]
 
             chosen_model_params = {
-                'lr': '0.0001', 'eps_min': '0.001', 'batch_size': '64',
-                  'gamma': '1.0', 'exploration_fraction': '0.6'}
+                'lr': '0.0001', 'eps_min': '0.001', 
+                'batch_size': '64', 'policy': 'UCBDQNPolicy',
+                'gamma': '1.0', 'exploration_fraction': '0.1'}
 
             model_dics = get_chosen_model(
                 model_dics, chosen_model_params, DEEP_AGENT_PARAMS['model_dir'])
