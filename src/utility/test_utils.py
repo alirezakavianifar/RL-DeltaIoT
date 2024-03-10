@@ -298,7 +298,8 @@ def read_from_tensorboardlog(smoothed=True, filtered=None, policies=None,
     for log_dir in log_dirs:
         if ((filtered is not None) or (policies is not None)):
             if ((log_dir.split('-')[1].split('\\')[2].upper() != filtered) or
-                  (log_dir.split('=')[1].split('-')[0].upper() not in policies)):
+                  (log_dir.split('=')[1].split('-')[0].upper() not in policies) or
+                  (log_dir.split('-')[-1].split('=')[1] != '0.1')):
                 continue      
         log_dir = os.path.join(log_dir, 'DQN_1')
         tag_name = log_dir.split('policy=')[1].split('-')[0]
@@ -336,7 +337,7 @@ def read_from_tensorboardlog(smoothed=True, filtered=None, policies=None,
 
 if __name__ == '__main__':
     # plot_quality_properties(plot_type=PLOT_TYPE, for_type=FOR_TYPE, path=PATH)
-    read_from_tensorboardlog(filtered='DQN_V1_MULTI_TT', 
+    read_from_tensorboardlog(filtered='BDBC_ALLNUMERIC_DQN_V1_MULTI_TT', 
                              policies=['MLPPOLICY', 'UCBDQNPOLICY'],
                              tags=['rollout/ep_rew_mean',
                                    'eval/mean_reward'])

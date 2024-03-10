@@ -12,7 +12,7 @@ from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedul
 from stable_baselines3.common.utils import get_linear_fn, get_parameters_by_name, polyak_update
 from stable_baselines3.dqn.policies import CnnPolicy, DQNPolicy, MlpPolicy, MultiInputPolicy, QNetwork
 from src.drl4sao.stable_algos.custom_policies.policies import SoftmaxDQNPolicy,\
-      BoltzmannDQNPolicy, UCBDQNPolicy, BayesianUCBDQNPolicy
+      BoltzmannDQNPolicy, UCBDQNPolicy, UCB1TUNEDDQNPolicy, BayesianUCBDQNPolicy
 from src.drl4sao.stable_algos.custom_policies.off_policy_algorithm import OffPolicyAlgorithm
 
 SelfDQN = TypeVar("SelfDQN", bound="DQN")
@@ -71,6 +71,7 @@ class DQN(OffPolicyAlgorithm):
         "SoftmaxDQNPolicy": SoftmaxDQNPolicy,
         "BoltzmannDQNPolicy": BoltzmannDQNPolicy,
         "UCBDQNPolicy": UCBDQNPolicy,
+        "UCB1TUNEDDQNPolicy": UCB1TUNEDDQNPolicy,
         "BayesianUCBDQNPolicy": BayesianUCBDQNPolicy
     }
     # Linear schedule will be defined in `_setup_model()`

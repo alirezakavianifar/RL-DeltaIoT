@@ -17,7 +17,7 @@ from src.environments.env_helpers import RewardMcOne, RewardMcTwo, \
 GET_CWD = os.getcwd()
 
 # Type of Environment, either DeltaIoT, or BDBC_AllNumeric
-ENV_NAME = 'DeltaIoT'
+ENV_NAME = 'BDBC_AllNumeric'
 
 PROMPT = True
 # FROM_SCRATCH is used if we want to split data into training and testing from scratch
@@ -31,7 +31,7 @@ CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
 V = 1
 # Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy, UCBDQNPolicy, BayesianUCBDQNPolicy
-POLICY = 'MlpPolicy'
+POLICY = 'UCBDQNPolicy'
 # Policy parameters for BoltzmannPolicy
 EXPLORATION_FRACTION = 0.1
 
@@ -136,14 +136,15 @@ if ENV_NAME == 'DeltaIoT':
     NUMGAMES = len(TRAIN_LST)
 
 if ENV_NAME == "BDBC_AllNumeric":
-    TOTAL_TIMESTEPS = 60_000
+    TOTAL_TIMESTEPS = 30_000
     WARMUP_COUNT = 100
     INPUT_DIMS = 42
     TIME_STEPS = 100
-    NUM_PULLS = np.zeros(TIME_STEPS)
+    NUM_PULLS = np.zeros(2_560)
     NETWORK_LAYERS = [150, 120, 100, 50, 25]
     N_STATES = 2560
     N_ACTIONS = 2560
+    MAX_EPISODE_STEPS = 100
     N_OBS_SPACE = 1
     DATA_DIR = os.path.join(GET_CWD, 'data', 'BDBC_AllNumeric')
     NUMGAMES = 500
@@ -196,6 +197,7 @@ def wrapper_get_params_for_training(is_training, *args, **kwargs):
 @click.option('--warmup_count', prompt=PROMPT, default=WARMUP_COUNT)
 @click.option('--lr', prompt=PROMPT, default=LR)
 @click.option('--n_games', prompt=PROMPT, default=NUMGAMES)
+@click.option('--max_episode_steps', prompt=PROMPT, default=MAX_EPISODE_STEPS)
 @click.option('--gamma', prompt=PROMPT, default=GAMMA, type=float)
 @click.option('--mem_size', prompt=PROMPT, default=MEM_SIZE)
 @click.option('--batch_size', prompt=PROMPT, default=BATCH_SIZE)
@@ -260,6 +262,7 @@ def get_params_for_training(*args, **kwargs):
         'total_timesteps': TOTAL_TIMESTEPS,
         'num_pulls': NUM_PULLS,
         'setpoint_thresh': SETPOINT_THRESH,
+        'max_episode_steps': MAX_EPISODE_STEPS,
     }
     return DEEP_AGENT_PARAMS
 

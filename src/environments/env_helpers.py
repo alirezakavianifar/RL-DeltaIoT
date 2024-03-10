@@ -35,42 +35,11 @@ class RewardMcTwo(IRewardMCOne):
 
     def get_reward(self, ut=None, energy_consumption=None, packet_loss=None, latency=None,
                    energy_thresh=None, packet_thresh=None, latency_thresh=None, setpoint_thresh=None):
-        # Define constants
-        """
-        Reward function to encourage increase in performance and penalize decrease.
-
-        Parameters:
-        - current_performance: The current performance value.
-
-        Returns:
-        - reward: The reward for the current state.
-        """
-        # Define constants
-        MAX_REWARD = 100.0
-        MIN_REWARD = 0.0
-        PENALTY_FACTOR = 0.5  # Adjust this factor based on the desired penalty strength
-
-        # Initial reward for the first step
-        if self.previous_performance is None:
-            self.previous_performance = energy_consumption
-            return MAX_REWARD
-
-        # Calculate reward based on performance change
-        performance_change = energy_consumption - self.previous_performance
-
-        if performance_change >= 0:
-            # Increase in performance, provide full reward
-            reward = MAX_REWARD
+        
+        if energy_consumption >= energy_thresh:
+            return 1.0
         else:
-            # Decrease in performance, penalize based on distance to previous performance
-            penalty = abs(performance_change) * PENALTY_FACTOR
-            reward = max(MIN_REWARD, MAX_REWARD - penalty)
-
-        # Update previous performance for the next step
-        self.previous_performance = energy_consumption
-
-        return reward
-
+            return energy_consumption/energy_thresh
 
 class RewardMcThree(IRewardMCOne):
     def __init__(self) -> None:

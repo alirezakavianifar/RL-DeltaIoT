@@ -12,7 +12,7 @@ from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedul
 from stable_baselines3.common.utils import get_linear_fn, get_parameters_by_name, polyak_update
 from stable_baselines3.dqn.policies import CnnPolicy, DQNPolicy, MlpPolicy, MultiInputPolicy, QNetwork
 from src.drl4sao.stable_algos.custom_policies.policies import SoftmaxDQNPolicy,\
-      BoltzmannDQNPolicy, UCBDQNPolicy, BayesianUCBDQNPolicy
+      BoltzmannDQNPolicy, UCBDQNPolicy, UCB1TUNEDDQNPolicy, BayesianUCBDQNPolicy
 from src.drl4sao.stable_algos.custom_policies.bayesian_ucb import BayesianUCB
 
 
@@ -160,6 +160,22 @@ class CustomDQN(DQN):
             self.num_pulls[selected_action] += 1
 
             return selected_action, state
+        
+        elif type(self.policy) == UCB1TUNEDDQNPolicy:
+            # Exploration-exploitation trade-off using UCB
+            q_values, state = self.policy.predict(
+                                    observation, state, episode_start, deterministic)
+
+            exploration_term = np.sqrt(2 * np.log(np.sum(self.num_pulls)) / np.maximum(1, self.num_pulls))
+            ucb_values = q_values + self.exploration_rate * exploration_term
+            selected_action = np.array([np.argmax(ucb_values)])
+
+            # Update exploration statistics
+            self.num_pulls[selected_action] += 1
+
+            return selected_action, state
+
+        
         elif type(self.policy) == BayesianUCBDQNPolicy:
             # Exploration-exploitation trade-off using UCB
             q_values, state = self.policy.predict(
