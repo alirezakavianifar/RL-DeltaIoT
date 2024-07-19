@@ -17,7 +17,7 @@
       "name": "Streamlit",
       "type": "debugpy",
       "request": "launch",
-      "program": "D:\\projects\\RL-DeltaIoT\\venv\\Scripts\\streamlit.exe",
+      "program": "D:\\projects\\RL-DeltaioT\\RL-DeltaioT\\venv\\Scripts\\streamlit.exe",
       "console": "integratedTerminal",
       "justMyCode": true,
       "args": ["run", "src\\main_v1.py"]

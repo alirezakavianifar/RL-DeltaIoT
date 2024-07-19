@@ -1,10 +1,11 @@
 stable-baselines3
 pandas
 scikit-learn
+gymnasium
 plotly
+streamlit
 dash
 seaborn
 pretty-errors
-tensorflow
 tqdm
 -e .

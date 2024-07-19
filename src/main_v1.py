@@ -2,14 +2,14 @@ import os
 import glob
 import numpy as np
 import streamlit as st
+import shutil
 from collections import defaultdict
 from stable_baselines3 import DQN, PPO
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from stable_baselines3.common.vec_env import DummyVecEnv
 from gymnasium.wrappers.time_limit import TimeLimit
 from stable_baselines3.common.monitor import Monitor
-from src.utility.utils import load_data, move_files
-from src.utility.constant_config import MAX_EPISODE_STEPS
+from src.utility.constantsv1 import MAX_EPISODE_STEPS
 from src.environments.deltaiot_env import DeltaIotEnv
 from src.environments.env_helpers import RewardStrategy
 from src.environments.bdbc_allNumeric_env import BDBC_AllNumeric
@@ -17,6 +17,7 @@ from src.drl4sao.custom_dqn.eps_dec_types import EpsDecTypeTwo
 from src.drl4sao.stable_algos.custom_stable import CustomDQN
 from src.drl4sao.stable_algos.custom_policies.bayesian_ucb import BayesianUCB
 from src.drl4sao.stable_algos.rl_algos.a2c import A2C
+from concurrent.futures import ProcessPoolExecutor
 
 def main():
     st.title("RL Environment Configuration")
@@ -52,6 +53,24 @@ def main():
     max_episode_steps = st.number_input("Max Episode Steps", additional_params['max_episode_steps'])
     chkpt_dir = st.text_input("Checkpoint Directory", "models")
     log_path = st.text_input("Log Path", "logs")
+    execution_mode = st.selectbox("Execution Mode", ['Serial', 'Parallel'])
+
+    # Number of processes input for parallel execution
+    num_processes = None
+    if execution_mode == 'Parallel':
+        num_processes = st.number_input("Number of Processes", min_value=1, value=4)
+
+    # Option to delete the contents of logs and models folders
+    if st.button("Clear Logs and Models"):
+        try:
+            if os.path.exists(log_path):
+                shutil.rmtree(log_path)
+                st.success(f"Successfully deleted the contents of {log_path}")
+            if os.path.exists(chkpt_dir):
+                shutil.rmtree(chkpt_dir)
+                st.success(f"Successfully deleted the contents of {chkpt_dir}")
+        except Exception as e:
+            st.error(f"An error occurred while deleting folders: {e}")
 
     warmup_count = 100
     eps_min = 0.001
@@ -71,8 +90,7 @@ def main():
                 'n_obs_space': n_obs_space,
                 'max_episode_steps': max_episode_steps
             })
-            env = setup_env(**additional_params)
-            stable_dqn(env, env_name, algo_name, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params.get('setpoint_thresh'))
+            stable_dqn(env_name, algo_name, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params, execution_mode, num_processes)
             st.success("Model training completed")
         except PermissionError as e:
             st.error(f"PermissionError: {e}")
@@ -88,12 +106,11 @@ def get_env_parameters(env_name):
         n_actions = 100
     return n_obs_space, n_actions
 
-def setup_env(**kwargs):
-    env_name = kwargs.get('env_name')
-    total_timesteps = kwargs.get('total_timesteps', 512)
-    n_actions = kwargs.get('n_actions', 216)
-    n_obs_space = kwargs.get('n_obs_space', 3)
-    max_episode_steps = kwargs.get('max_episode_steps', 216)
+def setup_env(env_name, additional_params):
+    total_timesteps = additional_params.get('total_timesteps', 512)
+    n_actions = additional_params.get('n_actions', 216)
+    n_obs_space = additional_params.get('n_obs_space', 3)
+    max_episode_steps = additional_params.get('max_episode_steps', 216)
     
     if env_name in ['DeltaIoTv1', 'DeltaIoTv2']:
         env = Monitor(TimeLimit(DeltaIotEnv(
@@ -101,15 +118,15 @@ def setup_env(**kwargs):
             timesteps=total_timesteps, 
             n_actions=n_actions, 
             n_obs_space=n_obs_space,
-            reward_type=RewardStrategy(kwargs.get('strategy_type')), 
-            goal=kwargs.get('goal'),
-            energy_coef=kwargs.get('energy_coef', 0.0),
-            packet_coef=kwargs.get('packet_coef', 0.0), 
-            latency_coef=kwargs.get('latency_coef', 0.0), 
+            reward_type=RewardStrategy(additional_params.get('strategy_type')), 
+            goal=additional_params.get('goal'),
+            energy_coef=additional_params.get('energy_coef', 0.0),
+            packet_coef=additional_params.get('packet_coef', 0.0), 
+            latency_coef=additional_params.get('latency_coef', 0.0), 
             packet_thresh=10.0, 
             latency_thresh=5.0, 
             energy_thresh=12.9, 
-            setpoint_thresh=kwargs.get('setpoint_thresh', 0.0)
+            setpoint_thresh=additional_params.get('setpoint_thresh', 0.0)
         ), max_episode_steps=max_episode_steps))
     elif env_name == 'BDBC_AllNumeric':
         env = Monitor(TimeLimit(BDBC_AllNumeric(
@@ -122,23 +139,37 @@ def setup_env(**kwargs):
     
     return DummyVecEnv([lambda: env])
 
-def stable_dqn(env, env_name, algo_name, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, setpoint_thresh):
+def stable_dqn(env_name, algo_name, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params, execution_mode, num_processes=None):
     lrs = lr.split(',')
     exploration_fractions = exploration_fraction.split(',')
+    tasks = []
 
-    for lr in lrs:
-        log_path_base = os.path.join(log_path, f"{env_name}-policy={policy}-lr={lr}-batch_size={batch_size}-gamma={gamma}-total_timesteps={total_timesteps}")
-        checkpoint_callback = CheckpointCallback(save_freq=1, save_path=chkpt_dir, name_prefix=f"{env_name}-policy={policy}-lr={lr}-batch_size={batch_size}-gamma={gamma}-total_timesteps={total_timesteps}")
-        eval_callback = EvalCallback(env, callback_on_new_best=checkpoint_callback, eval_freq=int(total_timesteps / 20), verbose=1, n_eval_episodes=5)
+    if execution_mode == 'Parallel':
+        with ProcessPoolExecutor(max_workers=num_processes) as executor:
+            for lr in lrs:
+                for exploration_fraction in exploration_fractions:
+                    tasks.append(executor.submit(train_model, env_name, algo_name, policy, float(lr), float(exploration_fraction), gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params))
+        
+        for task in tasks:
+            task.result()
 
-        if algo_name == "DQN":
+    else:
+        for lr in lrs:
             for exploration_fraction in exploration_fractions:
-                log_path_exploration = f"{log_path_base}-exploration_fraction={exploration_fraction}"
-                train_dqn(env, policy, float(lr), float(exploration_fraction), gamma, batch_size, total_timesteps, warmup_count, eps_min, epsilon, num_pulls, setpoint_thresh, log_path_exploration, checkpoint_callback, eval_callback)
-        elif algo_name == "PPO":
-            train_ppo(env, policy, float(lr), gamma, batch_size, total_timesteps, log_path_base, checkpoint_callback, eval_callback)
-        elif algo_name == "A2C":
-            train_a2c(env, policy, float(lr), gamma, total_timesteps, log_path_base, checkpoint_callback, eval_callback)
+                train_model(env_name, algo_name, policy, float(lr), float(exploration_fraction), gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params)
+
+def train_model(env_name, algo_name, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params):
+    env = setup_env(env_name, additional_params)
+    log_path_base = os.path.join(log_path, f"{env_name}-policy={policy}-lr={lr}-batch_size={batch_size}-gamma={gamma}-total_timesteps={total_timesteps}-exploration_fraction={exploration_fraction}")
+    checkpoint_callback = CheckpointCallback(save_freq=1, save_path=chkpt_dir, name_prefix=f"{env_name}-policy={policy}-lr={lr}-batch_size={batch_size}-gamma={gamma}-total_timesteps={total_timesteps}-exploration_fraction={exploration_fraction}")
+    eval_callback = EvalCallback(env, callback_on_new_best=checkpoint_callback, eval_freq=int(total_timesteps / 20), verbose=1, n_eval_episodes=5)
+
+    if algo_name == "DQN":
+        train_dqn(env, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, warmup_count, eps_min, epsilon, num_pulls, additional_params.get('setpoint_thresh'), log_path_base, checkpoint_callback, eval_callback)
+    elif algo_name == "PPO":
+        train_ppo(env, policy, lr, gamma, batch_size, total_timesteps, log_path_base, checkpoint_callback, eval_callback)
+    elif algo_name == "A2C":
+        train_a2c(env, policy, lr, gamma, total_timesteps, log_path_base, checkpoint_callback, eval_callback)
 
 def train_dqn(env, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, warmup_count, eps_min, epsilon, num_pulls, setpoint_thresh, log_path, checkpoint_callback, eval_callback):
     bayesian_ucb = BayesianUCB(env.action_space.n)

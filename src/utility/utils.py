@@ -324,7 +324,6 @@ def get_tt_qs(df, packet_thresh, latency_thresh, energy_thresh):
 
     return df
 
-
 def scale_data(data):
     # data = data.to_numpy().reshape(-1, 1)
     scaler = MinMaxScaler()
