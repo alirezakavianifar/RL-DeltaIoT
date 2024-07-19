@@ -21,7 +21,7 @@ if __name__ == '__main__':
         elif DEEP_AGENT_PARAMS['algo_type'] == 2:
             stable_dqn(agent_params=DEEP_AGENT_PARAMS)
     else:
-
+    
         model_dics = get_models(lambda: get_models_v2(
             DEEP_AGENT_PARAMS['model_dics'],
             DEEP_AGENT_PARAMS['algo_name'],

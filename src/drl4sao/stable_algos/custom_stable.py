@@ -7,12 +7,12 @@ from gymnasium import spaces
 from torch.nn import functional as F
 
 from src.drl4sao.stable_algos.rl_algos.dqn import DQN
-from stable_baselines3.common.buffers import ReplayBuffer
+from src.drl4sao.stable_algos.custom_policies.buffers import ReplayBuffer
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import get_linear_fn, get_parameters_by_name, polyak_update
-from stable_baselines3.dqn.policies import CnnPolicy, DQNPolicy, MlpPolicy, MultiInputPolicy, QNetwork
-from src.drl4sao.stable_algos.custom_policies.policies import SoftmaxDQNPolicy,\
-      BoltzmannDQNPolicy, UCBDQNPolicy, UCB1TUNEDDQNPolicy, BayesianUCBDQNPolicy
+# from stable_baselines3.dqn.policies import CnnPolicy, DQNPolicy, MlpPolicy, MultiInputPolicy, QNetwork
+from src.drl4sao.stable_algos.custom_policies.policies import DQNPolicy, MlpPolicy, SoftmaxDQNPolicy, SoftmaxUCBDQNPolicy,\
+      BoltzmannDQNPolicy, UCBDQNPolicy, UCB1TUNEDDQNPolicy, BayesianUCBDQNPolicy, SoftmaxUCBAdaptiveDQNPolicy
 from src.drl4sao.stable_algos.custom_policies.bayesian_ucb import BayesianUCB
 
 
@@ -49,7 +49,12 @@ class CustomDQN(DQN):
         total_timesteps: int = 10_000,
         num_pulls: int = 1,
         setpoint_thresh: float = 0.1,
-        bayesian_ucb: BayesianUCBDQNPolicy = None
+        bayesian_ucb: BayesianUCBDQNPolicy = None,
+        initial_alpha = 0.9,
+        max_alpha = 1.0,
+        min_alpha = 0.1,
+        alpha_adjustment_rate = 0.005,
+        target_uncertainty = 0.5
     ):
         super().__init__(
             policy,
@@ -80,6 +85,11 @@ class CustomDQN(DQN):
         self.deterministic = deterministic
         self.temprature = temprature
         self.total_timesteps = total_timesteps
+        self.max_alpha = max_alpha
+        self.min_alpha = min_alpha
+        self.initial_alpha = initial_alpha
+        self.alpha_adjustment_rate = alpha_adjustment_rate
+        self.target_uncertainty = target_uncertainty
         self.num_pulls = num_pulls
         self.setpoint_thresh = setpoint_thresh
         # Initialize Bayesian UCB for each action
@@ -193,6 +203,56 @@ class CustomDQN(DQN):
             self.num_pulls[selected_action] += 1
 
             return selected_action, state
+        elif type(self.policy) == SoftmaxUCBDQNPolicy:
+            # Calculate Softmax probabilities
+            q_values, state = self.policy.predict(
+                observation, state, episode_start, deterministic)
+            exp_values = np.exp((q_values - np.max(q_values)) / self.exploration_rate)
+            probabilities = exp_values / exp_values.sum()
+
+            # Exploration-exploitation trade-off using UCB
+            exploration_term = self.exploration_rate * \
+                np.sqrt(np.log(self.total_timesteps + 1) / (np.maximum(1, np.sum(self.num_pulls))))
+            ucb_values = q_values + exploration_term
+            alpha = 0.9
+            # Combine Softmax probabilities and UCB values using a weighted sum
+            combined_values = (1 - alpha) * probabilities + alpha * ucb_values
+
+            # Select action based on the combined values
+            selected_action = np.array([np.argmax(combined_values)])
+
+            # Update exploration statistics
+            self.num_pulls[selected_action] += 1
+
+            return selected_action, state
+        
+        elif type(self.policy) == SoftmaxUCBAdaptiveDQNPolicy:
+            # Calculate Softmax probabilities
+            q_values, state = self.policy.predict(
+                observation, state, episode_start, deterministic)
+            exp_values = np.exp((q_values - np.max(q_values)) / self.exploration_rate)
+            probabilities = exp_values / exp_values.sum()
+
+            # Exploration-exploitation trade-off using UCB
+            exploration_term = self.exploration_rate * \
+                np.sqrt(np.log(self.total_timesteps + 1) / (np.maximum(1, np.sum(self.num_pulls))))
+            ucb_values = q_values + exploration_term
+
+            # Adjust alpha based on uncertainty
+            uncertainty = np.std(q_values) / np.mean(q_values)
+            alpha = np.clip(self.initial_alpha + self.alpha_adjustment_rate * (uncertainty - self.target_uncertainty), self.min_alpha, self.max_alpha)
+
+            # Combine Softmax probabilities and UCB values using a weighted sum
+            combined_values = (1 - alpha) * probabilities + alpha * ucb_values
+
+            # Select action based on the combined values
+            selected_action = np.array([np.argmax(combined_values)])
+
+            # Update exploration statistics
+            self.num_pulls[selected_action] += 1
+
+            return selected_action, state
+
 
             
         

@@ -17,7 +17,7 @@ from src.environments.env_helpers import RewardMcOne, RewardMcTwo, \
 GET_CWD = os.getcwd()
 
 # Type of Environment, either DeltaIoT, or BDBC_AllNumeric
-ENV_NAME = 'BDBC_AllNumeric'
+ENV_NAME = 'DeltaIoT'
 
 PROMPT = True
 # FROM_SCRATCH is used if we want to split data into training and testing from scratch
@@ -30,11 +30,14 @@ TRAINING = True
 CMP = True
 # DeltaioT versions are DeltaIoTv1 and DeltaIoTv2
 V = 1
-# Policy selection, could be BoltzmannPolicy , MlpPolicy, SoftmaxDQNPolicy, BoltzmannDQNPolicy, UCBDQNPolicy, BayesianUCBDQNPolicy
-POLICY = 'UCBDQNPolicy'
+""" Policy selection, could be BoltzmannPolicy , MlpPolicy, 
+SoftmaxDQNPolicy, BoltzmannDQNPolicy, UCBDQNPolicy,
+ UCB1TUNEDDQNPolicy, BayesianUCBDQNPolicy, SoftmaxUCBDQNPolicy, SoftmaxUCBAdaptiveDQNPolicy"""
+POLICY = 'MlpPolicy'
 # Policy parameters for BoltzmannPolicy
-EXPLORATION_FRACTION = 0.1
+EXPLORATION_FRACTION = '0.1,0.2,0.4,0.6'
 
+# Algorithm names could be DQN, PPO, A2C
 ALGO_NAME = 'DQN'
 SETPOINT_THRESH = {'lower_bound': 12.9 - 0.1, 'upper_bound': 12.9 + 0.1}
 
@@ -52,10 +55,12 @@ QUALITY_TYPES = {'energy': 'energy', 'packet': 'packet',
 REWARD_TYPES = {'energy': 'rm2', 'packet': 'rm2',
                 'latency': 'rm2', 'multi': 'rm3',
                 'multi_tto': 'rm5', 'multi_tt': 'rm4'}
+DICT_REWARD_TYPES = {'energy': RewardMcOne, 'packet': RewardMcOne, 
+                     'latency': RewardMcOne, 'multi': RewardMcThree, }
 # Reward mechanism: rm1=threshold, rm2=minimum, rm3=multi, rm4=multi_tt, rm5=multi_tto
-REWARD_TYPE = REWARD_TYPES['multi_tt']
+REWARD_TYPE = REWARD_TYPES['multi']
 # QUALITY_TYPE could be energy, packet, latency, multi, multi_tt, multi_tto
-QUALITY_TYPE = QUALITY_TYPES['multi_tt']
+QUALITY_TYPE = QUALITY_TYPES['multi']
 # deep type could be either tensor or torch
 DEEP_TYPE = 'tensor'
 # deep types could be a collection of dqn, ddpg, ppo or etc...
@@ -89,6 +94,7 @@ if ENV_NAME == 'DeltaIoT':
         WARMUP_COUNT = 1_075
         INPUT_DIMS = 3
         TIME_STEPS = 216
+        MAX_EPISODE_STEPS = 216
         SETPOINT_THRESH = {'lower_bound': 12.9 -
                            0.1, 'upper_bound': 12.9 + 0.1}
         NUM_PULLS = np.zeros(TIME_STEPS)
@@ -98,13 +104,15 @@ if ENV_NAME == 'DeltaIoT':
         N_ACTIONS = 216
         NETWORK_LAYERS = [50, 25, 15]
         DATA_DIR = os.path.join(GET_CWD, 'data', 'DeltaIoTv1')
+        # DATA_DIR = r'D:\projects\gheibi-material\generated_data_by_deltaiot_simulation\under_drift_scenario'
         # DATA_DIR = r'D:\projects\papers\Deep Learning for Effective and Efficient  Reduction of Large Adaptation Spaces in Self-Adaptive Systems\DLASeR_plus_online_material\dlaser_plus\raw\DeltaIoTv1'
         N_STATES = 216
         N_OBS_SPACE = 3
     else:
         TOTAL_TIMESTEPS = 1_105_920
+        TOTAL_TIMESTEPS = 122_880
         TOTAL_TIMESTEPS = 552_920
-        WARMUP_COUNT = 20_480
+        WARMUP_COUNT = 4096
         INPUT_DIMS = 42
         TIME_STEPS = 4096
         SETPOINT_THRESH = {'lower_bound': 67.0 -
@@ -136,7 +144,7 @@ if ENV_NAME == 'DeltaIoT':
     NUMGAMES = len(TRAIN_LST)
 
 if ENV_NAME == "BDBC_AllNumeric":
-    TOTAL_TIMESTEPS = 30_000
+    TOTAL_TIMESTEPS = 15_000
     WARMUP_COUNT = 100
     INPUT_DIMS = 42
     TIME_STEPS = 100
@@ -144,7 +152,6 @@ if ENV_NAME == "BDBC_AllNumeric":
     NETWORK_LAYERS = [150, 120, 100, 50, 25]
     N_STATES = 2560
     N_ACTIONS = 2560
-    MAX_EPISODE_STEPS = 100
     N_OBS_SPACE = 1
     DATA_DIR = os.path.join(GET_CWD, 'data', 'BDBC_AllNumeric')
     NUMGAMES = 500
@@ -155,7 +162,7 @@ EPS_MIN = 0.001
 EPS_STEP_SIZE = 1
 EPS_DEC = EPS_STEP_SIZE/NUMGAMES
 GAMMA = 1
-LR = 0.0001
+LR = '0.0001,0.001,0.01,0.1'
 MEM_SIZE = 1024
 BATCH_SIZE = 64
 REPLACE = 100
@@ -169,6 +176,8 @@ FNAME = ALGO + '_' + ENV_NAME + '_lr' + str(LR) + '_' \
     + str(NUMGAMES) + 'games'
 
 MODEL_DIR = os.path.join(GET_CWD, 'models')
+
+MAX_EPISODE_STEPS = {'BDBC_AllNumeric':100, 'DeltaIoTv1': 216, 'DeltaIoTv2': 4096}
 
 
 def get_models(model_names, model_load_type=None, load_truths=False):
@@ -229,10 +238,9 @@ def get_params_for_training(*args, **kwargs):
                           latency_thresh=LATENCY_THRESH, energy_thresh=ENERGY_THRESH, setpoint_thresh=SETPOINT_THRESH)
     elif kwargs['environment'] == 'BDBC_AllNumeric':
         reward_type = RewardMcTwo
-        ENV = BDBC_AllNumeric(data_dir=DATA_DIR, timesteps=TIME_STEPS, n_actions=N_ACTIONS, n_obs_space=N_OBS_SPACE,
-                              reward_type=reward_type, energy_coef=0, packet_coef=0,
-                              latency_coef=0, packet_thresh=0,
-                              latency_thresh=0, energy_thresh=0, setpoint_thresh=0)
+        ENV = BDBC_AllNumeric(data_dir=DATA_DIR, timesteps=TIME_STEPS, n_actions=N_ACTIONS,
+                               n_obs_space=N_OBS_SPACE, performance_thresh=39.0)
+                              
     # agent params
     DEEP_AGENT_PARAMS = {
         'algo_type': kwargs['algo_type'],

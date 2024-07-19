@@ -337,8 +337,8 @@ def read_from_tensorboardlog(smoothed=True, filtered=None, policies=None,
 
 if __name__ == '__main__':
     # plot_quality_properties(plot_type=PLOT_TYPE, for_type=FOR_TYPE, path=PATH)
-    read_from_tensorboardlog(filtered='BDBC_ALLNUMERIC_DQN_V1_MULTI_TT', 
-                             policies=['MLPPOLICY', 'UCBDQNPOLICY'],
+    read_from_tensorboardlog(filtered='DeltaIoT', 
+                             policies=['MLPPOLICY'],
                              tags=['rollout/ep_rew_mean',
                                    'eval/mean_reward'])
     res = read_from_html(os.path.join(os.getcwd(), 'fig', 'Fig15-a.htm'))

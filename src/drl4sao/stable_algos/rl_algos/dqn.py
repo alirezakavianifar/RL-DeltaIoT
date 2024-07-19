@@ -10,9 +10,9 @@ from stable_baselines3.common.buffers import ReplayBuffer
 from stable_baselines3.common.policies import BasePolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import get_linear_fn, get_parameters_by_name, polyak_update
-from stable_baselines3.dqn.policies import CnnPolicy, DQNPolicy, MlpPolicy, MultiInputPolicy, QNetwork
-from src.drl4sao.stable_algos.custom_policies.policies import SoftmaxDQNPolicy,\
-      BoltzmannDQNPolicy, UCBDQNPolicy, UCB1TUNEDDQNPolicy, BayesianUCBDQNPolicy
+from stable_baselines3.dqn.policies import CnnPolicy, MultiInputPolicy, QNetwork
+from src.drl4sao.stable_algos.custom_policies.policies import DQNPolicy, SoftmaxDQNPolicy, SoftmaxUCBDQNPolicy,\
+      BoltzmannDQNPolicy, UCBDQNPolicy, UCB1TUNEDDQNPolicy, BayesianUCBDQNPolicy, SoftmaxUCBAdaptiveDQNPolicy
 from src.drl4sao.stable_algos.custom_policies.off_policy_algorithm import OffPolicyAlgorithm
 
 SelfDQN = TypeVar("SelfDQN", bound="DQN")
@@ -65,14 +65,16 @@ class DQN(OffPolicyAlgorithm):
     """
 
     policy_aliases: ClassVar[Dict[str, Type[BasePolicy]]] = {
-        "MlpPolicy": MlpPolicy,
+        "MlpPolicy": DQNPolicy,
         "CnnPolicy": CnnPolicy,
         "MultiInputPolicy": MultiInputPolicy,
         "SoftmaxDQNPolicy": SoftmaxDQNPolicy,
         "BoltzmannDQNPolicy": BoltzmannDQNPolicy,
         "UCBDQNPolicy": UCBDQNPolicy,
         "UCB1TUNEDDQNPolicy": UCB1TUNEDDQNPolicy,
-        "BayesianUCBDQNPolicy": BayesianUCBDQNPolicy
+        "BayesianUCBDQNPolicy": BayesianUCBDQNPolicy,
+        "SoftmaxUCBDQNPolicy": SoftmaxUCBDQNPolicy,
+        "SoftmaxUCBAdaptiveDQNPolicy": SoftmaxUCBAdaptiveDQNPolicy
     }
     # Linear schedule will be defined in `_setup_model()`
     exploration_schedule: Schedule

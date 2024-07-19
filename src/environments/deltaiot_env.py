@@ -13,7 +13,7 @@ class DeltaIotEnv(gym.Env):
 
     metadata = {"render_modes": ["human"], "render_fps": 30}
 
-    def __init__(self, n_actions, n_obs_space, data_dir, reward_type,
+    def __init__(self, n_actions, n_obs_space, data_dir, reward_type, goal=None,
                  energy_coef=0.8, packet_coef=0.2, latency_coef=0.0,
                  energy_thresh=13.2, packet_thresh=15, latency_thresh=10, timesteps=216, setpoint_thresh=0.1):
         super().__init__()
@@ -30,7 +30,8 @@ class DeltaIotEnv(gym.Env):
         self.info = {}
         self.data = return_next_item(self.data_dir, normalize=False)
         self.reward = 0
-        self.reward_type = reward_type()
+        self.reward_type = reward_type
+        self.goal = goal
         self.terminated = False
         self.truncated = False
         self.energy_coef = energy_coef
@@ -53,10 +54,11 @@ class DeltaIotEnv(gym.Env):
         ut = utility(self.energy_coef, self.packet_coef, self.latency_coef,
                      energy_consumption, packet_loss, latency)
 
-        self.reward = self.reward_type.get_reward(ut=ut, energy_consumption=energy_consumption,
+        self.reward = self.reward_type.get_reward(util=ut, energy_consumption=energy_consumption,
                                                   packet_loss=packet_loss, latency=latency,
                                                   energy_thresh=self.energy_thresh, packet_thresh=self.packet_thresh,
-                                                  latency_thresh=self.latency_thresh, setpoint_thresh=self.setpoint_thresh)
+                                                  latency_thresh=self.latency_thresh, 
+                                                  setpoint_thresh=self.setpoint_thresh, goal=self.goal)
         self.time_steps -= 1
         if self.time_steps == 0:
             self.terminated = True

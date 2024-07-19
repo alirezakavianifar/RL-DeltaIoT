@@ -6,12 +6,21 @@
     "configurations": [
         {
             "name": "Python: main",
-            "type": "python",
+            "type": "debugpy",
             "args": ["--training", "algo_type=2"],
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true
-        }
+        },
+        {
+      "name": "Streamlit",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "D:\\projects\\RL-DeltaIoT\\venv\\Scripts\\streamlit.exe",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "args": ["run", "src\\main_v1.py"]
+    },
     ]
 }
