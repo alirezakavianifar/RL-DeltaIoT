@@ -20,6 +20,8 @@ from src.drl4sao.stable_algos.custom_policies.bayesian_ucb import BayesianUCB
 from src.drl4sao.stable_algos.rl_algos.a2c import A2C
 from concurrent.futures import ProcessPoolExecutor
 import traceback
+import subprocess
+import webbrowser
 
 def display_error_message(e, context=""):
     error_message = f"""
@@ -66,6 +68,7 @@ def main():
     
     lr = st.text_input("Learning Rate", "0.0001,0.001,0.01,0.1")
     exploration_fraction = st.text_input("Exploration Fraction (for DQN)", "0.1,0.2,0.4,0.6")
+    warmup_count = st.number_input("Warmup Count", min_value=0, value=100)
     gamma = st.number_input("Gamma", min_value=0.0, max_value=1.0,  value=0.99)
     batch_size = st.number_input("Batch Size", 64)
     total_timesteps = st.number_input("Total Timesteps", 15000)
@@ -89,7 +92,18 @@ def main():
         except Exception as e:
             display_error_message(e, "Clearing Logs and Models")
 
-    warmup_count = 100
+    if st.button("Launch TensorBoard"):
+        try:
+            log_dir = log_path if log_path else "logs"
+            if not os.path.exists(log_dir):
+                os.makedirs(log_dir)
+            tb_process = subprocess.Popen(['tensorboard', '--logdir', log_dir])
+            tensorboard_url = "http://localhost:6006"
+            st.markdown(f'[Open TensorBoard in a new tab]({tensorboard_url})', unsafe_allow_html=True)
+            webbrowser.open_new_tab(tensorboard_url)
+        except Exception as e:
+            display_error_message(e, "Launching TensorBoard")
+
     eps_min = 0.001
     epsilon = 1.0
     num_pulls = np.zeros(100)
@@ -136,7 +150,7 @@ def setup_env(env_name, algo_name, additional_params):
         env = Monitor(TimeLimit(DeltaIotEnv(
             n_actions=n_actions, 
             n_obs_space=n_obs_space, 
-            data_dir=glob.glob(os.path.join(f'data/{env_name}/train', "*.json")),
+            data_dir=glob.glob(os.path.join('data', env_name, 'train', "*.json")),
             reward_type=RewardStrategy(additional_params.get('strategy_type')), 
             goal=additional_params.get('goal'),
             energy_coef=additional_params.get('energy_coef', 0.0),
@@ -176,14 +190,19 @@ def stable_dqn(env_name, algo_name, policy, lr, exploration_fraction, gamma, bat
                 task.result()
             except Exception as e:
                 display_error_message(e, "Parallel Execution")
+                break
 
     else:
         for lr in lrs:
-            for exploration_fraction in exploration_fractions:
-                try:
-                    train_model(env_name, algo_name, policy, float(lr), float(exploration_fraction), gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params)
-                except Exception as e:
-                    display_error_message(e, "Serial Execution")
+            try:
+                for exploration_fraction in exploration_fractions:
+                    try:
+                        train_model(env_name, algo_name, policy, float(lr), float(exploration_fraction), gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params)
+                    except Exception as e:
+                        display_error_message(e, "Serial Execution")
+                        raise Exception
+            except:
+                break
 
 def train_model(env_name, algo_name, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params):
     try:
@@ -202,6 +221,7 @@ def train_model(env_name, algo_name, policy, lr, exploration_fraction, gamma, ba
             train_her_dqn(env, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, warmup_count, eps_min, epsilon, num_pulls, additional_params.get('setpoint_thresh'), log_path_base, checkpoint_callback, eval_callback, additional_params)
     except Exception as e:
         display_error_message(e, "Model Training")
+        raise Exception
 
 def train_dqn(env, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, warmup_count, eps_min, epsilon, num_pulls, setpoint_thresh, log_path, checkpoint_callback, eval_callback):
     bayesian_ucb = BayesianUCB(env.action_space.n)
@@ -267,9 +287,17 @@ def train_her_dqn(env, policy, lr, exploration_fraction, gamma, batch_size, tota
                       device='cuda',
                       verbose=1,
                       bayesian_ucb=bayesian_ucb)
-    if bayesian_ucb is None:
-        st.error("Bayesian UCB is None!")
+    
+    # Warmup phase to fill the replay buffer
+    obs = env.reset()
+    for _ in range(warmup_count):
+        action = env.action_space.sample()
+        next_obs, reward, done, _ = env.step([action])  # Ensure action is provided as a list
+        model.replay_buffer.add(obs, next_obs, action, reward, done, [{}])  # Pass an empty dict in a list for infos
+        obs = next_obs if not done else env.reset()
+    
     model.learn(total_timesteps=total_timesteps, log_interval=1, callback=eval_callback)
+    
 
 if __name__ == "__main__":
     main()

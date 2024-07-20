@@ -115,7 +115,23 @@ class DeltaIotEnv(gym.Env):
             return self.obs, self.info
 
     def render(self):
-        ...
+        pass
 
     def close(self):
-        ...
+        pass
+
+    def compute_reward(self, achieved_goal, desired_goal, info):
+        """
+        Compute the reward for HER.
+
+        Parameters:
+        achieved_goal: The goal that was achieved during the episode
+        desired_goal: The goal that we desired to achieve
+        info: An info dictionary with additional information
+
+        Returns:
+        reward: The computed reward
+        """
+        # Example logic:
+        reward = -np.linalg.norm(achieved_goal - desired_goal)
+        return reward

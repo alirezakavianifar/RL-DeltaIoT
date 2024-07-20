@@ -11,7 +11,7 @@ from src.drl4sao.stable_algos.custom_policies.buffers import ReplayBuffer
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import get_linear_fn, get_parameters_by_name, polyak_update
 # from stable_baselines3.dqn.policies import CnnPolicy, DQNPolicy, MlpPolicy, MultiInputPolicy, QNetwork
-from src.drl4sao.stable_algos.custom_policies.policies import DQNPolicy, MlpPolicy, SoftmaxDQNPolicy, SoftmaxUCBDQNPolicy,\
+from src.drl4sao.stable_algos.custom_policies.policies import DQNPolicy, MlpPolicy, MultiInputPolicy, SoftmaxDQNPolicy, SoftmaxUCBDQNPolicy,\
       BoltzmannDQNPolicy, UCBDQNPolicy, UCB1TUNEDDQNPolicy, BayesianUCBDQNPolicy, SoftmaxUCBAdaptiveDQNPolicy
 from src.drl4sao.stable_algos.custom_policies.bayesian_ucb import BayesianUCB
 
@@ -114,7 +114,7 @@ class CustomDQN(DQN):
             (used in recurrent policies)
         """
 
-        if type(self.policy) == MlpPolicy:
+        if type(self.policy) in [MlpPolicy, MultiInputPolicy]:
             if not deterministic and np.random.rand() < self.exploration_rate:
                 if self.policy.is_vectorized_observation(observation):
                     if isinstance(observation, dict):

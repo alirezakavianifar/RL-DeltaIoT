@@ -10,8 +10,8 @@ from stable_baselines3.common.buffers import ReplayBuffer
 from stable_baselines3.common.policies import BasePolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import get_linear_fn, get_parameters_by_name, polyak_update
-from stable_baselines3.dqn.policies import CnnPolicy, MultiInputPolicy, QNetwork
-from src.drl4sao.stable_algos.custom_policies.policies import DQNPolicy, SoftmaxDQNPolicy, SoftmaxUCBDQNPolicy,\
+from stable_baselines3.dqn.policies import CnnPolicy, QNetwork
+from src.drl4sao.stable_algos.custom_policies.policies import DQNPolicy, MultiInputPolicy, SoftmaxDQNPolicy, SoftmaxUCBDQNPolicy,\
       BoltzmannDQNPolicy, UCBDQNPolicy, UCB1TUNEDDQNPolicy, BayesianUCBDQNPolicy, SoftmaxUCBAdaptiveDQNPolicy
 from src.drl4sao.stable_algos.custom_policies.off_policy_algorithm import OffPolicyAlgorithm
 
