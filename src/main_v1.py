@@ -21,6 +21,20 @@ from src.drl4sao.stable_algos.rl_algos.a2c import A2C
 from concurrent.futures import ProcessPoolExecutor
 import traceback
 
+def display_error_message(e, context=""):
+    error_message = f"""
+    <div style="border:1px solid red; padding: 10px; border-radius: 5px; background-color: #ffe6e6;">
+        <h4 style="color: red;">An error occurred</h4>
+        <p><strong>Context:</strong> {context}</p>
+        <p><strong>Error:</strong> {str(e)}</p>
+        <details>
+            <summary>Traceback</summary>
+            <pre>{traceback.format_exc()}</pre>
+        </details>
+    </div>
+    """
+    st.markdown(error_message, unsafe_allow_html=True)
+
 def main():
     st.title("RL Environment Configuration")
 
@@ -73,7 +87,7 @@ def main():
                 shutil.rmtree(chkpt_dir)
                 st.success(f"Successfully deleted the contents of {chkpt_dir}")
         except Exception as e:
-            st.error(f"An error occurred while deleting folders: {traceback.format_exc()}")
+            display_error_message(e, "Clearing Logs and Models")
 
     warmup_count = 100
     eps_min = 0.001
@@ -96,9 +110,9 @@ def main():
             stable_dqn(env_name, algo_name, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params, execution_mode, num_processes)
             st.success("Model training completed")
         except PermissionError as e:
-            st.error(f"PermissionError: {traceback.format_exc()}")
+            display_error_message(e, "Training Model (PermissionError)")
         except Exception as e:
-            st.error(f"An error occurred: {traceback.format_exc()}")
+            display_error_message(e, "Training Model")
 
 def get_env_parameters(env_name, algo_name):
     if algo_name == 'HER_DQN' and env_name in ['DeltaIoTv1', 'DeltaIoTv2']:
@@ -161,7 +175,7 @@ def stable_dqn(env_name, algo_name, policy, lr, exploration_fraction, gamma, bat
             try:
                 task.result()
             except Exception as e:
-                st.error(f"An error occurred in parallel execution: {traceback.format_exc()}")
+                display_error_message(e, "Parallel Execution")
 
     else:
         for lr in lrs:
@@ -169,7 +183,7 @@ def stable_dqn(env_name, algo_name, policy, lr, exploration_fraction, gamma, bat
                 try:
                     train_model(env_name, algo_name, policy, float(lr), float(exploration_fraction), gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params)
                 except Exception as e:
-                    st.error(f"An error occurred in serial execution: {traceback.format_exc()}")
+                    display_error_message(e, "Serial Execution")
 
 def train_model(env_name, algo_name, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params):
     try:
@@ -187,7 +201,7 @@ def train_model(env_name, algo_name, policy, lr, exploration_fraction, gamma, ba
         elif algo_name == "HER_DQN":
             train_her_dqn(env, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, warmup_count, eps_min, epsilon, num_pulls, additional_params.get('setpoint_thresh'), log_path_base, checkpoint_callback, eval_callback, additional_params)
     except Exception as e:
-        st.error(f"An error occurred during model training: {traceback.format_exc()}")
+        display_error_message(e, "Model Training")
 
 def train_dqn(env, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, warmup_count, eps_min, epsilon, num_pulls, setpoint_thresh, log_path, checkpoint_callback, eval_callback):
     bayesian_ucb = BayesianUCB(env.action_space.n)
