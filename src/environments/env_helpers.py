@@ -29,7 +29,7 @@ class RewardStrategy(IRewardStrategy):
                     #     return 1.0
                     # else:
                     #     return -0.02
-                    return -energy_consumption
+                    return energy_consumption
                     
             elif goal == "packet_loss":
                 if packet_loss is not None:
@@ -38,7 +38,7 @@ class RewardStrategy(IRewardStrategy):
                     #     return 1.0
                     # else:
                     #     return -0.02
-                    return -packet_loss
+                    return packet_loss
             elif goal == "latency":
                 if latency is not None:
                     # if latency <= latency_thresh:
@@ -46,7 +46,7 @@ class RewardStrategy(IRewardStrategy):
                     #     return 1.0
                     # else:
                     #     return -0.02
-                    return -latency
+                    return latency
             elif goal == "energy_thresh":
                 if energy_consumption is not None and energy_thresh is not None:
                     if energy_consumption <= energy_thresh:

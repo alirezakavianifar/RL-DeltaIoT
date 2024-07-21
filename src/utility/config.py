@@ -11,8 +11,7 @@ from src.environments.deltaiot_env import DeltaIotEnv
 from src.environments.bdbc_allNumeric_env import BDBC_AllNumeric
 import numpy as np
 from src.drl4sao.custom_dqn.eps_dec_types import EpsDecTypeOne, EpsDecTypeTwo
-from src.environments.env_helpers import RewardMcOne, RewardMcTwo, \
-    RewardMcThree, RewardMcFour, RewardMcFive
+
 
 GET_CWD = os.getcwd()
 
@@ -55,8 +54,8 @@ QUALITY_TYPES = {'energy': 'energy', 'packet': 'packet',
 REWARD_TYPES = {'energy': 'rm2', 'packet': 'rm2',
                 'latency': 'rm2', 'multi': 'rm3',
                 'multi_tto': 'rm5', 'multi_tt': 'rm4'}
-DICT_REWARD_TYPES = {'energy': RewardMcOne, 'packet': RewardMcOne, 
-                     'latency': RewardMcOne, 'multi': RewardMcThree, }
+# DICT_REWARD_TYPES = {'energy': RewardMcOne, 'packet': RewardMcOne, 
+#                      'latency': RewardMcOne, 'multi': RewardMcThree, }
 # Reward mechanism: rm1=threshold, rm2=minimum, rm3=multi, rm4=multi_tt, rm5=multi_tto
 REWARD_TYPE = REWARD_TYPES['multi']
 # QUALITY_TYPE could be energy, packet, latency, multi, multi_tt, multi_tto

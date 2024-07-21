@@ -45,6 +45,7 @@ def main():
     if env_name in ['DeltaIoTv1', 'DeltaIoTv2']:
         strategy_type = st.selectbox("Strategy Type", ['min', 'multi'])
         additional_params['strategy_type'] = strategy_type
+        additional_params['energy_coef'] = additional_params['packet_coef'] = additional_params['latency_coef'] = 0
         if strategy_type == 'multi':
             additional_params['energy_coef'] = st.number_input("Energy Coefficient", min_value=0.0, max_value=1.0, value=0.1)
             additional_params['packet_coef'] = st.number_input("Packet Coefficient", min_value=0.0, max_value=1.0, value=0.8)
@@ -53,13 +54,14 @@ def main():
                 'lower_bound': st.number_input("Setpoint Threshold Lower Bound", 12.8),
                 'upper_bound': st.number_input("Setpoint Threshold Upper Bound", 13.0)
             }
-        if strategy_type == 'min':
-            goal = st.selectbox("Goal", ['energy', 'packet_loss', 'latency'])
+        elif strategy_type == 'min':
+            goal = st.selectbox("Goal", ['energy', 'packet', 'latency'])
             additional_params['goal'] = goal
+            additional_params[f'{goal}_coef'] = 1.0
 
     algo_name = st.selectbox("Algorithm Name", ['DQN', 'PPO', 'A2C', 'HER_DQN'])
     policy_options = {
-        "DQN": ["MlpPolicy", 'BoltzmannPolicy', 'SoftmaxDQNPolicy', 'BoltzmannDQNPolicy', 'UCBDQNPolicy', 'UCB1TUNEDDQNPolicy', 'BayesianUCBDQNPolicy', 'SoftmaxUCBDQNPolicy', 'SoftmaxUCBAdaptiveDQNPolicy'],
+        "DQN": ["MlpPolicy", 'SoftmaxDQNPolicy', 'BoltzmannDQNPolicy', 'UCBDQNPolicy', 'UCB1TUNEDDQNPolicy', 'BayesianUCBDQNPolicy', 'SoftmaxUCBDQNPolicy', 'SoftmaxUCBAdaptiveDQNPolicy'],
         "PPO": ["MlpPolicy", "CnnPolicy", "MultiInputPolicy"],
         "A2C": ["MlpPolicy", "CnnPolicy", "MultiInputPolicy"],
         "HER_DQN": ["MultiInputPolicy"]
@@ -68,10 +70,10 @@ def main():
     
     lr = st.text_input("Learning Rate", "0.0001,0.001,0.01,0.1")
     exploration_fraction = st.text_input("Exploration Fraction (for DQN)", "0.1,0.2,0.4,0.6")
-    warmup_count = st.number_input("Warmup Count", min_value=0, value=100)
+    warmup_count = st.number_input("Warmup Count", min_value=0, value=1024)
     gamma = st.number_input("Gamma", min_value=0.0, max_value=1.0,  value=0.99)
     batch_size = st.number_input("Batch Size", 64)
-    total_timesteps = st.number_input("Total Timesteps", 15000)
+    total_timesteps = st.number_input("Total Timesteps", min_value=5000, value=15000)
     max_episode_steps = st.number_input("Max Episode Steps", additional_params['max_episode_steps'])
     chkpt_dir = st.text_input("Checkpoint Directory", "models")
     log_path = st.text_input("Log Path", "logs")
@@ -106,10 +108,9 @@ def main():
 
     eps_min = 0.001
     epsilon = 1.0
-    num_pulls = np.zeros(100)
     network_layers = [150, 120, 100, 50, 25]
-
     n_obs_space, n_actions, use_dict_obs_space = get_env_parameters(env_name, algo_name)
+    num_pulls = np.zeros(n_actions)
 
     if st.button("Train Model"):
         try:
@@ -129,14 +130,16 @@ def main():
             display_error_message(e, "Training Model")
 
 def get_env_parameters(env_name, algo_name):
-    if algo_name == 'HER_DQN' and env_name in ['DeltaIoTv1', 'DeltaIoTv2']:
+    if env_name in ['DeltaIoTv1', 'DeltaIoTv2']:
         n_obs_space = 3
-        n_actions = 216 if env_name == 'DeltaIoTv1' else 4096
-        use_dict_obs_space = True
+        n_actions = 216 if env_name == 'DeltaIoTv1' else 4096 
     else:
-        n_obs_space = 3
-        n_actions = 216 if env_name == 'DeltaIoTv1' else 4096
+        n_obs_space = 1
+        n_actions = 100 
         use_dict_obs_space = False
+
+    use_dict_obs_space = True if algo_name == 'HER_DQN' else False
+
     return n_obs_space, n_actions, use_dict_obs_space
 
 def setup_env(env_name, algo_name, additional_params):
@@ -289,12 +292,12 @@ def train_her_dqn(env, policy, lr, exploration_fraction, gamma, batch_size, tota
                       bayesian_ucb=bayesian_ucb)
     
     # Warmup phase to fill the replay buffer
-    obs = env.reset()
-    for _ in range(warmup_count):
-        action = env.action_space.sample()
-        next_obs, reward, done, _ = env.step([action])  # Ensure action is provided as a list
-        model.replay_buffer.add(obs, next_obs, action, reward, done, [{}])  # Pass an empty dict in a list for infos
-        obs = next_obs if not done else env.reset()
+    # obs = env.reset()
+    # for _ in range(warmup_count):
+    #     action = env.action_space.sample()
+    #     next_obs, reward, done, _ = env.step([action])  # Ensure action is provided as a list
+    #     model.replay_buffer.add(obs, next_obs, action, reward, done, [{}])  # Pass an empty dict in a list for infos
+    #     obs = next_obs if not done else env.reset()
     
     model.learn(total_timesteps=total_timesteps, log_interval=1, callback=eval_callback)
     

@@ -58,22 +58,37 @@ class DeltaIotEnv(gym.Env):
         self.setpoint_thresh = setpoint_thresh
         self.time_steps = timesteps
 
+        # Initialize min and max values
+        self.min_energy = float('inf')
+        self.max_energy = float('-inf')
+        self.min_packet_loss = float('inf')
+        self.max_packet_loss = float('-inf')
+        self.min_latency = float('inf')
+        self.max_latency = float('-inf')
+
     def step(self, action):
-        self.obs = self.df.iloc[action][[
-            'energyconsumption', 'packetloss', 'latency']].to_numpy(dtype=float).flatten()
+        self.obs = self.df.iloc[action][['energyconsumption', 'packetloss', 'latency']].to_numpy(dtype=float).flatten()
 
         energy_consumption = self.obs[0].flatten()
         packet_loss = self.obs[1].flatten()
         latency = self.obs[2].flatten()
 
+        # Update reward estimates
+        self.update_reward_estimates(energy_consumption, packet_loss, latency)
+
         ut = utility(self.energy_coef, self.packet_coef, self.latency_coef,
                      energy_consumption, packet_loss, latency)
 
-        self.reward = self.reward_type.get_reward(util=ut, energy_consumption=energy_consumption,
+        raw_reward = self.reward_type.get_reward(util=ut, energy_consumption=energy_consumption,
                                                   packet_loss=packet_loss, latency=latency,
                                                   energy_thresh=self.energy_thresh, packet_thresh=self.packet_thresh,
                                                   latency_thresh=self.latency_thresh,
                                                   setpoint_thresh=self.setpoint_thresh, goal=self.goal)
+
+        # Normalize the reward
+        normalized_reward = self.normalize_reward(energy_consumption, packet_loss, latency)
+
+        self.reward = normalized_reward
         self.time_steps -= 1
         if self.time_steps == 0:
             self.terminated = True
@@ -89,6 +104,23 @@ class DeltaIotEnv(gym.Env):
         else:
             return self.obs, self.reward, self.terminated, self.truncated, self.info
 
+    def normalize_reward(self, energy_consumption, packet_loss, latency):
+        norm_energy = (self.max_energy - energy_consumption) / (self.max_energy - self.min_energy) if self.max_energy != self.min_energy else 1
+        norm_packet_loss = (self.max_packet_loss - packet_loss) / (self.max_packet_loss - self.min_packet_loss) if self.max_packet_loss != self.min_packet_loss else 1
+        norm_latency = (self.max_latency - latency) / (self.max_latency - self.min_latency) if self.max_latency != self.min_latency else 1
+
+        # Combine normalized metrics
+        norm_reward = (norm_energy * self.energy_coef) + (norm_packet_loss * self.packet_coef) + (norm_latency * self.latency_coef)
+        return norm_reward
+
+    def update_reward_estimates(self, energy_consumption, packet_loss, latency):
+        self.min_energy = min(self.min_energy, energy_consumption)
+        self.max_energy = max(self.max_energy, energy_consumption)
+        self.min_packet_loss = min(self.min_packet_loss, packet_loss)
+        self.max_packet_loss = max(self.max_packet_loss, packet_loss)
+        self.min_latency = min(self.min_latency, latency)
+        self.max_latency = max(self.max_latency, latency)
+
     def reset(self, seed=None, options=None):
         self.time_steps = self.init_time_steps
         self.terminated = False
@@ -101,8 +133,7 @@ class DeltaIotEnv(gym.Env):
             self.df = next(self.data).drop('verification_times', axis=1)
 
         rand_num = np.random.randint(self.df.count().iloc[0])
-        self.obs = self.df.iloc[rand_num][[
-            'energyconsumption', 'packetloss', 'latency']].to_numpy(dtype=float).flatten()
+        self.obs = self.df.iloc[rand_num][['energyconsumption', 'packetloss', 'latency']].to_numpy(dtype=float).flatten()
         self.her_goal = self.obs  # For simplicity, use the same observation as the goal
         obs_dict = {
             'observation': self.obs,
@@ -121,17 +152,5 @@ class DeltaIotEnv(gym.Env):
         pass
 
     def compute_reward(self, achieved_goal, desired_goal, info):
-        """
-        Compute the reward for HER.
-
-        Parameters:
-        achieved_goal: The goal that was achieved during the episode
-        desired_goal: The goal that we desired to achieve
-        info: An info dictionary with additional information
-
-        Returns:
-        reward: The computed reward
-        """
-        # Example logic:
         reward = -np.linalg.norm(achieved_goal - desired_goal)
         return reward
