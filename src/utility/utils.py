@@ -13,6 +13,7 @@ from collections import defaultdict
 import shutil
 from functools import wraps
 import time
+import traceback
 
 
 def timeit(func):
@@ -156,7 +157,85 @@ def utility(energy_coef, packet_coef, latency_coef, energy_consumption, packet_l
 
     return (energy_coef * energy_consumption + packet_coef * packet_loss + latency_coef * latency)
 
+def display_error_message(st, e, context=""):
+    error_message = f"""
+    <div style="border:1px solid red; padding: 10px; border-radius: 5px; background-color: #ffe6e6;">
+        <h4 style="color: red;">An error occurred</h4>
+        <p><strong>Context:</strong> {context}</p>
+        <p><strong>Error:</strong> {str(e)}</p>
+        <details>
+            <summary>Traceback</summary>
+            <pre>{traceback.format_exc()}</pre>
+        </details>
+    </div>
+    """
+    st.markdown(error_message, unsafe_allow_html=True)
 
+    return st
+
+def load_and_prepare_data(data_dir, from_cycles=0, to_cycles = 1505):
+    
+    LST_PACKET = []
+    LST_ENERGY = []
+    LST_DATA, _ = load_data(path=data_dir, load_all=False, version='', shuffle=False, fraction=1.0, test_size=0.2, return_train_test=False)
+    DATA = return_next_item(LST_DATA, normalize=False)
+    LST_PACKET = []
+    LST_ENERGY = []
+    LST_LATENCY = []
+    cycle_metrics = []
+    try:
+        while True:
+            data_ = next(DATA)
+            LST_PACKET.append(data_['packetloss'].min())
+            LST_ENERGY.append(data_['energyconsumption'].min())
+            LST_LATENCY.append(data_['latency'].min())
+            cycle_metrics.append({
+                'packetloss': data_['packetloss'],
+                'energyconsumption': data_['energyconsumption'],
+                'latency': data_['latency']
+            })
+    except:
+        pass
+    
+    df = pd.DataFrame()
+    for i, metrics in enumerate(cycle_metrics[from_cycles:to_cycles]):
+        cycle_df = pd.DataFrame(metrics)
+        cycle_df['cycle'] = i
+        df = pd.concat([df, cycle_df])
+
+    return LST_PACKET, LST_ENERGY, LST_LATENCY, df
+
+def plot_latency_vs_packet_loss(st, LST_LATENCY, LST_PACKET):
+    configurations = list(range(1, len(LST_LATENCY) + 1))
+    fig, ax1 = plt.subplots()
+    color = 'tab:blue'
+    ax1.set_xlabel('Configuration')
+    ax1.set_ylabel('Latency', color=color)
+    ax1.scatter(configurations, LST_LATENCY, color=color, label='Latency')
+    ax1.tick_params(axis='y', labelcolor=color)
+
+    ax2 = ax1.twinx()
+    color = 'tab:red'
+    ax2.set_ylabel('Packet Loss', color=color)
+    ax2.plot(configurations, LST_PACKET, color=color, marker='o', linestyle='None', label='Packet Loss')
+    ax2.tick_params(axis='y', labelcolor=color)
+
+    plt.title('Latency and Packet Loss for Different Configurations')
+    ax1.grid(True)
+    fig.tight_layout()
+    st.pyplot(fig)
+
+
+def plot_adaptation_spaces(st, df, from_cycles=0, to_cycles=1505):
+    plt.figure(figsize=(10, 6))
+    plt.scatter(df['packetloss'], df['energyconsumption'], s=1, alpha=0.5)
+    plt.xlabel('Packet loss (%)')
+    plt.ylabel('Energy Consumption (mC)')
+    plt.title(f'Adaptation spaces from cycles {from_cycles} to {to_cycles} cycles')
+    plt.xticks([0,10,20,30,40,50,60,70,80])
+    st.pyplot(plt.gcf())
+
+    
 def move_files(files, dst, *args, **kwargs):
     """
     Copy files from source to destination.

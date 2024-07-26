@@ -24,6 +24,8 @@ LST_DATAS = []
 LST_PACKET = []
 LST_ENERGY = []
 LST_LATENCY = []
+cycle_metrics = []
+
 try:
     while(True):
         # LST_DATAS.append(next(DATA))
@@ -31,9 +33,32 @@ try:
         LST_PACKET.append(data_['packetloss'].min())
         LST_ENERGY.append(data_['energyconsumption'].min())
         LST_LATENCY.append(data_['latency'].min())
+        cycle_metrics.append({
+            'packetloss': data_['packetloss'],
+            'energyconsumption': data_['energyconsumption'],
+            'latency': data_['latency']
+        })
 except:
     # all_data = pd.concat(LST_DATAS)
-    print('f')
+
+
+    # Prepare the data for visualization
+    from_cycles = 0
+    to_cycles = 300
+    df = pd.DataFrame()
+    for i, metrics in enumerate(cycle_metrics[from_cycles:to_cycles]):
+        cycle_df = pd.DataFrame(metrics)
+        cycle_df['cycle'] = i
+        df = pd.concat([df, cycle_df])
+
+    # Plotting the adaptation spaces over cycles for packet loss and energy consumption
+    plt.figure(figsize=(10, 6))
+    plt.scatter(df['packetloss'], df['energyconsumption'], s=1, alpha=0.5)
+    plt.xlabel('Packet loss (%)')
+    plt.ylabel('Energy Consumption (mC)')
+    plt.title(f'Adaptation spaces over {to_cycles} cycles')
+    plt.xticks([0,10,20,30,40,50,60,70,80])
+    plt.show()
 
     configurations = list(range(1, len(LST_LATENCY) + 1))
     # Create scatter plot

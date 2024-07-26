@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings('ignore')
 import os
 import glob
 import numpy as np
@@ -10,6 +12,7 @@ from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from stable_baselines3.common.vec_env import DummyVecEnv
 from gymnasium.wrappers.time_limit import TimeLimit
 from stable_baselines3.common.monitor import Monitor
+from src.rl_agents import train_a2c, train_dqn, train_her_dqn, train_ppo
 from src.utility.constantsv1 import MAX_EPISODE_STEPS
 from src.environments.deltaiot_env import DeltaIotEnv
 from src.environments.env_helpers import RewardStrategy
@@ -22,6 +25,7 @@ from concurrent.futures import ProcessPoolExecutor
 import traceback
 import subprocess
 import webbrowser
+from src.utility.utils import plot_adaptation_spaces, plot_latency_vs_packet_loss, load_and_prepare_data
 
 def display_error_message(e, context=""):
     error_message = f"""
@@ -36,6 +40,7 @@ def display_error_message(e, context=""):
     </div>
     """
     st.markdown(error_message, unsafe_allow_html=True)
+
 
 def main():
     st.title("RL Environment Configuration")
@@ -55,9 +60,10 @@ def main():
                 'upper_bound': st.number_input("Setpoint Threshold Upper Bound", 13.0)
             }
         elif strategy_type == 'min':
-            goal = st.selectbox("Goal", ['energy', 'packet', 'latency'])
+            goal = st.selectbox("Goal", ['energy', 'packet', 'latency', 
+                                         'energy_thresh', 'packet_thresh', 'latency_thresh'])
             additional_params['goal'] = goal
-            additional_params[f'{goal}_coef'] = 1.0
+            additional_params[f'{goal.split('_')[0]}_coef'] = 1.0
 
     algo_name = st.selectbox("Algorithm Name", ['DQN', 'PPO', 'A2C', 'HER_DQN'])
     policy_options = {
@@ -73,7 +79,7 @@ def main():
     warmup_count = st.number_input("Warmup Count", min_value=0, value=1024)
     gamma = st.number_input("Gamma", min_value=0.0, max_value=1.0,  value=0.99)
     batch_size = st.number_input("Batch Size", 64)
-    total_timesteps = st.number_input("Total Timesteps", min_value=5000, value=15000)
+    total_timesteps = st.number_input("Total Timesteps", min_value=2000, value=15000)
     max_episode_steps = st.number_input("Max Episode Steps", additional_params['max_episode_steps'])
     chkpt_dir = st.text_input("Checkpoint Directory", "models")
     log_path = st.text_input("Log Path", "logs")
@@ -111,6 +117,16 @@ def main():
     network_layers = [150, 120, 100, 50, 25]
     n_obs_space, n_actions, use_dict_obs_space = get_env_parameters(env_name, algo_name)
     num_pulls = np.zeros(n_actions)
+
+    if env_name == "DeltaIoTv1":
+        st.header("Visualization for DeltaIoTv1 Environment")
+        data_dir = st.text_input("Data Directory", r'D:\projects\gheibi-material\generated_data_by_deltaiot_simulation\under_drift_scenario')
+        from_cycles = st.number_input("From cycles", min_value=0,  value=0)
+        to_cycles = st.number_input("To cycles", min_value=0,  value=1505)
+        if st.button("Load and Plot Data"):
+            LST_PACKET, LST_ENERGY, LST_LATENCY, df = load_and_prepare_data(data_dir, from_cycles=from_cycles, to_cycles=to_cycles)
+            plot_adaptation_spaces(st, df, from_cycles=from_cycles, to_cycles=to_cycles)
+            plot_latency_vs_packet_loss(st, LST_LATENCY, LST_PACKET)
 
     if st.button("Train Model"):
         try:
@@ -159,7 +175,7 @@ def setup_env(env_name, algo_name, additional_params):
             energy_coef=additional_params.get('energy_coef', 0.0),
             packet_coef=additional_params.get('packet_coef', 0.0), 
             latency_coef=additional_params.get('latency_coef', 0.0), 
-            energy_thresh=additional_params.get('energy_thresh', 12.9), 
+            energy_thresh=additional_params.get('energy_thresh', 12.95), 
             packet_thresh=additional_params.get('packet_thresh', 10.0), 
             latency_thresh=additional_params.get('latency_thresh', 5.0), 
             timesteps=total_timesteps, 
@@ -226,80 +242,7 @@ def train_model(env_name, algo_name, policy, lr, exploration_fraction, gamma, ba
         display_error_message(e, "Model Training")
         raise Exception
 
-def train_dqn(env, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, warmup_count, eps_min, epsilon, num_pulls, setpoint_thresh, log_path, checkpoint_callback, eval_callback):
-    bayesian_ucb = BayesianUCB(env.action_space.n)
-    model = CustomDQN(policy,
-                      env,
-                      learning_rate=lr,
-                      learning_starts=warmup_count,
-                      batch_size=batch_size,
-                      gamma=gamma,
-                      exploration_initial_eps=epsilon,
-                      exploration_final_eps=eps_min,
-                      exploration_fraction=exploration_fraction,
-                      replay_buffer_class=None,
-                      tensorboard_log=log_path,
-                      device='cuda',
-                      verbose=1,
-                      deterministic=False,
-                      num_pulls=num_pulls,
-                      setpoint_thresh=setpoint_thresh,
-                      bayesian_ucb=bayesian_ucb)
-    model.learn(total_timesteps=total_timesteps, log_interval=1, callback=eval_callback)
 
-def train_ppo(env, policy, lr, gamma, batch_size, total_timesteps, log_path, checkpoint_callback, eval_callback):
-    model = PPO(policy,
-                env,
-                learning_rate=lr,
-                batch_size=batch_size,
-                gamma=gamma,
-                tensorboard_log=log_path,
-                device='cuda',
-                verbose=1)
-    model.learn(total_timesteps=total_timesteps, log_interval=1, callback=eval_callback)
-
-def train_a2c(env, policy, lr, gamma, total_timesteps, log_path, checkpoint_callback, eval_callback):
-    model = A2C(policy,
-                env,
-                learning_rate=lr,
-                gamma=gamma,
-                tensorboard_log=log_path,
-                device='cuda',
-                verbose=1)
-    model.learn(total_timesteps=total_timesteps, log_interval=1, callback=eval_callback)
-
-def train_her_dqn(env, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, warmup_count, eps_min, epsilon, num_pulls, setpoint_thresh, log_path, checkpoint_callback, eval_callback, additional_params):
-    goal_selection_strategy = GoalSelectionStrategy.FUTURE
-    replay_buffer_kwargs = {
-        'n_sampled_goal': 4,
-        'goal_selection_strategy': goal_selection_strategy,
-    }
-    bayesian_ucb = BayesianUCB(env.action_space.n)
-    model = CustomDQN(policy,
-                      env,
-                      replay_buffer_class=HerReplayBuffer,
-                      replay_buffer_kwargs=replay_buffer_kwargs,
-                      learning_rate=lr,
-                      gamma=gamma,
-                      batch_size=batch_size,
-                      learning_starts=warmup_count,
-                      exploration_initial_eps=epsilon,
-                      exploration_final_eps=eps_min,
-                      exploration_fraction=exploration_fraction,
-                      tensorboard_log=log_path,
-                      device='cuda',
-                      verbose=1,
-                      bayesian_ucb=bayesian_ucb)
-    
-    # Warmup phase to fill the replay buffer
-    # obs = env.reset()
-    # for _ in range(warmup_count):
-    #     action = env.action_space.sample()
-    #     next_obs, reward, done, _ = env.step([action])  # Ensure action is provided as a list
-    #     model.replay_buffer.add(obs, next_obs, action, reward, done, [{}])  # Pass an empty dict in a list for infos
-    #     obs = next_obs if not done else env.reset()
-    
-    model.learn(total_timesteps=total_timesteps, log_interval=1, callback=eval_callback)
     
 
 if __name__ == "__main__":

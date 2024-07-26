@@ -22,50 +22,25 @@ class RewardStrategy(IRewardStrategy):
                     return 1.0
                 else:
                     return -0.02
-            elif goal == "energy":
-                if energy_consumption is not None:
-                    # if energy_consumption <= self.previous_performance:
-                    #     self.previous_performance = energy_consumption
-                    #     return 1.0
-                    # else:
-                    #     return -0.02
-                    return energy_consumption
+                
+            elif goal in ["energy", "packet", "latency"]:
+                return np.array([energy_consumption, packet_loss, latency])
                     
             elif goal == "packet_loss":
                 if packet_loss is not None:
-                    # if packet_loss <= packet_thresh:
-                    #     self.previous_performance = packet_loss
-                    #     return 1.0
-                    # else:
-                    #     return -0.02
                     return packet_loss
+                
             elif goal == "latency":
-                if latency is not None:
-                    # if latency <= latency_thresh:
-                    #     self.previous_performance = latency
-                    #     return 1.0
-                    # else:
-                    #     return -0.02
-                    return latency
-            elif goal == "energy_thresh":
-                if energy_consumption is not None and energy_thresh is not None:
-                    if energy_consumption <= energy_thresh:
-                        return 1.0
-                    else:
-                        return -0.02
-            elif goal == "packet_loss_thresh":
-                if packet_loss is not None and packet_thresh is not None:
-                    if packet_loss <= packet_thresh:
-                        return 1.0
-                    else:
-                        return -0.02
-            elif goal == "latency_thresh":
-                if latency is not None and latency_thresh is not None:
-                    if latency <= latency_thresh:
-                        return 1.0
-                    else:
-                        return -0.02
+                return latency
+            
+            elif goal in ["energy_thresh", "packet_thresh", "latency_thresh"]:
+                ...
+                # energy_consumption = 1.0 if energy_consumption <= energy_thresh else -0.2
+                # packet_loss = 1.0 if packet_loss <= packet_thresh else -0.2
+                # latency = 1.0 if latency <= latency_thresh else -0.2
 
+                return np.array([energy_consumption, packet_loss, latency])
+                    
         elif self.strategy_type == "two":
             if energy_consumption is not None and energy_thresh is not None:
                 if energy_consumption >= energy_thresh:

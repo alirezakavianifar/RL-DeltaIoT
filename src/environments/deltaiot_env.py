@@ -58,13 +58,20 @@ class DeltaIotEnv(gym.Env):
         self.setpoint_thresh = setpoint_thresh
         self.time_steps = timesteps
 
+        # Initialize storage for energy consumption history
+        self.energy_history = []
+        self.packet_history = []
+        self.latency_history = []
+
         # Initialize min and max values
-        self.min_energy = float('inf')
-        self.max_energy = float('-inf')
-        self.min_packet_loss = float('inf')
-        self.max_packet_loss = float('-inf')
-        self.min_latency = float('inf')
-        self.max_latency = float('-inf')
+        self.initialize_metrics()
+
+        # self.min_energy = float(12.90)
+        # self.max_energy = float(13.80)
+        # self.min_packet_loss = float(0.0)
+        # self.max_packet_loss = float(100.0)
+        # self.min_latency = float(0.0)
+        # self.max_latency = float(100.0)
 
     def step(self, action):
         self.obs = self.df.iloc[action][['energyconsumption', 'packetloss', 'latency']].to_numpy(dtype=float).flatten()
@@ -86,9 +93,9 @@ class DeltaIotEnv(gym.Env):
                                                   setpoint_thresh=self.setpoint_thresh, goal=self.goal)
 
         # Normalize the reward
-        normalized_reward = self.normalize_reward(energy_consumption, packet_loss, latency)
+        self.reward = self.reward_shape(raw_reward)
 
-        self.reward = normalized_reward
+        # self.reward = normalized_reward
         self.time_steps -= 1
         if self.time_steps == 0:
             self.terminated = True
@@ -104,24 +111,8 @@ class DeltaIotEnv(gym.Env):
         else:
             return self.obs, self.reward, self.terminated, self.truncated, self.info
 
-    def normalize_reward(self, energy_consumption, packet_loss, latency):
-        norm_energy = (self.max_energy - energy_consumption) / (self.max_energy - self.min_energy) if self.max_energy != self.min_energy else 1
-        norm_packet_loss = (self.max_packet_loss - packet_loss) / (self.max_packet_loss - self.min_packet_loss) if self.max_packet_loss != self.min_packet_loss else 1
-        norm_latency = (self.max_latency - latency) / (self.max_latency - self.min_latency) if self.max_latency != self.min_latency else 1
-
-        # Combine normalized metrics
-        norm_reward = (norm_energy * self.energy_coef) + (norm_packet_loss * self.packet_coef) + (norm_latency * self.latency_coef)
-        return norm_reward
-
-    def update_reward_estimates(self, energy_consumption, packet_loss, latency):
-        self.min_energy = min(self.min_energy, energy_consumption)
-        self.max_energy = max(self.max_energy, energy_consumption)
-        self.min_packet_loss = min(self.min_packet_loss, packet_loss)
-        self.max_packet_loss = max(self.max_packet_loss, packet_loss)
-        self.min_latency = min(self.min_latency, latency)
-        self.max_latency = max(self.max_latency, latency)
-
     def reset(self, seed=None, options=None):
+        self.initialize_metrics()
         self.time_steps = self.init_time_steps
         self.terminated = False
         self.truncated = False
@@ -151,6 +142,72 @@ class DeltaIotEnv(gym.Env):
     def close(self):
         pass
 
+    def initialize_metrics(self):
+        self.min_energy = float('inf')
+        self.max_energy = float('-inf')
+        self.min_packet_loss = float('inf')
+        self.max_packet_loss = float('-inf')
+        self.min_latency = float('inf')
+        self.max_latency = float('-inf')
+
+    def reward_shape(self, data):
+        
+        energy_consumption, packet_loss, latency = data
+
+        if self.goal in ['energy', 'packet', 'latency']:
+            norm_energy = (self.max_energy - energy_consumption) / (self.max_energy - self.min_energy) if self.max_energy != self.min_energy else 1
+            norm_packet_loss = (self.max_packet_loss - packet_loss) / (self.max_packet_loss - self.min_packet_loss) if self.max_packet_loss != self.min_packet_loss else 1
+            norm_latency = (self.max_latency - latency) / (self.max_latency - self.min_latency) if self.max_latency != self.min_latency else 1
+
+            # Combine normalized metrics
+            reward = (norm_energy * self.energy_coef) \
+                + (norm_packet_loss * self.packet_coef) \
+                + (norm_latency * self.latency_coef)
+
+        elif self.goal in ['energy_thresh', 'packet_thresh', 'latency_thresh']:
+            reward = (energy_consumption * self.energy_coef) \
+                + (packet_loss * self.packet_coef) \
+                + (latency * self.latency_coef)
+
+        return reward
+    
+    def reward_shape_with_variability(self, raw_reward):
+        energy_consumption, packet_loss, latency = raw_reward
+
+        # Add current energy consumption to history
+        self.energy_history.append(energy_consumption)
+        self.packet_history.append(packet_loss)
+        self.latency_history.append(latency)
+        if len(self.energy_history) > 1:
+            # Calculate standard deviation of energy consumption
+            energy_std = np.std(self.energy_history)
+            packet_std = np.std(self.packet_history)
+            latency_std = np.std(self.latency_history)
+        else:
+            energy_std = 0
+            packet_std = 0
+            latency_std = 0
+
+        # Define weights for the reward function
+        alpha = 1
+        beta = 0.5
+
+        # Calculate the reward
+        reward_energy = -alpha * (energy_consumption - self.min_energy) - beta * energy_std
+        reward_packet = -alpha * (packet_loss - self.min_packet_loss) - beta * packet_std
+        reward_latency = -alpha * (latency - self.min_latency) - beta * latency_std
+        return reward_energy, reward_packet, reward_latency
+    
+
+
+    def update_reward_estimates(self, energy_consumption, packet_loss, latency):
+        self.min_energy = min(self.min_energy, energy_consumption)
+        self.max_energy = max(self.max_energy, energy_consumption)
+        self.min_packet_loss = min(self.min_packet_loss, packet_loss)
+        self.max_packet_loss = max(self.max_packet_loss, packet_loss)
+        self.min_latency = min(self.min_latency, latency)
+        self.max_latency = max(self.max_latency, latency)
+
     def compute_reward(self, achieved_goal, desired_goal, info):
-        reward = -np.linalg.norm(achieved_goal - desired_goal)
+        reward = np.apply_along_axis(self.reward_shape, 1, achieved_goal, desired_goal)
         return reward
