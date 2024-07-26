@@ -20,7 +20,7 @@
       "program": "venv\\Scripts\\streamlit.exe",
       "console": "integratedTerminal",
       "justMyCode": true,
-      "args": ["run", "src\\main_v1.py"]
+      "args": ["run", "src\\app.py"]
     },
     ]
 }

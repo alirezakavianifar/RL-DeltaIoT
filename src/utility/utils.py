@@ -14,7 +14,7 @@ import shutil
 from functools import wraps
 import time
 import traceback
-
+import streamlit as st
 
 def timeit(func):
     @wraps(func)
@@ -157,7 +157,7 @@ def utility(energy_coef, packet_coef, latency_coef, energy_consumption, packet_l
 
     return (energy_coef * energy_consumption + packet_coef * packet_loss + latency_coef * latency)
 
-def display_error_message(st, e, context=""):
+def display_error_message(e, context=""):
     error_message = f"""
     <div style="border:1px solid red; padding: 10px; border-radius: 5px; background-color: #ffe6e6;">
         <h4 style="color: red;">An error occurred</h4>
@@ -171,7 +171,18 @@ def display_error_message(st, e, context=""):
     """
     st.markdown(error_message, unsafe_allow_html=True)
 
-    return st
+def get_env_parameters(env_name, algo_name):
+    if env_name in ['DeltaIoTv1', 'DeltaIoTv2']:
+        n_obs_space = 3
+        n_actions = 216 if env_name == 'DeltaIoTv1' else 4096 
+    else:
+        n_obs_space = 1
+        n_actions = 100 
+        use_dict_obs_space = False
+
+    use_dict_obs_space = True if algo_name == 'HER_DQN' else False
+
+    return n_obs_space, n_actions, use_dict_obs_space
 
 def load_and_prepare_data(data_dir, from_cycles=0, to_cycles = 1505):
     
@@ -235,7 +246,7 @@ def plot_adaptation_spaces(st, df, from_cycles=0, to_cycles=1505):
     plt.xticks([0,10,20,30,40,50,60,70,80])
     st.pyplot(plt.gcf())
 
-    
+
 def move_files(files, dst, *args, **kwargs):
     """
     Copy files from source to destination.
