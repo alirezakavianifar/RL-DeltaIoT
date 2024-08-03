@@ -73,22 +73,3 @@ def train_her_dqn(env, policy, lr, exploration_fraction, gamma, batch_size, tota
                       bayesian_ucb=bayesian_ucb)
     
     model.learn(total_timesteps=total_timesteps, log_interval=1, callback=eval_callback)
-
-def train_model(env_name, algo_name, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params):
-    try:
-        env = setup_env(env_name, algo_name, additional_params)
-        log_path_base = os.path.join(log_path, f"{env_name}-policy={policy}-lr={lr}-batch_size={batch_size}-gamma={gamma}-total_timesteps={total_timesteps}-exploration_fraction={exploration_fraction}")
-        checkpoint_callback = CheckpointCallback(save_freq=1, save_path=chkpt_dir, name_prefix=f"{env_name}-policy={policy}-lr={lr}-batch_size={batch_size}-gamma={gamma}-total_timesteps={total_timesteps}-exploration_fraction={exploration_fraction}")
-        eval_callback = EvalCallback(env, callback_on_new_best=checkpoint_callback, eval_freq=int(total_timesteps / 20), verbose=1, n_eval_episodes=5)
-
-        if algo_name == "DQN":
-            train_dqn(env, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, warmup_count, eps_min, epsilon, num_pulls, additional_params.get('setpoint_thresh'), log_path_base, checkpoint_callback, eval_callback)
-        elif algo_name == "PPO":
-            train_ppo(env, policy, lr, gamma, batch_size, total_timesteps, log_path_base, checkpoint_callback, eval_callback)
-        elif algo_name == "A2C":
-            train_a2c(env, policy, lr, gamma, total_timesteps, log_path_base, checkpoint_callback, eval_callback)
-        elif algo_name == "HER_DQN":
-            train_her_dqn(env, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, warmup_count, eps_min, epsilon, num_pulls, additional_params.get('setpoint_thresh'), log_path_base, checkpoint_callback, eval_callback, additional_params)
-    except Exception as e:
-        display_error_message(e, "Model Training")
-        raise Exception

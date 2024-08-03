@@ -101,12 +101,20 @@ class DeltaIotEnv(gym.Env):
             self.terminated = True
             self.truncated = True
 
-        obs_dict = {
+        # obs_dict = {
+        #     'observation': self.obs,
+        #     'achieved_goal': self.obs,
+        #     'desired_goal': self.her_goal
+        # }
+
+        
+        
+        if self.use_dict_obs_space:
+            obs_dict = {
             'observation': self.obs,
             'achieved_goal': self.obs,
             'desired_goal': self.her_goal
         }
-        if self.use_dict_obs_space:
             return obs_dict, self.reward, self.terminated, self.truncated, self.info
         else:
             return self.obs, self.reward, self.terminated, self.truncated, self.info
@@ -208,6 +216,9 @@ class DeltaIotEnv(gym.Env):
         self.min_latency = min(self.min_latency, latency)
         self.max_latency = max(self.max_latency, latency)
 
+    def her_reward_shape(self, achieved_goal, desired_goal):
+        return desired_goal[:, 0:1]
+
     def compute_reward(self, achieved_goal, desired_goal, info):
-        reward = np.apply_along_axis(self.reward_shape, 1, achieved_goal, desired_goal)
+        reward = np.apply_along_axis(self.reward_shape, 1, desired_goal)
         return reward

@@ -49,7 +49,7 @@ def setup_env(env_name, algo_name, additional_params):
     
     return DummyVecEnv([lambda: env])
 
-def stable_dqn(env_name, algo_name, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params, execution_mode, num_processes=None):
+def stable_dqn(env_name, algo_name, goal, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params, execution_mode, num_processes=None):
     lrs = lr.split(',')
     exploration_fractions = exploration_fraction.split(',')
     tasks = []
@@ -58,7 +58,7 @@ def stable_dqn(env_name, algo_name, policy, lr, exploration_fraction, gamma, bat
         with ProcessPoolExecutor(max_workers=num_processes) as executor:
             for lr in lrs:
                 for exploration_fraction in exploration_fractions:
-                    tasks.append(executor.submit(train_model, env_name, algo_name, policy, float(lr), float(exploration_fraction), gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params))
+                    tasks.append(executor.submit(train_model, env_name, algo_name, goal, policy, float(lr), float(exploration_fraction), gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params))
         
         for task in tasks:
             try:
@@ -72,18 +72,19 @@ def stable_dqn(env_name, algo_name, policy, lr, exploration_fraction, gamma, bat
             try:
                 for exploration_fraction in exploration_fractions:
                     try:
-                        train_model(env_name, algo_name, policy, float(lr), float(exploration_fraction), gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params)
+                        train_model(env_name, algo_name, goal, policy, float(lr), float(exploration_fraction), gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params)
+             
                     except Exception as e:
                         display_error_message(e, "Serial Execution")
                         raise Exception
             except:
                 break
 
-def train_model(env_name, algo_name, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params):
+def train_model(env_name, algo_name, goal, policy, lr, exploration_fraction, gamma, batch_size, total_timesteps, chkpt_dir, log_path, warmup_count, eps_min, epsilon, num_pulls, additional_params):
     try:
         env = setup_env(env_name, algo_name, additional_params)
-        log_path_base = os.path.join(log_path, f"{env_name}-policy={policy}-lr={lr}-batch_size={batch_size}-gamma={gamma}-total_timesteps={total_timesteps}-exploration_fraction={exploration_fraction}")
-        checkpoint_callback = CheckpointCallback(save_freq=1, save_path=chkpt_dir, name_prefix=f"{env_name}-policy={policy}-lr={lr}-batch_size={batch_size}-gamma={gamma}-total_timesteps={total_timesteps}-exploration_fraction={exploration_fraction}")
+        log_path_base = os.path.join(log_path, f"algo={algo_name}-goal={goal}-env={env_name}-policy={policy}-lr={lr}-batch_size={batch_size}-gamma={gamma}-total_timesteps={total_timesteps}-exploration_fraction={exploration_fraction}")
+        checkpoint_callback = CheckpointCallback(save_freq=1, save_path=chkpt_dir, name_prefix=f"algo={algo_name}-goal={goal}-env={env_name}-policy={policy}-lr={lr}-batch_size={batch_size}-gamma={gamma}-total_timesteps={total_timesteps}-exploration_fraction={exploration_fraction}")
         eval_callback = EvalCallback(env, callback_on_new_best=checkpoint_callback, eval_freq=int(total_timesteps / 20), verbose=1, n_eval_episodes=5)
 
         if algo_name == "DQN":

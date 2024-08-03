@@ -3,6 +3,7 @@ import glob
 import tensorflow as tf
 import random
 import os
+import re
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
@@ -15,6 +16,7 @@ from functools import wraps
 import time
 import traceback
 import streamlit as st
+from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
 def timeit(func):
     @wraps(func)
@@ -420,3 +422,57 @@ def scale_data(data):
     data = scaler.fit_transform(data.iloc[:,-3:])
     # data = pd.DataFrame(data)
     return data
+def parse_log_directory_name(log_dir):
+    pattern = re.compile(r'algo=(?P<algo>[^-]+)-goal=(?P<goal>[^-]+)-env=(?P<env>[^-]+)-policy=(?P<policy>[^-]+)-lr=(?P<lr>[^-]+)-batch_size=(?P<batch_size>[^-]+)-gamma=(?P<gamma>[^-]+)-total_timesteps=(?P<total_timesteps>[^-]+)-exploration_fraction=(?P<exploration_fraction>[^-]+)')
+    match = pattern.search(log_dir)
+    if match:
+        return match.groupdict()
+    return {}
+
+def exponential_moving_average(data, alpha=0.01):
+    ema = [data[0]]
+    for value in data[1:]:
+        ema.append(alpha * value + (1 - alpha) * ema[-1])
+    return np.array(ema)
+
+def smooth_scalar(values, weight=0.6):
+    smoothed_values = []
+    last = values[0]
+    for point in values:
+        smoothed_value = last * weight + (1 - weight) * point
+        smoothed_values.append(smoothed_value)
+        last = smoothed_value
+    return np.array(smoothed_values)
+
+def read_from_tensorboardlog(st, log_dirs, smoothed=True, smooth_factor=0.6, filtered=None, policies=None, 
+                             tags=['rollout/ep_rew_mean', 'eval/mean_reward'], 
+                             titles=['DQN', 'DQN']):
+    for index, tag in enumerate(tags):
+        fig, ax = plt.subplots(figsize=(14, 10))
+        for log_dir in log_dirs:
+            params = parse_log_directory_name(log_dir)
+            label = ', '.join([f'{k}={v}' for k, v in params.items()])
+            label = re.search(r'policy=([^,]+)', label).group(1)
+            log_dir = os.path.join(log_dir, 'DQN_1')
+            event_acc = EventAccumulator(log_dir)
+            event_acc.Reload()
+
+            scalar_data = {
+                tag: [(event.step, event.value) for event in event_acc.Scalars(tag)]
+                for tag in event_acc.Tags()['scalars']
+            }
+
+            if tag in scalar_data:
+                data = scalar_data[tag]
+                steps, values = zip(*data)
+                if smoothed:
+                    values = smooth_scalar(values, weight=smooth_factor)
+                
+                ax.plot(steps, values, label=label, linewidth=4)  # Make lines bolder
+
+        ax.set_title(titles[index] if index < len(titles) else f'Tag: {tag}', fontsize=16, fontweight='bold')
+        ax.set_xlabel('Steps', fontsize=14, fontweight='bold')
+        ax.set_ylabel('Mean Reward', fontsize=14, fontweight='bold')
+        ax.legend(loc='upper left', bbox_to_anchor=(1, 1), fontsize=12)  # Position legend outside the plot
+        plt.tight_layout()
+        st.pyplot(fig)

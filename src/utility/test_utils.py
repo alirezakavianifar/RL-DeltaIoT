@@ -296,11 +296,11 @@ def read_from_tensorboardlog(smoothed=True, filtered=None, policies=None,
     # Plot the scalar data using Matplotlib
     fig, axs = plt.subplots(len(tags), 1, figsize=(12, 8))
     for log_dir in log_dirs:
-        if ((filtered is not None) or (policies is not None)):
-            if ((log_dir.split('-')[1].split('\\')[2].upper() != filtered) or
-                  (log_dir.split('=')[1].split('-')[0].upper() not in policies) or
-                  (log_dir.split('-')[-1].split('=')[1] != '0.1')):
-                continue      
+    #     if ((filtered is not None) or (policies is not None)):
+    #         if ((log_dir.split('-')[1].split('\\')[2].upper() != filtered) or
+    #               (log_dir.split('=')[1].split('-')[0].upper() not in policies) or
+    #               (log_dir.split('-')[-1].split('=')[1] != '0.1')):
+    #             continue      
         log_dir = os.path.join(log_dir, 'DQN_1')
         tag_name = log_dir.split('policy=')[1].split('-')[0]
         # Create an EventAccumulator to load TensorBoard events
@@ -334,12 +334,20 @@ def read_from_tensorboardlog(smoothed=True, filtered=None, policies=None,
 
     # Show the plots
     plt.show()
+   
+
+
+# Example usage
+log_directory = r'D:\projects\RL-DeltaIoT\logs'
+scalar_tag = 'loss'  # or 'accuracy', or any other tag you used
+# read_and_plot_tensorboard_log(log_directory, scalar_tag)
+
 
 if __name__ == '__main__':
     # plot_quality_properties(plot_type=PLOT_TYPE, for_type=FOR_TYPE, path=PATH)
-    read_from_tensorboardlog(filtered='DeltaIoT', 
-                             policies=['MLPPOLICY'],
-                             tags=['rollout/ep_rew_mean',
-                                   'eval/mean_reward'])
+    read_from_tensorboardlog(filtered='DeltaIoT', policies=['MLPPOLICY'], tags=['rollout/ep_rew_mean', 'eval/mean_reward'])
+                             
+                             
+                                   
     res = read_from_html(os.path.join(os.getcwd(), 'fig', 'Fig15-a.htm'))
     print('f')
