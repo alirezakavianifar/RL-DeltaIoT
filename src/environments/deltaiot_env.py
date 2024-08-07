@@ -6,7 +6,7 @@ import pandas as pd
 from gymnasium import spaces
 from sklearn.preprocessing import StandardScaler
 
-from src.utility.utils import utility, return_next_item, pca_analysis, kmeans_analysis
+from src.utility.utils import utility, return_next_item, pca_analysis, kmeans_analysis, TrackedGenerator
 
 
 class DeltaIotEnv(gym.Env):
@@ -43,6 +43,7 @@ class DeltaIotEnv(gym.Env):
         self.data_dir = data_dir
         self.info = {}
         self.data = return_next_item(self.data_dir, normalize=False)
+        self.data = TrackedGenerator(self.data)
         self.reward = 0
         self.reward_type = reward_type
         self.goal = goal
@@ -126,6 +127,7 @@ class DeltaIotEnv(gym.Env):
         self.truncated = False
         try:
             self.df = next(self.data).drop('verification_times', axis=1)
+            print(f"Consumed: {self.data.consumed_items()}")
         except Exception as e:
             print(e)
             self.data = return_next_item(self.data_dir, normalize=False)
@@ -162,7 +164,7 @@ class DeltaIotEnv(gym.Env):
         
         energy_consumption, packet_loss, latency = data
 
-        if self.goal in ['energy', 'packet', 'latency']:
+        if self.goal in ['energy', 'packet', 'latency', 'multi']:
             norm_energy = (self.max_energy - energy_consumption) / (self.max_energy - self.min_energy) if self.max_energy != self.min_energy else 1
             norm_packet_loss = (self.max_packet_loss - packet_loss) / (self.max_packet_loss - self.min_packet_loss) if self.max_packet_loss != self.min_packet_loss else 1
             norm_latency = (self.max_latency - latency) / (self.max_latency - self.min_latency) if self.max_latency != self.min_latency else 1

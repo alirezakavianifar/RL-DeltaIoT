@@ -23,7 +23,7 @@ class RewardStrategy(IRewardStrategy):
                 else:
                     return -0.02
                 
-            elif goal in ["energy", "packet", "latency"]:
+            elif goal in ["energy", "packet", "latency", "multi"]:
                 return np.array([energy_consumption, packet_loss, latency])
                     
             elif goal == "packet_loss":

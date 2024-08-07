@@ -186,7 +186,7 @@ def get_env_parameters(env_name, algo_name):
 
     return n_obs_space, n_actions, use_dict_obs_space
 
-def load_and_prepare_data(data_dir, from_cycles=0, to_cycles = 1505):
+def load_and_prepare_data(data_dir, from_cycles=0, to_cycles = 1505, cofig_num=33):
     
     LST_PACKET = []
     LST_ENERGY = []
@@ -199,9 +199,9 @@ def load_and_prepare_data(data_dir, from_cycles=0, to_cycles = 1505):
     try:
         while True:
             data_ = next(DATA)
-            LST_PACKET.append(data_['packetloss'].min())
-            LST_ENERGY.append(data_['energyconsumption'].min())
-            LST_LATENCY.append(data_['latency'].min())
+            LST_PACKET.append(data_['packetloss'].iloc[cofig_num])
+            LST_ENERGY.append(data_['energyconsumption'].iloc[cofig_num])
+            LST_LATENCY.append(data_['latency'].iloc[cofig_num])
             cycle_metrics.append({
                 'packetloss': data_['packetloss'],
                 'energyconsumption': data_['energyconsumption'],
@@ -216,9 +216,9 @@ def load_and_prepare_data(data_dir, from_cycles=0, to_cycles = 1505):
         cycle_df['cycle'] = i
         df = pd.concat([df, cycle_df])
 
-    return LST_PACKET, LST_ENERGY, LST_LATENCY, df
+    return LST_PACKET[from_cycles:to_cycles], LST_ENERGY[from_cycles:to_cycles], LST_LATENCY[from_cycles:to_cycles], df
 
-def plot_latency_vs_packet_loss(st, LST_LATENCY, LST_PACKET):
+def plot_latency_vs_packet_loss(st, LST_LATENCY, LST_PACKET, LST_ENERGY):
     configurations = list(range(1, len(LST_LATENCY) + 1))
     fig, ax1 = plt.subplots()
     color = 'tab:blue'
@@ -237,6 +237,44 @@ def plot_latency_vs_packet_loss(st, LST_LATENCY, LST_PACKET):
     ax1.grid(True)
     fig.tight_layout()
     st.pyplot(fig)
+
+
+def plot_metrics_vs_configurations(st, LST_LATENCY, LST_PACKET, LST_ENERGY):
+    configurations = list(range(1, len(LST_LATENCY) + 1))
+    
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 15))
+
+    # Plot Latency
+    color = 'tab:blue'
+    ax1.set_xlabel('Configuration')
+    ax1.set_ylabel('Latency', color=color)
+    ax1.scatter(configurations, LST_LATENCY, color=color, label='Latency')
+    ax1.tick_params(axis='y', labelcolor=color)
+    ax1.set_title('Latency vs Configurations')
+    ax1.grid(True)
+
+    # Plot Packet Loss
+    color = 'tab:red'
+    ax2.set_xlabel('Configuration')
+    ax2.set_ylabel('Packet Loss', color=color)
+    ax2.plot(configurations, LST_PACKET, color=color, marker='o', linestyle='None', label='Packet Loss')
+    ax2.tick_params(axis='y', labelcolor=color)
+    ax2.set_title('Packet Loss vs Configurations')
+    ax2.grid(True)
+
+    # Plot Energy
+    color = 'tab:green'
+    ax3.set_xlabel('Configuration')
+    ax3.set_ylabel('Energy', color=color)
+    ax3.plot(configurations, LST_ENERGY, color=color, marker='x', linestyle='None', label='Energy')
+    ax3.tick_params(axis='y', labelcolor=color)
+    ax3.set_title('Energy vs Configurations')
+    ax3.grid(True)
+
+    fig.tight_layout()
+    st.pyplot(fig)
+
+
 
 
 def plot_adaptation_spaces(st, df, from_cycles=0, to_cycles=1505):
@@ -307,6 +345,33 @@ def create_dummy(data):
     mu, sigma = 0, 0.01
     s = np.random.normal(mu, sigma)
     return data + s
+
+
+class TrackedGenerator:
+    def __init__(self, generator):
+        self.generator, self.gen_copy = self._tee(generator)
+        self.consumed_count = 0
+        self.remaining_count = sum(1 for _ in self.gen_copy)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        value = next(self.generator)
+        self.consumed_count += 1
+        self.remaining_count -= 1
+        return value
+
+    def consumed_items(self):
+        return self.consumed_count
+
+    def remaining_items(self):
+        return self.remaining_count
+
+    def _tee(self, iterable):
+        import itertools
+        return itertools.tee(iterable)
+
 
 
 def return_next_item(lst, normalize=True, normalize_cols=['energyconsumption', 'packetloss', 'latency'],

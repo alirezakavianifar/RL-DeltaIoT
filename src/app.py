@@ -27,20 +27,28 @@ def main():
     if env_name in ['DeltaIoTv1', 'DeltaIoTv2']:
         strategy_type = st.sidebar.selectbox("Strategy Type", ['min', 'multi'])
         additional_params['strategy_type'] = strategy_type
+        goal = st.sidebar.selectbox("Goal", ['packet', 'energy', 'latency', "multi", 
+                                        'energy_thresh', 'packet_thresh', 'latency_thresh'])
+        additional_params['goal'] = goal
+        additional_params[f'{goal.split('_')[0]}_coef'] = 1.0
         additional_params['energy_coef'] = additional_params['packet_coef'] = additional_params['latency_coef'] = 0
-        if strategy_type == 'multi':
-            additional_params['energy_coef'] = st.sidebar.number_input("Energy Coefficient", min_value=0.0, max_value=1.0, value=0.1)
-            additional_params['packet_coef'] = st.sidebar.number_input("Packet Coefficient", min_value=0.0, max_value=1.0, value=0.8)
-            additional_params['latency_coef'] = st.sidebar.number_input("Latency Coefficient", min_value=0.0, max_value=1.0, value=0.8)
-            additional_params['setpoint_thresh'] = {
-                'lower_bound': st.sidebar.number_input("Setpoint Threshold Lower Bound", 12.8),
-                'upper_bound': st.sidebar.number_input("Setpoint Threshold Upper Bound", 13.0)
-            }
-        elif strategy_type == 'min':
-            goal = st.sidebar.selectbox("Goal", ['packet', 'energy', 'latency', 
-                                         'energy_thresh', 'packet_thresh', 'latency_thresh'])
-            additional_params['goal'] = goal
-            additional_params[f'{goal.split('_')[0]}_coef'] = 1.0
+        # if strategy_type == 'multi':
+        energy_coef = st.sidebar.number_input("Energy Coefficient", min_value=0.0, max_value=1.0, value=0.6)
+        packet_coef = st.sidebar.number_input("Packet Coefficient", min_value=0.0, max_value=1.0, value=0.2)
+        latency_coef = st.sidebar.number_input("Latency Coefficient", min_value=0.0, max_value=1.0, value=0.2)
+        
+        total_coef = energy_coef + packet_coef + latency_coef
+        if total_coef > 0:
+            additional_params['energy_coef'] = energy_coef / total_coef
+            additional_params['packet_coef'] = packet_coef / total_coef
+            additional_params['latency_coef'] = latency_coef / total_coef
+
+        additional_params['setpoint_thresh'] = {
+            'lower_bound': st.sidebar.number_input("Setpoint Threshold Lower Bound", 12.8),
+            'upper_bound': st.sidebar.number_input("Setpoint Threshold Upper Bound", 13.0)
+        }
+        # elif strategy_type == 'min':
+        
 
     algo_name = st.sidebar.selectbox("Algorithm Name", [ 'HER_DQN', 'DQN', 'PPO', 'A2C'])
     policy_options = {
